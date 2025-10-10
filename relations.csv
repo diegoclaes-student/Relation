@@ -1,0 +1,101 @@
+# Format: Person1;Person2;RelationType
+# Types de relations:
+# 0 = Bisous
+# 1 = Dodo ensemble
+# 2 = Baise
+# 3 = Couple
+#
+# Person1;Person2;Type
+Alex P;Leo O;2
+Alex P;Myrdin;0
+Alexandre B;Thiphaine;0
+Arthur L;Camille S;0
+Arthur L;Simon L;0
+Arthur L;Mahaut;0
+Arthur S;Claudia;0
+Arthur S;Camille S;0
+Arthur S;Marion G;0
+Arthur S;Sara R;0
+Baptiste;Soledhie;0
+Benjamin;Coline;0
+Camille S;Victor Louys;0
+Camille S;Madhi;0
+Camille S;Bastien;0
+Célia;Diego;0
+Célia;Bellomo;0
+Claudia;Cyril G;0
+Clemrog;Juliette W;0
+Clemrog;Lucie Lhotelerie;0
+Coline;Mathys;0
+Coline;Sacha;0
+Coline;Robin;0
+Diego;Lola T;0
+Diego;Margaux M;0
+Diego;Cambric;0
+Diego;Sara R;0
+Eline D;Bellomo;0
+Emilie S;Baptiste H;0
+Emilie S;Baptiste;0
+Etienne;Alice H;0
+Forest;Alice L;0
+Henri;Lison;0
+Henri;Noemie;0
+Illian;Isaline R;0
+Illian;Lilly;0
+Illian;Nadia;0
+Illian;Mahaut;0
+Isaline D;Guillaume G;0
+Isaline D;Arthur D;0
+Isaline D;Bastien;0
+Isaline D;Matthis B;0
+Isaline R;Stef;0
+Isaline R;Myrdin;0
+Isidore;Diego;0
+Isidore;Lilly;0
+Jeanjean;Anto;0
+Jeanjean;Diego;0
+Jeanjean;Yannick;0
+Jeanjean;Baptiste H;0
+Juliette M;Illian;0
+Juliette M;Thibaut;0
+Juliette M;Lepage;0
+Juliette M;Remi;0
+Juliette M;Remy;0
+Juliette Menne;Isidore;0
+Léa B;Bleu Bouc;0
+Lea Lahaye;Matthis P;0
+Lea N;Etienne;0
+Lea N;Diego;0
+Leo O;Zoé G;0
+Lilly;Forest;0
+Lilly;Devos;0
+Lison;Valentin;0
+Lison;Leo O;0
+Lola T;Anto;0
+Marion G;Leo O;0
+Marvin;Cambric;0
+Marvin;Louanne;0
+Myrdin;Alice H;0
+Myrdin;Zoé G;0
+Myrdin;Emilie M;0
+Nadia;Theo Duvelliez;0
+Nael;Léa B;0
+Nathan;Jane;0
+Odile;Marvin;0
+Rachel;Benjamin;0
+Rachel;Arthur S;0
+Rachel;Arthur L;0
+Rachel;Alexandre B;0
+Rachel;Nael;0
+Remy;Lea N;0
+Robin;Juliette M;0
+Sacha;Emilie M;0
+Sacha;Léa B;0
+Sacha;Romane Bleu;0
+Stef;Isaline D;0
+Stef;Amandine;0
+Thibaut;Emilie S;0
+Thibaut;Ann-So;0
+Thiphaine;Stef;0
+Thomas O;Lea G;0
+Toine;Eline D;0
