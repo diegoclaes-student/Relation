@@ -41,6 +41,101 @@ import networkx as nx
 import plotly.graph_objects as go
 
 
+# === DÉTECTION AUTOMATIQUE DU GENRE ===
+def detect_gender(name: str) -> str:
+    """
+    Détecte automatiquement le genre d'un prénom (M/F/?)
+    Basé sur les terminaisons et les prénoms français courants
+    """
+    name_lower = name.lower().strip()
+    
+    # Prénoms masculins courants (liste non exhaustive)
+    male_names = {
+        'diego', 'thomas', 'arthur', 'louis', 'lucas', 'paul', 'pierre', 'mathis',
+        'jules', 'hugo', 'nathan', 'maxime', 'clement', 'antoine', 'nicolas', 'alex',
+        'theo', 'tom', 'leo', 'adam', 'raphael', 'simon', 'gabriel', 'timeo', 'matheo',
+        'ethan', 'nolan', 'baptiste', 'axel', 'enzo', 'yanis', 'noah', 'romain', 'quentin',
+        'jeremy', 'kevin', 'florian', 'guillaume', 'benjamin', 'alexandre', 'anthony',
+        'valentin', 'damien', 'julien', 'maxence', 'victor', 'pierre', 'charles', 'olivier'
+    }
+    
+    # Prénoms féminins courants (liste non exhaustive)
+    female_names = {
+        'marie', 'lea', 'emma', 'lola', 'alice', 'chloe', 'sarah', 'julie', 'laura',
+        'camille', 'manon', 'lisa', 'clara', 'lucie', 'oceane', 'charlotte', 'amelie',
+        'morgane', 'pauline', 'marine', 'anaïs', 'juliette', 'clemence', 'elise', 'mathilde',
+        'louise', 'jade', 'zoe', 'rose', 'lou', 'mila', 'nina', 'lina', 'anna', 'eva',
+        'isaline', 'valentine', 'gabrielle', 'margaux', 'emilie', 'melissa', 'maeva',
+        'celia', 'salome', 'romane', 'aurore', 'eloise', 'jeanne', 'adele', 'sophia'
+    }
+    
+    # Vérifier d'abord dans les listes de prénoms connus
+    base_name = name_lower.split()[0] if ' ' in name_lower else name_lower
+    
+    if base_name in male_names:
+        return 'M'
+    if base_name in female_names:
+        return 'F'
+    
+    # Terminaisons typiquement féminines
+    feminine_endings = ['a', 'e', 'ie', 'ine', 'elle', 'ette', 'ance', 'ence', 'otte', 'line']
+    for ending in feminine_endings:
+        if name_lower.endswith(ending) and len(name_lower) > 3:
+            return 'F'
+    
+    # Terminaisons typiquement masculines
+    masculine_endings = ['o', 'n', 'r', 'l', 'x', 's', 'c', 'k', 'go']
+    for ending in masculine_endings:
+        if name_lower.endswith(ending):
+            return 'M'
+    
+    # Par défaut, inconnu
+    return '?'
+
+
+def analyze_gender_preference(node: str, G: nx.DiGraph, nodes: List[str]) -> Tuple[str, str]:
+    """
+    Analyse les préférences de genre d'une personne basées sur son historique.
+    Retourne: (preference, description)
+    - preference: 'M', 'F', 'BOTH', 'UNKNOWN'
+    - description: texte descriptif
+    
+    IMPORTANT: Regarde TOUTES les relations (sortantes ET entrantes) pour avoir une vue complète
+    """
+    # Récupérer TOUTES les personnes liées (sortantes ET entrantes)
+    outgoing_relations = set(G.successors(node))  # Personnes que node a pécho
+    incoming_relations = set(G.predecessors(node))  # Personnes qui ont pécho node
+    
+    # Union des deux pour avoir toutes les relations
+    all_relations = outgoing_relations.union(incoming_relations)
+    
+    if not all_relations:
+        return 'UNKNOWN', 'Aucune relation'
+    
+    # Détecter le genre de chaque relation
+    genders = [detect_gender(person) for person in all_relations]
+    gender_counts = {
+        'M': genders.count('M'),
+        'F': genders.count('F'),
+        '?': genders.count('?')
+    }
+    
+    total_known = gender_counts['M'] + gender_counts['F']
+    
+    if total_known == 0:
+        return 'UNKNOWN', 'Genres inconnus'
+    
+    # Déterminer la préférence stricte
+    if gender_counts['M'] > 0 and gender_counts['F'] > 0:
+        return 'BOTH', f"Mixte ({gender_counts['M']}H / {gender_counts['F']}F)"
+    elif gender_counts['M'] > 0:
+        return 'M', f"Que des hommes ({gender_counts['M']}H)"
+    elif gender_counts['F'] > 0:
+        return 'F', f"Que des femmes ({gender_counts['F']}F)"
+    
+    return 'UNKNOWN', 'Préférence inconnue'
+
+
 def build_graph(relations: Dict[str, Iterable[str]] | Dict[str, List[Tuple[str, int]]]) -> nx.DiGraph:
     """Construit un graphe orienté à partir des relations.
     
@@ -180,20 +275,24 @@ def _compute_community_layout(G: nx.Graph, seed: int, spread: float) -> Dict[str
     return pos
 
 
-def compute_layout(G: nx.Graph, seed: int = 42, spread: float = 2.0, min_separation: float = 0.03, mode: str = "community", center_node: Optional[str] = None) -> Dict[str, Tuple[float, float]]:
+def compute_layout(G: nx.Graph, seed: int = 42, spread: float = 2.0, min_separation: float = 0.03, mode: str = "community", center_node: Optional[str] = None, repulsion: float = 1.0) -> Dict[str, Tuple[float, float]]:
     """Calcule une disposition 2D lisible.
 
     mode: 'community' | 'spring' | 'kk' | 'spectral'
     center_node: optionnel, nom du nœud à placer au centre (0,0)
+    repulsion: facteur multiplicateur pour la force de répulsion (1.0 = normal)
     """
+    # Ajuster min_separation avec le facteur repulsion
+    adjusted_min_sep = min_separation * repulsion
+    
     if mode == "spring":
-        raw = _compute_spring(G, seed, spread)
+        raw = _compute_spring(G, seed, spread * repulsion)
     elif mode == "kk":
         raw = _compute_kk(G, seed)
     elif mode == "spectral":
         raw = _compute_spectral(G, seed)
     else:
-        raw = _compute_community_layout(G, seed, spread)
+        raw = _compute_community_layout(G, seed, spread * repulsion)
 
     pos = {n: (float(x), float(y)) for n, (x, y) in raw.items()}
     
@@ -203,7 +302,7 @@ def compute_layout(G: nx.Graph, seed: int = 42, spread: float = 2.0, min_separat
         pos = {n: (x - cx, y - cy) for n, (x, y) in pos.items()}
     
     # Répulsion locale plus forte pour éviter les chevauchements
-    pos = _enforce_min_separation(pos, min_dist=min_separation, steps=12, damping=0.75)
+    pos = _enforce_min_separation(pos, min_dist=adjusted_min_sep, steps=12, damping=0.75)
     return pos
 
 
@@ -230,126 +329,371 @@ def shorten_segment(x0: float, y0: float, x1: float, y1: float, cut_head: float,
     return sx0, sy0, sx1, sy1
 
 
-def make_figure(G: nx.DiGraph, pos: Dict[str, Tuple[float, float]]) -> go.Figure:
-    # Degrés
+def make_figure(G: nx.DiGraph, pos: Dict[str, Tuple[float, float]], size_factor: float = 1.0, edge_width: float = 1.5) -> go.Figure:
+    """Crée une figure Plotly style LinkedIn Maps avec communautés colorées distinctes.
+    
+    size_factor: multiplicateur pour les tailles de bulles (1.0 = normal, 2.0 = double)
+    edge_width: épaisseur des liens
+    """
+    from networkx.algorithms.community import greedy_modularity_communities
+    
+    # Détecter les communautés
+    Gu = G.to_undirected()
+    communities = list(greedy_modularity_communities(Gu))
+    
+    # Assigner chaque nœud à sa communauté
+    node_to_community = {}
+    for idx, community in enumerate(communities):
+        for node in community:
+            node_to_community[node] = idx
+    
+    # Palette de couleurs PROFESSIONNELLE et ÉLÉGANTE (tons doux et saturés)
+    color_palette = [
+        '#5B8DEE',  # Bleu royal doux
+        '#FF6B9D',  # Rose moderne
+        '#20C997',  # Vert émeraude
+        '#F59F00',  # Orange chaud
+        '#AB7DF6',  # Violet élégant
+        '#FF8C42',  # Corail chaleureux
+        '#4ECDC4',  # Turquoise professionnel
+        '#E74C3C',  # Rouge mat
+        '#3498DB',  # Bleu ciel profond
+        '#9B59B6',  # Violet profond
+        '#1ABC9C',  # Turquoise mat
+        '#F39C12',  # Jaune doré
+    ]
+    
     nodes = list(G.nodes())
     indeg = dict(G.in_degree())
     outdeg = dict(G.out_degree())
     deg_total = [indeg.get(n, 0) + outdeg.get(n, 0) for n in nodes]
 
-    # Tailles et couleurs de nœuds selon degré total (un peu plus petites)
-    sizes = scale(deg_total, out_min=18, out_max=45)
-    colors = deg_total  # utilisé directement avec colorscale continue
+    # Tailles de nœuds ajustables via size_factor
+    base_min, base_max = 30, 80
+    sizes = scale(deg_total, out_min=base_min * size_factor, out_max=base_max * size_factor)
     
-    # Opacités selon le degré (plus connecté = plus opaque)
-    opacities = scale(deg_total, out_min=0.4, out_max=1.0)
-
-    # Tracé des nœuds
+    # Couleurs par communauté
+    node_colors = [color_palette[node_to_community.get(n, 0) % len(color_palette)] for n in nodes]
+    
+    # === PRÉDICTION INTELLIGENTE DES PROCHAINES RELATIONS (avec détection de genre) ===
+    def predict_next_connection(node):
+        """
+        Prédit la prochaine relation probable basée sur:
+        1. Les préférences de genre (H/F/Mixte)
+        2. Les connexions communes (amis d'amis)
+        3. La communauté
+        """
+        # Analyser la préférence de genre de la personne
+        gender_pref, gender_desc = analyze_gender_preference(node, G, nodes)
+        
+        # Récupérer TOUTES les relations (sortantes + entrantes)
+        outgoing = set(G.successors(node))
+        incoming = set(G.predecessors(node))
+        all_neighbors = outgoing.union(incoming)
+        
+        # Fonction pour filtrer par genre selon la préférence STRICTE
+        def matches_preference(candidate_name):
+            """Vérifie si le candidat correspond STRICTEMENT à la préférence de genre"""
+            candidate_gender = detect_gender(candidate_name)
+            
+            # Si genre inconnu du candidat, on le rejette pour être sûr
+            if candidate_gender == '?':
+                return False
+            
+            # Si pas de préférence établie, accepter tout le monde
+            if gender_pref == 'UNKNOWN':
+                return True
+            
+            # Si préférence mixte, accepter H et F
+            if gender_pref == 'BOTH':
+                return candidate_gender in ['M', 'F']
+            
+            # Sinon, matcher strictement avec la préférence
+            return candidate_gender == gender_pref
+        
+        if not all_neighbors:
+            # Si pas de connexions, suggérer quelqu'un de la même communauté avec le bon genre
+            same_community = [n for n in nodes 
+                            if node_to_community.get(n) == node_to_community.get(node) 
+                            and n != node
+                            and matches_preference(n)]
+            if same_community:
+                # Choisir celui avec le plus de connexions
+                best = max(same_community, key=lambda n: deg_total[nodes.index(n)])
+                gender_emoji = '👨' if detect_gender(best) == 'M' else '👩' if detect_gender(best) == 'F' else '👤'
+                return best, f"Même communauté {gender_emoji}"
+            return None, None
+        
+        # Calculer les amis d'amis (connexions à 2 degrés) AVEC FILTRE DE GENRE STRICT
+        friends_of_friends = {}
+        for neighbor in all_neighbors:
+            # Regarder dans les deux directions (successeurs ET prédécesseurs)
+            neighbor_connections = set(G.successors(neighbor)).union(set(G.predecessors(neighbor)))
+            
+            for friend in neighbor_connections:
+                if friend != node and friend not in all_neighbors:
+                    # VÉRIFICATION STRICTE DU GENRE
+                    if matches_preference(friend):
+                        # Compter les connexions communes
+                        if friend not in friends_of_friends:
+                            friends_of_friends[friend] = {'common': 0, 'via': []}
+                        friends_of_friends[friend]['common'] += 1
+                        friends_of_friends[friend]['via'].append(neighbor)
+        
+        if friends_of_friends:
+            # Trouver le candidat avec le plus de connexions communes
+            best_candidate = max(friends_of_friends.items(), key=lambda x: x[1]['common'])
+            candidate_name = best_candidate[0]
+            common_count = best_candidate[1]['common']
+            via_person = best_candidate[1]['via'][0]
+            
+            # Emoji selon le genre
+            candidate_gender = detect_gender(candidate_name)
+            gender_emoji = '👨' if candidate_gender == 'M' else '👩' if candidate_gender == 'F' else '�'
+            
+            # Vérification de debug (ne devrait jamais arriver)
+            if gender_pref not in ['BOTH', 'UNKNOWN'] and candidate_gender != gender_pref:
+                print(f"⚠️ WARNING: Prédiction incorrecte pour {node} (pref:{gender_pref}, candidat:{candidate_name}={candidate_gender})")
+            
+            return candidate_name, f"Via {via_person} ({common_count} ami{'s' if common_count > 1 else ''} commun{'s' if common_count > 1 else ''}) {gender_emoji}"
+        
+        # Si pas d'amis d'amis, suggérer quelqu'un de la même communauté avec le bon genre
+        same_community = [n for n in nodes 
+                         if node_to_community.get(n) == node_to_community.get(node) 
+                         and n != node 
+                         and n not in all_neighbors
+                         and matches_preference(n)]
+        if same_community:
+            best = max(same_community, key=lambda n: deg_total[nodes.index(n)])
+            gender_emoji = '👨' if detect_gender(best) == 'M' else '👩' if detect_gender(best) == 'F' else '👤'
+            return best, f"Même communauté {gender_emoji}"
+        
+        return None, None
+    
+    # Tracé des nœuds avec informations enrichies
     x_nodes = [pos[n][0] for n in nodes]
     y_nodes = [pos[n][1] for n in nodes]
-    hover_text = [
-        f"{n}<br>degré total: {deg_total[i]}\n"
-        f"entrants: {indeg.get(n, 0)} | sortants: {outdeg.get(n, 0)}"
-        for i, n in enumerate(nodes)
-    ]
+    
+    # Générer les hover texts enrichis avec analyse de genre
+    hover_text = []
+    for i, n in enumerate(nodes):
+        # Récupérer les personnes connectées (relations sortantes = "a pécho")
+        outgoing_relations = list(G.successors(n))
+        neighbors_str = ", ".join(outgoing_relations[:5])  # Limiter à 5 pour la lisibilité
+        if len(outgoing_relations) > 5:
+            neighbors_str += f" ... (+{len(outgoing_relations)-5} autres)"
+        
+        # Analyser la préférence de genre
+        gender_pref, gender_desc = analyze_gender_preference(n, G, nodes)
+        
+        # Emoji selon la préférence
+        pref_emoji = {
+            'M': '👨 (Préfère les hommes)',
+            'F': '👩 (Préfère les femmes)',
+            'BOTH': '👥 (Préfère H/F)',
+            'UNKNOWN': '❓ (Préférence inconnue)'
+        }.get(gender_pref, '❓')
+        
+        # Déterminer le genre de la personne elle-même
+        own_gender = detect_gender(n)
+        own_gender_emoji = '👨' if own_gender == 'M' else '👩' if own_gender == 'F' else '👤'
+        
+        # Prédiction de la prochaine relation
+        next_person, reason = predict_next_connection(n)
+        prediction_str = f"<b style='color:#4ECDC4'>→ {next_person}</b><br><span style='color:#999; font-size:11px'>{reason}</span>" if next_person else "<span style='color:#999'>Aucune suggestion</span>"
+        
+        # Construire le hover text complet
+        hover = (
+            f"<b style='font-size:16px; color:#667eea'>{own_gender_emoji} {n}</b><br>"
+            f"<span style='color:#999'>──────────────</span><br>"
+            f"<b>👥 Relations ({len(outgoing_relations)}):</b><br>"
+            f"<span style='font-size:11px'>{neighbors_str if outgoing_relations else 'Aucune'}</span><br><br>"
+            f"<b>💘 Préférence:</b> {pref_emoji}<br>"
+            f"<span style='font-size:11px; color:#999'>{gender_desc}</span><br><br>"
+            f"<b>📊 Total:</b> {deg_total[i]} connexion{'s' if deg_total[i] > 1 else ''}<br>"
+            f"<span style='font-size:11px'>↓ {indeg.get(n, 0)} entrant{'s' if indeg.get(n, 0) > 1 else ''} | "
+            f"↑ {outdeg.get(n, 0)} sortant{'s' if outdeg.get(n, 0) > 1 else ''}</span><br><br>"
+            f"<b>🔮 Prochaine relation prédite:</b><br>"
+            f"{prediction_str}"
+        )
+        hover_text.append(hover)
+    
+    # Seuil pour afficher les labels : seulement les gros nœuds (degré > médiane)
+    median_deg = sorted(deg_total)[len(deg_total) // 2] if deg_total else 0
+    
+    # Labels conditionnels : afficher seulement pour les nœuds importants
+    node_text = [str(n) if deg_total[i] > median_deg else "" for i, n in enumerate(nodes)]
 
-    # Marqueurs pour tous les nœuds (labels au survol seulement)
-    node_trace = go.Scatter(
+    # Nœuds avec Scatter standard pour compatibilité maximale
+    node_trace = go.Scatter(  # Scatter classique - pas de WebGL
         x=x_nodes,
         y=y_nodes,
-        mode="markers",
-        hoverinfo="text",
-        text=[str(n) for n in nodes],
-        textposition="top center",
-        textfont=dict(size=12),
+        mode="markers+text",
+        text=node_text,  # Labels conditionnels
+        textposition="middle center",
+        textfont=dict(
+            size=12,
+            color="#1a1a1a",  # Noir foncé pour contraste sur fond clair
+            family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif",
+        ),
         marker=dict(
-            showscale=True,
-            colorscale="Viridis",
-            reversescale=False,
-            color=colors,
+            color=node_colors,
             size=sizes,
-            opacity=opacities,
-            colorbar=dict(
-                thickness=15,
-                title="Degré total",
-                xanchor="left",
-                titleside="right",
-                titlefont=dict(size=14),
-                tickfont=dict(size=11),
-            ),
-            line=dict(width=1.5, color="#333"),
+            opacity=0.88,  # Transparence élégante (88%)
+            line=dict(width=2, color="rgba(255, 255, 255, 0.7)"),  # Contour réduit pour performance
         ),
         hovertext=hover_text,
+        hoverinfo="text",
+        hoverlabel=dict(
+            bgcolor="rgba(30, 30, 40, 0.98)",  # Tooltip sombre élégant
+            font=dict(size=12, color="white", family="Arial"),
+            bordercolor="rgba(102, 126, 234, 0.8)",
+            align="left",
+        ),
         name="Personnes",
     )
 
-    # Afficher tous les noms avec fond blanc semi-transparent pour la lisibilité
-    # Alterner les positions pour réduire les collisions de texte
-    positions_cycle = ["top center", "bottom center", "middle right", "middle left"]
-    label_x, label_y, label_text, label_pos = [], [], [], []
-    for idx, n in enumerate(nodes):
-        x, y = pos[n]
-        label_x.append(x)
-        label_y.append(y)
-        label_text.append(str(n))
-        # Alterner par ordre d'apparition pour répartir les positions
-        label_pos.append(positions_cycle[idx % len(positions_cycle)])
-
-    # Labels avec fond blanc pour contraste maximal
-    label_trace = go.Scatter(
-        x=label_x,
-        y=label_y,
-        mode="text",
-        text=label_text,
-        textposition=label_pos,
-        textfont=dict(size=12, color="#000", family="Arial Black, Arial, sans-serif"),
-        hoverinfo="skip",
-        name="Labels",
-        # Ajouter un padding virtuel via le mode marker invisible pour créer de l'espace
-    )
-
-    # Tracé des arêtes comme segments (pour la lisibilité), plus annotations pour les flèches
-    edge_x: List[float] = []
-    edge_y: List[float] = []
-    annotations = []
-
-    # Paramètres visuels - scalables avec le zoom
-    base_arrow_color = "#444"
-    base_edge_width = 1.5
-    # Ces marges évitent que les segments/arrows touchent le centre des nœuds
-    # Elles sont en coordonnées de layout (unités sans dimension). Ajustées empiriquement.
-    cut_head = 0.08
-    cut_tail = 0.08
-
-    for src, dst in G.edges():
+    # Tracé des arêtes - VERSION INTELLIGENTE avec évitement des bulles
+    # Créer des traces individuelles avec courbes optimisées
+    edge_traces = []
+    
+    # Palette de couleurs variées pour différencier les liens
+    edge_colors = [
+        'rgba(102, 126, 234, 0.3)',   # Bleu violet
+        'rgba(237, 100, 166, 0.3)',   # Rose
+        'rgba(255, 159, 64, 0.3)',    # Orange
+        'rgba(75, 192, 192, 0.3)',    # Turquoise
+        'rgba(153, 102, 255, 0.3)',   # Violet
+        'rgba(255, 99, 132, 0.3)',    # Rouge rose
+        'rgba(54, 162, 235, 0.3)',    # Bleu ciel
+        'rgba(255, 206, 86, 0.3)',    # Jaune
+    ]
+    
+    # Fonction pour vérifier si un point est proche d'un nœud
+    def is_near_node(x, y, exclude_nodes=None):
+        """Vérifie si le point (x,y) est trop proche d'un nœud (sauf ceux exclus)"""
+        min_distance = 0.08  # Distance minimale pour éviter les bulles
+        for node in nodes:
+            if exclude_nodes and node in exclude_nodes:
+                continue
+            nx_pos, ny_pos = pos[node]
+            dist = ((x - nx_pos)**2 + (y - ny_pos)**2) ** 0.5
+            if dist < min_distance:
+                return True, dist
+        return False, float('inf')
+    
+    # Note: edge_width est maintenant un paramètre de la fonction
+    
+    # Créer les arêtes COURBÉES avec évitement intelligent des bulles
+    for idx, (src, dst) in enumerate(G.edges()):
         x0, y0 = pos[src]
         x1, y1 = pos[dst]
-        sx0, sy0, sx1, sy1 = shorten_segment(x0, y0, x1, y1, cut_head=cut_head, cut_tail=cut_tail)
-
-        # Segment visuel
-        edge_x += [sx0, sx1, None]
-        edge_y += [sy0, sy1, None]
-
-        # Annotation en flèche: tête = (sx1,sy1), queue proche (sx0,sy0)
-        # Utiliser standoff pour mieux gérer la distance avec le marqueur
-        annotations.append(
-            dict(
-                x=sx1,
-                y=sy1,
-                ax=sx0,
-                ay=sy0,
-                xref="x",
-                yref="y",
-                axref="x",
-                ayref="y",
-                showarrow=True,
-                arrowhead=0,  # Pas de pointe de flèche, juste une ligne
-                arrowwidth=1.5,
-                arrowcolor=base_arrow_color,
-                opacity=0.85,
-                standoff=6,  # Distance en pixels depuis le nœud cible
-            )
+        
+        # Calculer les paramètres de base
+        mx, my = (x0 + x1) / 2, (y0 + y1) / 2
+        dx, dy = x1 - x0, y1 - y0
+        length = (dx**2 + dy**2) ** 0.5
+        
+        if length > 0:
+            # Perpendiculaire (rotation 90°)
+            px, py = -dy / length, dx / length
+            
+            # ÉVITEMENT INTELLIGENT : tester plusieurs offsets pour éviter les bulles
+            base_offset = length * 0.15
+            direction = 1 if idx % 2 == 0 else -1
+            
+            # Tester le point de contrôle par défaut
+            cx_candidate = mx + px * base_offset * direction
+            cy_candidate = my + py * base_offset * direction
+            
+            # Vérifier s'il est proche d'une bulle (exclure source et destination)
+            near_node, distance = is_near_node(cx_candidate, cy_candidate, exclude_nodes={src, dst})
+            
+            if near_node:
+                # Augmenter la courbure pour éviter la bulle
+                base_offset = length * 0.28  # Courbure plus prononcée
+                # Essayer de l'autre côté si nécessaire
+                cx_candidate = mx + px * base_offset * direction
+                cy_candidate = my + py * base_offset * direction
+                
+                # Si encore trop proche, inverser la direction
+                still_near, _ = is_near_node(cx_candidate, cy_candidate, exclude_nodes={src, dst})
+                if still_near:
+                    direction *= -1
+                    cx_candidate = mx + px * base_offset * direction
+                    cy_candidate = my + py * base_offset * direction
+            
+            cx, cy = cx_candidate, cy_candidate
+        else:
+            cx, cy = mx, my
+        
+        # Courbe avec 9 points (bon compromis beauté/performance)
+        edge_x, edge_y = [], []
+        t_values = [i/8 for i in range(9)]
+        for t in t_values:
+            curve_x = (1-t)**2 * x0 + 2*(1-t)*t * cx + t**2 * x1
+            curve_y = (1-t)**2 * y0 + 2*(1-t)*t * cy + t**2 * y1
+            edge_x.append(curve_x)
+            edge_y.append(curve_y)
+        
+        # Choisir une couleur de la palette
+        color = edge_colors[idx % len(edge_colors)]
+        
+        # Créer une trace pour cet edge
+        edge_trace = go.Scatter(
+            x=edge_x,
+            y=edge_y,
+            mode='lines',
+            line=dict(
+                width=edge_width * 0.8,
+                color=color,
+            ),
+            hoverinfo='text',
+            hovertext=f"{src} → {dst}",
+            showlegend=False,
+            opacity=0.7,
         )
+        edge_traces.append(edge_trace)
+
+    # DÉSACTIVER les ombres pour performance
+    # shadow_trace supprimé
+
+    # Créer la figure avec TOUTES les traces d'edges + nodes
+    fig = go.Figure(data=edge_traces + [node_trace])
+    
+    # Layout épuré et moderne avec optimisations de performance
+    fig.update_layout(
+        showlegend=False,
+        hovermode="closest",
+        margin=dict(b=0, l=0, r=0, t=0),
+        xaxis=dict(
+            showgrid=False, 
+            zeroline=False, 
+            visible=False,
+            fixedrange=False,
+        ),
+        yaxis=dict(
+            showgrid=False, 
+            zeroline=False, 
+            visible=False,
+            fixedrange=False,
+        ),
+        plot_bgcolor="#F8F9FA",
+        paper_bgcolor="#F8F9FA",
+        # Optimisations MAXIMALES pour fluidité
+        dragmode='pan',
+        transition={'duration': 0},
+        # Désactiver le rendu lors du drag
+        modebar={'bgcolor': 'rgba(0,0,0,0)'},
+    )
+    
+    # Configuration WebGL pour accélération matérielle
+    fig.update_traces(
+        # Désactiver le hover pendant le drag pour plus de fluidité
+        hovertemplate=None
+    )
+
+    return fig
 
     edge_trace = go.Scatter(
         x=edge_x,

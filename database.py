@@ -37,6 +37,18 @@ class RelationDB:
         conn = self.get_connection()
         cursor = conn.cursor()
         
+        # Table des personnes avec informations détaillées
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS persons (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT UNIQUE NOT NULL,
+                gender TEXT,
+                sexual_orientation TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        
         # Table des relations approuvées
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS relations (
@@ -90,6 +102,7 @@ class RelationDB:
         """)
         
         # Index pour améliorer les performances
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_person_name ON persons(name)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_person1 ON relations(person1)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_person2 ON relations(person2)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_history_date ON history(created_at DESC)")
@@ -98,20 +111,39 @@ class RelationDB:
         conn.close()
     
     def add_relation(self, person1: str, person2: str, relation_type: int = 0, 
-                     approved_by: str = "system") -> bool:
-        """Ajoute une relation approuvée."""
+                     approved_by: str = "system", auto_symmetrize: bool = True) -> bool:
+        """Ajoute une relation approuvée avec symétrie automatique."""
         conn = self.get_connection()
         cursor = conn.cursor()
         
         try:
+            # Ajouter la relation principale
             cursor.execute("""
                 INSERT INTO relations (person1, person2, relation_type, approved_by)
                 VALUES (?, ?, ?, ?)
             """, (person1, person2, relation_type, approved_by))
+            
+            # Ajouter automatiquement la relation inverse si demandé
+            if auto_symmetrize:
+                try:
+                    cursor.execute("""
+                        INSERT INTO relations (person1, person2, relation_type, approved_by)
+                        VALUES (?, ?, ?, ?)
+                    """, (person2, person1, relation_type, approved_by))
+                except sqlite3.IntegrityError:
+                    # Relation inverse déjà existante, c'est OK
+                    pass
+            
             conn.commit()
+            
+            # Logger l'action
+            self.log_action("ADD", person1, person2, relation_type, approved_by, 
+                          "Relation ajoutée" + (" (avec symétrie)" if auto_symmetrize else ""))
+            
             return True
         except sqlite3.IntegrityError:
             # Relation déjà existante
+            conn.rollback()
             return False
         finally:
             conn.close()
@@ -150,8 +182,8 @@ class RelationDB:
         conn.close()
         return results
     
-    def approve_relation(self, pending_id: int, approved_by: str) -> bool:
-        """Approuve une relation en attente et la déplace vers les relations actives."""
+    def approve_relation(self, pending_id: int, approved_by: str, auto_symmetrize: bool = True) -> bool:
+        """Approuve une relation en attente avec symétrie automatique."""
         conn = self.get_connection()
         cursor = conn.cursor()
         
@@ -175,6 +207,17 @@ class RelationDB:
                 VALUES (?, ?, ?, ?)
             """, (person1, person2, relation_type, approved_by))
             
+            # Ajouter la relation inverse si auto_symmetrize
+            if auto_symmetrize:
+                try:
+                    cursor.execute("""
+                        INSERT INTO relations (person1, person2, relation_type, approved_by)
+                        VALUES (?, ?, ?, ?)
+                    """, (person2, person1, relation_type, approved_by))
+                except sqlite3.IntegrityError:
+                    # Relation inverse déjà existante
+                    pass
+            
             # Supprimer de la liste d'attente
             cursor.execute("DELETE FROM pending_relations WHERE id = ?", (pending_id,))
             
@@ -182,7 +225,7 @@ class RelationDB:
             
             # Logger l'action
             self.log_action("APPROVE", person1, person2, relation_type, approved_by, 
-                          "Relation approuvée depuis pending")
+                          "Relation approuvée depuis pending" + (" (avec symétrie)" if auto_symmetrize else ""))
             
             return True
         except sqlite3.IntegrityError:
@@ -315,8 +358,9 @@ class RelationDB:
         conn.close()
         return results
     
-    def delete_relation(self, person1: str, person2: str, relation_type: int, deleted_by: str = "admin") -> bool:
-        """Supprime une relation et enregistre dans l'historique."""
+    def delete_relation(self, person1: str, person2: str, relation_type: int, 
+                       deleted_by: str = "admin", auto_symmetrize: bool = True) -> bool:
+        """Supprime une relation avec option de symétrie."""
         conn = self.get_connection()
         cursor = conn.cursor()
         
@@ -326,11 +370,19 @@ class RelationDB:
         """, (person1, person2, relation_type))
         
         deleted = cursor.rowcount > 0
+        
+        # Supprimer aussi la relation inverse si auto_symmetrize
+        if deleted and auto_symmetrize:
+            cursor.execute("""
+                DELETE FROM relations
+                WHERE person1 = ? AND person2 = ? AND relation_type = ?
+            """, (person2, person1, relation_type))
+        
         conn.commit()
         
         if deleted:
             self.log_action("DELETE", person1, person2, relation_type, deleted_by, 
-                          f"Relation supprimée")
+                          f"Relation supprimée" + (" (avec symétrie)" if auto_symmetrize else ""))
         
         conn.close()
         return deleted
@@ -356,6 +408,236 @@ class RelationDB:
         
         conn.close()
         return updated
+    
+    # ===== GESTION DES PERSONNES =====
+    
+    def add_person(self, name: str, gender: str = None, sexual_orientation: str = None) -> bool:
+        """Ajoute une personne dans la table persons."""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute("""
+                INSERT INTO persons (name, gender, sexual_orientation)
+                VALUES (?, ?, ?)
+            """, (name, gender, sexual_orientation))
+            conn.commit()
+            self.log_action("ADD_PERSON", person1=name, details=f"Genre: {gender}, Orientation: {sexual_orientation}")
+            return True
+        except sqlite3.IntegrityError:
+            return False
+        finally:
+            conn.close()
+    
+    def get_all_persons_detailed(self) -> List[Dict]:
+        """Récupère toutes les personnes avec leurs informations."""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT id, name, gender, sexual_orientation, created_at, updated_at
+            FROM persons
+            ORDER BY name
+        """)
+        
+        results = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return results
+    
+    def update_person_info(self, name: str, gender: str = None, sexual_orientation: str = None, 
+                          updated_by: str = "admin") -> bool:
+        """Met à jour les informations d'une personne."""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        # Vérifier si la personne existe
+        cursor.execute("SELECT id FROM persons WHERE name = ?", (name,))
+        if not cursor.fetchone():
+            # Créer la personne si elle n'existe pas
+            cursor.execute("""
+                INSERT INTO persons (name, gender, sexual_orientation)
+                VALUES (?, ?, ?)
+            """, (name, gender, sexual_orientation))
+        else:
+            # Mettre à jour
+            updates = []
+            params = []
+            
+            if gender is not None:
+                updates.append("gender = ?")
+                params.append(gender)
+            
+            if sexual_orientation is not None:
+                updates.append("sexual_orientation = ?")
+                params.append(sexual_orientation)
+            
+            updates.append("updated_at = CURRENT_TIMESTAMP")
+            params.append(name)
+            
+            if updates:
+                cursor.execute(f"""
+                    UPDATE persons
+                    SET {', '.join(updates)}
+                    WHERE name = ?
+                """, params)
+        
+        conn.commit()
+        self.log_action("UPDATE_PERSON", person1=name, performed_by=updated_by,
+                       details=f"Genre: {gender}, Orientation: {sexual_orientation}")
+        conn.close()
+        return True
+    
+    def rename_person(self, old_name: str, new_name: str, updated_by: str = "admin") -> bool:
+        """Renomme une personne avec cascade sur toutes les relations."""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            # Vérifier que le nouveau nom n'existe pas déjà
+            cursor.execute("SELECT id FROM persons WHERE name = ?", (new_name,))
+            if cursor.fetchone():
+                conn.close()
+                return False
+            
+            # Mettre à jour la table persons
+            cursor.execute("""
+                UPDATE persons
+                SET name = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE name = ?
+            """, (new_name, old_name))
+            
+            # Mettre à jour person1 dans relations
+            cursor.execute("""
+                UPDATE relations
+                SET person1 = ?
+                WHERE person1 = ?
+            """, (new_name, old_name))
+            
+            # Mettre à jour person2 dans relations
+            cursor.execute("""
+                UPDATE relations
+                SET person2 = ?
+                WHERE person2 = ?
+            """, (new_name, old_name))
+            
+            # Mettre à jour person1 dans pending_relations
+            cursor.execute("""
+                UPDATE pending_relations
+                SET person1 = ?
+                WHERE person1 = ?
+            """, (new_name, old_name))
+            
+            # Mettre à jour person2 dans pending_relations
+            cursor.execute("""
+                UPDATE pending_relations
+                SET person2 = ?
+                WHERE person2 = ?
+            """, (new_name, old_name))
+            
+            conn.commit()
+            self.log_action("RENAME_PERSON", person1=old_name, person2=new_name, 
+                          performed_by=updated_by, details=f"Renommé: {old_name} → {new_name}")
+            conn.close()
+            return True
+            
+        except Exception as e:
+            conn.rollback()
+            conn.close()
+            print(f"Erreur lors du renommage: {e}")
+            return False
+    
+    def merge_persons(self, primary_name: str, duplicate_name: str, updated_by: str = "admin") -> bool:
+        """Fusionne deux personnes (transfère toutes les relations du doublon vers le principal)."""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            # 1. Transférer toutes les relations où duplicate_name est person1
+            cursor.execute("""
+                SELECT person2, relation_type
+                FROM relations
+                WHERE person1 = ?
+            """, (duplicate_name,))
+            
+            for person2, rel_type in cursor.fetchall():
+                # Essayer d'ajouter la relation avec primary_name
+                try:
+                    cursor.execute("""
+                        INSERT INTO relations (person1, person2, relation_type, approved_by)
+                        VALUES (?, ?, ?, ?)
+                    """, (primary_name, person2, rel_type, updated_by))
+                except sqlite3.IntegrityError:
+                    # Relation déjà existante, skip
+                    pass
+            
+            # 2. Transférer toutes les relations où duplicate_name est person2
+            cursor.execute("""
+                SELECT person1, relation_type
+                FROM relations
+                WHERE person2 = ?
+            """, (duplicate_name,))
+            
+            for person1, rel_type in cursor.fetchall():
+                # Essayer d'ajouter la relation avec primary_name
+                try:
+                    cursor.execute("""
+                        INSERT INTO relations (person1, person2, relation_type, approved_by)
+                        VALUES (?, ?, ?, ?)
+                    """, (person1, primary_name, rel_type, updated_by))
+                except sqlite3.IntegrityError:
+                    # Relation déjà existante, skip
+                    pass
+            
+            # 3. Supprimer toutes les anciennes relations du doublon
+            cursor.execute("DELETE FROM relations WHERE person1 = ? OR person2 = ?", 
+                         (duplicate_name, duplicate_name))
+            
+            # 4. Supprimer de pending_relations
+            cursor.execute("DELETE FROM pending_relations WHERE person1 = ? OR person2 = ?", 
+                         (duplicate_name, duplicate_name))
+            
+            # 5. Supprimer de persons
+            cursor.execute("DELETE FROM persons WHERE name = ?", (duplicate_name,))
+            
+            conn.commit()
+            self.log_action("MERGE_PERSONS", person1=primary_name, person2=duplicate_name,
+                          performed_by=updated_by, 
+                          details=f"Fusion: {duplicate_name} fusionné dans {primary_name}")
+            conn.close()
+            return True
+            
+        except Exception as e:
+            conn.rollback()
+            conn.close()
+            print(f"Erreur lors de la fusion: {e}")
+            return False
+    
+    def delete_person(self, name: str, deleted_by: str = "admin") -> bool:
+        """Supprime une personne et toutes ses relations."""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            # Supprimer toutes les relations
+            cursor.execute("DELETE FROM relations WHERE person1 = ? OR person2 = ?", (name, name))
+            
+            # Supprimer de pending_relations
+            cursor.execute("DELETE FROM pending_relations WHERE person1 = ? OR person2 = ?", (name, name))
+            
+            # Supprimer de persons
+            cursor.execute("DELETE FROM persons WHERE name = ?", (name,))
+            
+            conn.commit()
+            self.log_action("DELETE_PERSON", person1=name, performed_by=deleted_by,
+                          details=f"Personne supprimée avec toutes ses relations")
+            conn.close()
+            return True
+            
+        except Exception as e:
+            conn.rollback()
+            conn.close()
+            print(f"Erreur lors de la suppression: {e}")
+            return False
 
 
 def migrate_csv_to_db(csv_path: Path, db: RelationDB):
