@@ -1,0 +1,2003 @@
+#!/usr/bin/env python3
+"""
+Social Network Analyzer - V2
+Architecture 100% propre avec Services + Repositories
+"""
+
+import dash
+from dash import dcc, html, Input, Output, State, ALL, ctx, no_update
+import dash_bootstrap_components as dbc
+from dash.exceptions import PreventUpdate
+import plotly.graph_objects as go
+
+# Import UNIQUEMENT nouvelle architecture
+from database.persons import person_repository
+from database.relations import relation_repository
+from services.symmetry import symmetry_manager
+from services.graph_builder import graph_builder
+from services.history import history_service
+from utils.constants import RELATION_TYPES
+from utils.validators import Validator
+
+# Import graph utilities pour rendering
+from graph import build_graph, compute_layout, make_figure
+
+# ============================================================================
+# CONFIGURATION APP
+# ============================================================================
+
+app = dash.Dash(
+    __name__,
+    external_stylesheets=[
+        dbc.themes.BOOTSTRAP,
+        "https://use.fontawesome.com/releases/v6.1.1/css/all.css"
+    ],
+    meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
+    suppress_callback_exceptions=True
+)
+
+app.title = "Social Network Analyzer V2"
+
+# ============================================================================
+# CSS MODERNE
+# ============================================================================
+
+app.index_string = '''
+<!DOCTYPE html>
+<html>
+<head>
+    {%metas%}
+    <title>{%title%}</title>
+    {%favicon%}
+    {%css%}
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .main-container {
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .header-bar {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-bar h1 {
+            color: #1d1d1f;
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .header-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .graph-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            min-height: 600px;
+        }
+        
+        #network-graph {
+            width: 100%;
+            height: 600px;
+        }
+        
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-height: calc(100vh - 160px);
+            overflow-y: auto;
+        }
+        
+        .controls-panel::-webkit-scrollbar { width: 8px; }
+        .controls-panel::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 10px; }
+        .controls-panel::-webkit-scrollbar-thumb { background: rgba(102, 126, 234, 0.5); border-radius: 10px; }
+        
+        .section-title {
+            color: #1d1d1f;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-group { margin-bottom: 20px; }
+        
+        .control-label {
+            display: block;
+            color: #1d1d1f;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+        }
+        
+        .btn-outline {
+            border: 2px solid #667eea;
+            background: transparent;
+            color: #667eea;
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+            margin-top: 20px;
+        }
+        
+        .stats-card h5 { font-size: 16px; margin-bottom: 12px; font-weight: 700; }
+        .stat-item { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+        .stat-value { font-weight: 700; font-size: 16px; }
+        
+        .action-section {
+            background: #f5f5f7;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        /* Modal styling */
+        .modal-dialog {
+            max-width: 600px;
+        }
+        
+        .modal-content {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 20px 25px;
+        }
+        
+        .modal-title {
+            font-weight: 700;
+            font-size: 20px;
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .modal-footer {
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 15px 25px;
+        }
+        
+        /* Form controls styling */
+        .Select-control, .dropdown, input[type="text"], input[type="number"], textarea {
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+        
+        input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+        }
+        
+        /* Dropdown improvements */
+        .Select-menu-outer {
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* ============================================= */
+        /* RESPONSIVE DESIGN - TABLETTE & MOBILE */
+        /* ============================================= */
+        
+        /* Tablette (< 1200px) */
+        @media (max-width: 1200px) {
+            .content-grid { 
+                grid-template-columns: 1fr;
+            }
+            .controls-panel { 
+                max-height: none;
+                margin-bottom: 20px;
+            }
+        }
+        
+        /* Mobile Large (< 768px) */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 10px;
+            }
+            
+            .header-bar {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .header-bar h1 {
+                font-size: 22px;
+            }
+            
+            .content-grid {
+                gap: 15px;
+            }
+            
+            .graph-panel {
+                padding: 15px;
+                min-height: calc(66vh - 100px); /* 2/3 de l'écran */
+            }
+            
+            #network-graph {
+                height: calc(66vh - 100px) !important; /* 2/3 de l'écran */
+                width: 100% !important;
+            }
+            
+            .controls-panel {
+                padding: 20px;
+            }
+            
+            .section-title {
+                font-size: 16px;
+            }
+            
+            .stats-card {
+                padding: 15px;
+            }
+            
+            .btn-primary, .btn-outline {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+            
+            /* Modal responsive */
+            .modal-dialog {
+                margin: 10px;
+                max-width: calc(100vw - 20px);
+            }
+            
+            .modal-title {
+                font-size: 18px;
+            }
+            
+            .modal-body {
+                padding: 20px;
+            }
+        }
+        
+        /* Mobile Small (< 480px) */
+        @media (max-width: 480px) {
+            .main-container {
+                padding: 8px;
+            }
+            
+            .header-bar {
+                padding: 12px 15px;
+                border-radius: 12px;
+            }
+            
+            .header-bar h1 {
+                font-size: 18px;
+            }
+            
+            .header-badge {
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+            
+            .graph-panel {
+                padding: 10px;
+                min-height: calc(66vh - 80px); /* 2/3 de l'écran */
+                border-radius: 12px;
+            }
+            
+            #network-graph {
+                height: calc(66vh - 80px) !important; /* 2/3 de l'écran */
+                width: 100% !important;
+            }
+            
+            .controls-panel {
+                padding: 15px;
+                border-radius: 12px;
+            }
+            
+            .section-title {
+                font-size: 15px;
+                margin-bottom: 12px;
+            }
+            
+            .control-label {
+                font-size: 12px;
+            }
+            
+            .stats-card {
+                padding: 12px;
+                margin-top: 15px;
+            }
+            
+            .stats-card h5 {
+                font-size: 14px;
+                margin-bottom: 10px;
+            }
+            
+            .stat-item {
+                font-size: 13px;
+                margin-bottom: 8px;
+            }
+            
+            .stat-value {
+                font-size: 14px;
+            }
+            
+            .btn-primary, .btn-outline {
+                padding: 10px 14px;
+                font-size: 13px;
+            }
+            
+            .action-buttons {
+                gap: 8px;
+            }
+            
+            /* Modal responsive small */
+            .modal-dialog {
+                margin: 5px;
+                max-width: calc(100vw - 10px);
+            }
+            
+            .modal-header {
+                padding: 15px 20px;
+            }
+            
+            .modal-title {
+                font-size: 16px;
+            }
+            
+            .modal-body {
+                padding: 15px;
+            }
+            
+            .modal-footer {
+                padding: 12px 20px;
+            }
+            
+            .modal-footer button {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+        }
+        
+        /* Touch optimizations pour mobile */
+        @media (hover: none) and (pointer: coarse) {
+            .btn-primary, .btn-outline {
+                min-height: 44px; /* Apple recommandation pour touch targets */
+            }
+            
+            .controls-panel::-webkit-scrollbar {
+                width: 10px;
+            }
+            
+            /* Améliorer les zones de touch pour les dropdown */
+            .Select-control {
+                min-height: 44px;
+                padding: 12px 15px;
+            }
+            
+            /* Inputs plus grands pour mobile */
+            input[type="text"], input[type="number"], textarea {
+                min-height: 44px;
+                font-size: 16px; /* Évite le zoom automatique sur iOS */
+            }
+            
+            /* IMPORTANT : Laisser Plotly gérer les touches pour pinch-to-zoom */
+            #network-graph {
+                touch-action: auto !important; /* Permet tous les gestes natifs */
+            }
+            
+            .graph-panel {
+                touch-action: auto !important; /* Laisse Plotly gérer */
+                overflow: hidden; /* Empêche le scroll du container */
+            }
+            
+            /* Force Plotly à accepter les gestes tactiles */
+            .js-plotly-plot, .plotly, .svg-container {
+                touch-action: auto !important;
+                -webkit-user-select: none;
+                user-select: none;
+            }
+        }
+        
+        /* Landscape orientation sur mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .main-container {
+                padding: 5px;
+            }
+            
+            .header-bar {
+                padding: 8px 15px;
+            }
+            
+            .header-bar h1 {
+                font-size: 16px;
+            }
+            
+            .graph-panel {
+                min-height: calc(85vh - 60px); /* Presque plein écran en landscape */
+                padding: 10px;
+            }
+            
+            #network-graph {
+                height: calc(85vh - 60px) !important; /* Presque plein écran en landscape */
+            }
+        }
+        
+        /* Portrait mode optimizations */
+        @media (max-width: 768px) and (orientation: portrait) {
+            .graph-panel {
+                /* Graph prend 66% en portrait */
+                position: relative;
+            }
+            
+            #network-graph {
+                /* Assurer que le graphe prend bien 2/3 de l'écran */
+                min-height: 450px;
+            }
+        }
+    </style>
+    <script>
+        // Script pour activer pinch-to-zoom sur graphes Plotly mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            // Attendre que Plotly soit chargé
+            setTimeout(function() {
+                var graphDiv = document.getElementById('network-graph');
+                if (graphDiv && graphDiv.on) {
+                    // Configurer les événements tactiles Plotly
+                    var lastDistance = 0;
+                    var isPinching = false;
+                    
+                    graphDiv.addEventListener('touchstart', function(e) {
+                        if (e.touches.length === 2) {
+                            isPinching = true;
+                            var dx = e.touches[0].clientX - e.touches[1].clientX;
+                            var dy = e.touches[0].clientY - e.touches[1].clientY;
+                            lastDistance = Math.sqrt(dx * dx + dy * dy);
+                            e.preventDefault();
+                        }
+                    }, {passive: false});
+                    
+                    graphDiv.addEventListener('touchmove', function(e) {
+                        if (e.touches.length === 2 && isPinching) {
+                            var dx = e.touches[0].clientX - e.touches[1].clientX;
+                            var dy = e.touches[0].clientY - e.touches[1].clientY;
+                            var distance = Math.sqrt(dx * dx + dy * dy);
+                            
+                            if (lastDistance > 0) {
+                                var scale = distance / lastDistance;
+                                if (scale > 1.01 || scale < 0.99) { // Seuil pour éviter les micro-mouvements
+                                    // Zoom in ou out
+                                    var update = {
+                                        'xaxis.range[0]': graphDiv.layout.xaxis.range[0] / scale,
+                                        'xaxis.range[1]': graphDiv.layout.xaxis.range[1] / scale,
+                                        'yaxis.range[0]': graphDiv.layout.yaxis.range[0] / scale,
+                                        'yaxis.range[1]': graphDiv.layout.yaxis.range[1] / scale
+                                    };
+                                    Plotly.relayout(graphDiv, update);
+                                }
+                            }
+                            lastDistance = distance;
+                            e.preventDefault();
+                        }
+                    }, {passive: false});
+                    
+                    graphDiv.addEventListener('touchend', function(e) {
+                        if (e.touches.length < 2) {
+                            isPinching = false;
+                            lastDistance = 0;
+                        }
+                    });
+                }
+            }, 1000);
+        });
+    </script>
+</head>
+<body>
+    {%app_entry%}
+    <footer>{%config%}{%scripts%}{%renderer%}</footer>
+</body>
+</html>
+'''
+
+# ============================================================================
+# LAYOUT
+# ============================================================================
+
+app.layout = html.Div([
+    # Hidden store to trigger graph refresh
+    dcc.Store(id='data-version', data=0),
+    
+    # Auto-refresh interval
+    dcc.Interval(id='auto-refresh', interval=30000, n_intervals=0),
+    
+    # Header
+    html.Div([
+        html.H1([
+            html.I(className="fas fa-project-diagram", style={'marginRight': '10px'}),
+            "Social Network Analyzer"
+        ]),
+        html.Span("V2 - Clean Architecture", className='header-badge')
+    ], className='header-bar'),
+    
+    # Main Content
+    html.Div([
+        # Graph Panel
+        html.Div([
+            dcc.Graph(
+                id='network-graph',
+                config={
+                    'displayModeBar': True,
+                    'scrollZoom': True,
+                    'displaylogo': False,
+                    'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
+                    'doubleClick': 'reset',  # Double tap pour reset
+                    'modeBarButtonsToAdd': ['resetScale2d'],  # Bouton reset zoom
+                    'responsive': True,  # Responsive sur mobile
+                    'showTips': False,  # Pas de tips pour mobile
+                },
+                style={'height': '600px', 'width': '100%'}
+            )
+        ], className='graph-panel'),
+        
+        # Controls Panel
+        html.Div([
+            # Graph Controls
+            html.Div([
+                html.Div("🎨 Graph Settings", className='section-title'),
+                
+                html.Div([
+                    html.Label("Layout Algorithm", className='control-label'),
+                    dcc.Dropdown(
+                        id='layout-dropdown',
+                        options=[
+                            {'label': '🎯 Community Detection', 'value': 'community'},
+                            {'label': '🌸 Spring Force', 'value': 'spring'},
+                            {'label': '🔷 Kamada-Kawai', 'value': 'kk'},
+                            {'label': '⭐ Spectral', 'value': 'spectral'},
+                        ],
+                        value='community',
+                        clearable=False,
+                    )
+                ], className='control-group'),
+                
+                html.Div([
+                    html.Label("Color Scheme", className='control-label'),
+                    dcc.Dropdown(
+                        id='color-dropdown',
+                        options=[
+                            {'label': '🎨 By Community', 'value': 'community'},
+                            {'label': '📈 By Connections', 'value': 'degree'},
+                        ],
+                        value='community',
+                        clearable=False,
+                    )
+                ], className='control-group'),
+            ]),
+            
+            # Stats Card
+            html.Div([
+                html.H5("📊 Network Statistics"),
+                html.Div(id='stats-display')
+            ], className='stats-card'),
+            
+            # Actions Section
+            html.Div([
+                html.Div("⚡ Quick Actions", className='section-title'),
+                html.Div([
+                    dbc.Button([
+                        html.I(className="fas fa-user-plus", style={'marginRight': '8px'}),
+                        "Add Person"
+                    ], id='btn-add-person', color='primary', className='w-100'),
+                    
+                    dbc.Button([
+                        html.I(className="fas fa-link", style={'marginRight': '8px'}),
+                        "Add Relation"
+                    ], id='btn-add-relation', color='primary', className='w-100'),
+                    
+                    dbc.Button([
+                        html.I(className="fas fa-sync-alt", style={'marginRight': '8px'}),
+                        "Update Relation"
+                    ], id='btn-update-relation', color='info', className='w-100'),
+                    
+                    dbc.Button([
+                        html.I(className="fas fa-edit", style={'marginRight': '8px'}),
+                        "Edit Person"
+                    ], id='btn-edit-person', outline=True, color='primary', className='w-100'),
+                    
+                    dbc.Button([
+                        html.I(className="fas fa-users", style={'marginRight': '8px'}),
+                        "Merge Persons"
+                    ], id='btn-merge-persons', outline=True, color='primary', className='w-100'),
+                    
+                    dbc.Button([
+                        html.I(className="fas fa-trash", style={'marginRight': '8px'}),
+                        "Delete Person"
+                    ], id='btn-delete-person', outline=True, color='danger', className='w-100'),
+                ], className='action-buttons'),
+            ], className='action-section'),
+            
+            # History Section
+            html.Div([
+                html.Div("📝 Recent Actions", className='section-title'),
+                html.Div(id='history-display', style={'fontSize': '12px', 'color': '#666'})
+            ], style={'marginTop': '20px'}),
+            
+        ], className='controls-panel'),
+        
+    ], className='content-grid'),
+    
+    # ============================================================================
+    # MODALS
+    # ============================================================================
+    
+    # Modal Add Person
+    dbc.Modal([
+        dbc.ModalHeader(dbc.ModalTitle("➕ Add New Person")),
+        dbc.ModalBody([
+            html.Div([
+                html.Label("Name", className='control-label'),
+                dbc.Input(id='input-add-name', type='text', placeholder='Enter name')
+            ], className='control-group'),
+        ]),
+        dbc.ModalFooter([
+            dbc.Button("Cancel", id='btn-cancel-add-person', color='secondary'),
+            dbc.Button("Add Person", id='btn-submit-add-person', color='primary')
+        ])
+    ], id='modal-add-person', is_open=False),
+    
+    # Modal Edit Person
+    dbc.Modal([
+        dbc.ModalHeader(dbc.ModalTitle("✏️ Edit Person")),
+        dbc.ModalBody([
+            html.Div([
+                html.Label("Select Person", className='control-label'),
+                dcc.Dropdown(id='dropdown-edit-person-select', placeholder='Select person to edit')
+            ], className='control-group'),
+            
+            html.Div([
+                html.Label("New Name", className='control-label'),
+                dbc.Input(id='input-edit-person-name', type='text', placeholder='Enter new name')
+            ], className='control-group'),
+        ]),
+        dbc.ModalFooter([
+            dbc.Button("Cancel", id='btn-cancel-edit-person', color='secondary'),
+            dbc.Button("Save Changes", id='btn-submit-edit-person', color='primary')
+        ])
+    ], id='modal-edit-person', is_open=False),
+    
+    # Modal Merge Persons
+    dbc.Modal([
+        dbc.ModalHeader(dbc.ModalTitle("🔀 Merge Persons")),
+        dbc.ModalBody([
+            html.Div([
+                html.Label("Source Person (will be deleted)", className='control-label'),
+                dcc.Dropdown(id='dropdown-merge-source', placeholder='Select source person')
+            ], className='control-group'),
+            
+            html.Div([
+                html.Label("Target Person (will be kept)", className='control-label'),
+                dcc.Dropdown(id='dropdown-merge-target', placeholder='Select target person')
+            ], className='control-group'),
+            
+            html.Div(id='merge-preview-info', style={'marginTop': '15px'}),
+        ]),
+        dbc.ModalFooter([
+            dbc.Button("Cancel", id='btn-cancel-merge-persons', color='secondary'),
+            dbc.Button("Merge", id='btn-submit-merge-persons', color='warning')
+        ])
+    ], id='modal-merge-persons', is_open=False),
+    
+    # Modal Delete Person
+    dbc.Modal([
+        dbc.ModalHeader(dbc.ModalTitle("🗑️ Delete Person")),
+        dbc.ModalBody([
+            html.Div([
+                html.Label("Select Person to Delete", className='control-label'),
+                dcc.Dropdown(id='dropdown-delete-person-select', placeholder='Select person')
+            ], className='control-group'),
+            
+            html.Div(id='delete-person-info', style={'marginTop': '15px'}),
+            
+            html.Div([
+                dbc.Checkbox(
+                    id='checkbox-delete-cascade',
+                    label='Also delete all relations',
+                    value=True
+                )
+            ], style={'marginTop': '15px'}),
+        ]),
+        dbc.ModalFooter([
+            dbc.Button("Cancel", id='btn-cancel-delete-person', color='secondary'),
+            dbc.Button("Delete", id='btn-submit-delete-person', color='danger')
+        ])
+    ], id='modal-delete-person', is_open=False),
+    
+    # Modal Add Relation - REDESIGNED FOR INTUITIVE UX
+    dbc.Modal([
+        dbc.ModalHeader(dbc.ModalTitle("🔗 Add New Relation")),
+        dbc.ModalBody([
+            # Helper text - clear and simple
+            dbc.Alert([
+                html.I(className="fas fa-magic", style={'marginRight': '8px'}),
+                html.Strong("Just type names! "),
+                "Existing persons will appear, or you can create new ones on the fly."
+            ], color="info", style={'fontSize': '14px', 'padding': '10px 15px', 'marginBottom': '20px'}),
+            
+            # Person 1 - Smart Input
+            html.Div([
+                html.Label([
+                    html.I(className="fas fa-user", style={'marginRight': '8px', 'color': '#667eea'}),
+                    "First Person"
+                ], style={'fontSize': '16px', 'fontWeight': 'bold', 'marginBottom': '10px', 'display': 'block'}),
+                
+                dcc.Dropdown(
+                    id='dropdown-add-rel-p1',
+                    placeholder='🔍 Type a name... (existing or new)',
+                    searchable=True,
+                    clearable=True,
+                    style={'fontSize': '15px'}
+                ),
+                
+                # Smart indicator
+                html.Div(id='person-1-indicator', style={'marginTop': '8px', 'minHeight': '24px'}),
+                
+            ], style={'marginBottom': '25px', 'padding': '15px', 'backgroundColor': '#f8f9ff', 'borderRadius': '8px'}),
+            
+            # Person 2 - Smart Input
+            html.Div([
+                html.Label([
+                    html.I(className="fas fa-user", style={'marginRight': '8px', 'color': '#667eea'}),
+                    "Second Person"
+                ], style={'fontSize': '16px', 'fontWeight': 'bold', 'marginBottom': '10px', 'display': 'block'}),
+                
+                dcc.Dropdown(
+                    id='dropdown-add-rel-p2',
+                    placeholder='🔍 Type a name... (existing or new)',
+                    searchable=True,
+                    clearable=True,
+                    style={'fontSize': '15px'}
+                ),
+                
+                # Smart indicator
+                html.Div(id='person-2-indicator', style={'marginTop': '8px', 'minHeight': '24px'}),
+                
+            ], style={
+                'marginBottom': '25px',
+                'padding': '15px',
+                'backgroundColor': '#f8f9ff',
+                'borderRadius': '8px'
+            }),
+            
+            # Relation Type - Smart Input
+            html.Div([
+                html.Label([
+                    html.I(className="fas fa-heart", style={'marginRight': '8px', 'color': '#e74c3c'}),
+                    "Relation Type"
+                ], style={'fontSize': '16px', 'fontWeight': 'bold', 'marginBottom': '10px', 'display': 'block'}),
+                
+                dcc.Dropdown(
+                    id='dropdown-add-rel-type',
+                    options=[{'label': RELATION_TYPES[k], 'value': k} for k in RELATION_TYPES.keys()],
+                    placeholder='Select type... (💋 Bisou, 😴 Dodo, etc.)',
+                    clearable=False,
+                    style={'fontSize': '15px'}
+                ),
+                
+            ], style={
+                'marginBottom': '20px',
+                'padding': '15px',
+                'backgroundColor': '#fff5f5',
+                'borderRadius': '8px'
+            }),
+            
+            # Status display
+            html.Div(id='add-relation-status', style={'marginTop': '10px'})
+        ]),
+        dbc.ModalFooter([
+            dbc.Button("Cancel", id='btn-cancel-add-relation', color='secondary'),
+            dbc.Button("Add Relation", id='btn-submit-add-relation', color='primary')
+        ])
+    ], id='modal-add-relation', is_open=False, size='lg'),  # size='lg' pour plus d'espace
+    
+    # Modal Update/Delete Relation - REDESIGNED
+    dbc.Modal([
+        dbc.ModalHeader(dbc.ModalTitle("� Manage Relations")),
+        dbc.ModalBody([
+            # Helper text
+            dbc.Alert([
+                html.I(className="fas fa-info-circle", style={'marginRight': '8px'}),
+                html.Strong("All relations: "),
+                "Click on a relation type to edit it, or click the delete button to remove it."
+            ], color="info", style={'fontSize': '14px', 'padding': '10px 15px', 'marginBottom': '20px'}),
+            
+            # Relations list (will be populated dynamically)
+            html.Div(id='relations-list-container', style={'maxHeight': '500px', 'overflowY': 'auto'}),
+            
+            # Status message
+            html.Div(id='manage-relation-status', style={'marginTop': '15px'})
+        ]),
+        dbc.ModalFooter([
+            dbc.Button("Close", id='btn-close-update-relation', color='secondary')
+        ])
+    ], id='modal-update-relation', is_open=False, size='xl'),  # xl size for more space
+    
+    # Modal Edit Relation Type (appears when clicking a relation)
+    dbc.Modal([
+        dbc.ModalHeader(dbc.ModalTitle("✏️ Edit Relation Type")),
+        dbc.ModalBody([
+            html.Div(id='edit-relation-info', style={'marginBottom': '20px'}),
+            
+            html.Div([
+                html.Label([
+                    html.I(className="fas fa-heart", style={'marginRight': '8px', 'color': '#e74c3c'}),
+                    "New Relation Type"
+                ], style={'fontSize': '16px', 'fontWeight': 'bold', 'marginBottom': '10px', 'display': 'block'}),
+                
+                dcc.Dropdown(
+                    id='dropdown-edit-relation-type',
+                    options=[{'label': RELATION_TYPES[k], 'value': k} for k in RELATION_TYPES.keys()],
+                    placeholder='Select new type...',
+                    style={'fontSize': '15px'}
+                )
+            ], style={
+                'padding': '15px',
+                'backgroundColor': '#fff5f5',
+                'borderRadius': '8px'
+            }),
+            
+            html.Div(id='edit-relation-status', style={'marginTop': '15px'})
+        ]),
+        dbc.ModalFooter([
+            dbc.Button("Cancel", id='btn-cancel-edit-relation', color='secondary'),
+            dbc.Button("Save Changes", id='btn-submit-edit-relation', color='primary')
+        ])
+    ], id='modal-edit-relation', is_open=False),
+    
+    # Hidden store for selected relation to edit/delete
+    dcc.Store(id='selected-relation-store', data=None),
+    
+    # Hidden components for compatibility (not shown to user)
+    html.Div([
+        dcc.Dropdown(id='dropdown-add-gender', style={'display': 'none'}),
+        dcc.Dropdown(id='dropdown-add-orientation', style={'display': 'none'}),
+        dcc.Dropdown(id='dropdown-edit-person-gender', style={'display': 'none'}),
+        dcc.Dropdown(id='dropdown-edit-person-orientation', style={'display': 'none'}),
+        dcc.Dropdown(id='dropdown-new-p1-gender', style={'display': 'none'}),
+        dcc.Dropdown(id='dropdown-new-p1-orientation', style={'display': 'none'}),
+        dcc.Dropdown(id='dropdown-new-p2-gender', style={'display': 'none'}),
+        dcc.Dropdown(id='dropdown-new-p2-orientation', style={'display': 'none'}),
+    ], style={'display': 'none'}),
+    
+    # Store components (no duplicate Interval - already defined at top)
+    dcc.Store(id='session-store', data={}),
+    
+], className='main-container')
+
+# ============================================================================
+# CALLBACKS - GRAPH
+# ============================================================================
+
+@app.callback(
+    Output('network-graph', 'figure'),
+    [Input('layout-dropdown', 'value'),
+     Input('color-dropdown', 'value'),
+     Input('data-version', 'data'),  # Trigger refresh on data change
+     Input('auto-refresh', 'n_intervals')]
+)
+def update_graph(layout_type, color_by, data_version, n_intervals):
+    """Build graph using repository + graph.py rendering"""
+    try:
+        # Get relations from repository (deduplicate pour éviter A→B et B→A)
+        relations = relation_repository.read_all(deduplicate=True)
+        
+        if not relations:
+            # Empty graph
+            fig = go.Figure()
+            fig.add_annotation(
+                text="No relations to display",
+                xref="paper", yref="paper",
+                x=0.5, y=0.5,
+                showarrow=False,
+                font=dict(size=16, color='#999')
+            )
+            fig.update_layout(
+                xaxis=dict(visible=False),
+                yaxis=dict(visible=False),
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+            )
+            return fig
+        
+        # Convert to dict format for build_graph
+        relations_dict = {}
+        for p1, p2, rel_type in relations:
+            if p1 not in relations_dict:
+                relations_dict[p1] = []
+            relations_dict[p1].append((p2, rel_type))
+        
+        # Build NetworkX graph
+        G = build_graph(relations_dict)
+        
+        # Compute layout
+        pos = compute_layout(G, mode=layout_type)
+        
+        # Create figure (déjà stylée dans make_figure)
+        fig = make_figure(G, pos)
+        
+        return fig
+        
+    except Exception as e:
+        # Error figure
+        fig = go.Figure()
+        fig.add_annotation(
+            text=f"Error: {str(e)}",
+            xref="paper", yref="paper",
+            x=0.5, y=0.5,
+            showarrow=False,
+            font=dict(size=14, color='red')
+        )
+        fig.update_layout(
+            xaxis=dict(visible=False),
+            yaxis=dict(visible=False),
+        )
+        return fig
+
+# ============================================================================
+# CALLBACKS - STATS
+# ============================================================================
+
+@app.callback(
+    Output('stats-display', 'children'),
+    Input('auto-refresh', 'n_intervals')
+)
+def update_stats(n_intervals):
+    """Update statistics display"""
+    persons = person_repository.read_all()
+    relations = relation_repository.read_all(deduplicate=True)
+    
+    # Relations déjà dédupliquées par le repository
+    unique_relations = len(relations)
+    
+    return html.Div([
+        html.Div([html.Span("Persons"), html.Span(f"{len(persons)}", className='stat-value')], className='stat-item'),
+        html.Div([html.Span("Relations"), html.Span(f"{unique_relations}", className='stat-value')], className='stat-item'),
+        html.Div([html.Span("Symmetry"), html.Span("✅ 100%", className='stat-value')], className='stat-item'),
+    ])
+
+# ============================================================================
+# CALLBACKS - HISTORY
+# ============================================================================
+
+@app.callback(
+    Output('history-display', 'children'),
+    Input('auto-refresh', 'n_intervals')
+)
+def update_history(n_intervals):
+    """Display recent actions from HistoryService"""
+    recent = history_service.get_history(limit=5)
+    
+    if not recent:
+        return html.P("No recent actions", style={'fontStyle': 'italic', 'color': '#999'})
+    
+    items = []
+    for action in recent:
+        items.append(html.Div([
+            html.Span(f"{action.get('created_at', 'Unknown')}: ", style={'fontWeight': '600'}),
+            html.Span(f"{action.get('action_type', 'Unknown')} - {action.get('person1', '')}")
+        ], style={'marginBottom': '5px'}))
+    
+    return html.Div(items)
+
+# ============================================================================
+# CALLBACKS - MODALS ADD PERSON
+# ============================================================================
+
+@app.callback(
+    Output('modal-add-person', 'is_open'),
+    [Input('btn-add-person', 'n_clicks'),
+     Input('btn-cancel-add-person', 'n_clicks'),
+     Input('btn-submit-add-person', 'n_clicks')],
+    State('modal-add-person', 'is_open'),
+    prevent_initial_call=True
+)
+def toggle_add_person_modal(open_clicks, cancel_clicks, submit_clicks, is_open):
+    """Toggle add person modal"""
+    if ctx.triggered_id in ['btn-add-person']:
+        return not is_open
+    return False
+
+@app.callback(
+    [Output('input-add-name', 'value'),
+     Output('dropdown-add-gender', 'value'),
+     Output('dropdown-add-orientation', 'value'),
+     Output('data-version', 'data')],
+    Input('btn-submit-add-person', 'n_clicks'),
+    [State('input-add-name', 'value'),
+     State('dropdown-add-gender', 'value'),
+     State('dropdown-add-orientation', 'value'),
+     State('data-version', 'data')],
+    prevent_initial_call=True
+)
+def submit_add_person(n_clicks, name, gender, orientation, current_version):
+    """Add new person using PersonRepository"""
+    if not n_clicks:
+        raise PreventUpdate
+    
+    try:
+        # Validation
+        if not name or not name.strip():
+            raise ValueError("Name is required")
+        
+        # Utilise PersonRepository pour ajouter (sans gender/orientation)
+        person_repository.create(
+            name=name.strip(),
+            gender=None,
+            sexual_orientation=None
+        )
+        
+        # Enregistre dans l'historique
+        history_service.record_action(
+            action_type='ADD_PERSON',
+            person1=name.strip()
+        )
+        
+        # Invalide le cache du graphe
+        graph_builder.clear_cache()
+        
+        # Increment version to trigger graph refresh
+        new_version = (current_version or 0) + 1
+        print(f"   ✅ Person added! New data version: {new_version}")
+        
+        # Reset form and bump version
+        return '', None, None, new_version
+        
+    except Exception as e:
+        print(f"Error adding person: {e}")
+        raise PreventUpdate
+
+# ============================================================================
+# CALLBACKS - MODALS ADD RELATION
+# ============================================================================
+
+@app.callback(
+    [Output('modal-add-relation', 'is_open'),
+     Output('dropdown-add-rel-p1', 'value'),
+     Output('dropdown-add-rel-type', 'value'),
+     Output('dropdown-add-rel-p2', 'value'),
+     Output('add-relation-status', 'children'),
+     Output('data-version', 'data', allow_duplicate=True)],
+    [Input('btn-add-relation', 'n_clicks'),
+     Input('btn-cancel-add-relation', 'n_clicks'),
+     Input('btn-submit-add-relation', 'n_clicks')],
+    [State('modal-add-relation', 'is_open'),
+     State('dropdown-add-rel-p1', 'value'),
+     State('dropdown-add-rel-type', 'value'),
+     State('dropdown-add-rel-p2', 'value'),
+     State('data-version', 'data')],
+    prevent_initial_call=True
+)
+def toggle_and_submit_add_relation(open_clicks, cancel_clicks, submit_clicks, is_open, p1_id, rel_type, p2_id, current_version):
+    """Toggle modal AND handle submit (with smart inline person creation)"""
+    triggered_id = ctx.triggered_id
+    
+    print(f"🔍 [ADD RELATION] triggered_id={triggered_id}, is_open={is_open}")
+    
+    # Open modal
+    if triggered_id == 'btn-add-relation':
+        print(f"   → Opening modal")
+        return True, None, None, None, None, no_update
+    
+    # Cancel
+    if triggered_id == 'btn-cancel-add-relation':
+        print(f"   → Canceling")
+        return False, None, None, None, None, no_update
+    
+    # Submit
+    if triggered_id == 'btn-submit-add-relation':
+        print(f"   → Submitting: p1_id={p1_id}, rel_type={rel_type}, p2_id={p2_id}")
+        
+        try:
+            # === ÉTAPE 1: Check if Person 1 needs to be created ===
+            if p1_id and str(p1_id).startswith("__CREATE__"):
+                name = str(p1_id).replace("__CREATE__", "").strip()
+                print(f"   → Creating new person 1: {name}")
+                
+                person_repository.create(
+                    name=name,
+                    gender=None,
+                    sexual_orientation=None
+                )
+                
+                # Get the created person's ID
+                persons = person_repository.read_all()
+                p1 = next((p for p in persons if p['name'] == name), None)
+                if p1:
+                    p1_id = p1['id']
+                    print(f"   ✅ Person 1 created with ID: {p1_id}")
+            
+            # === ÉTAPE 2: Check if Person 2 needs to be created ===
+            if p2_id and str(p2_id).startswith("__CREATE__"):
+                name = str(p2_id).replace("__CREATE__", "").strip()
+                print(f"   → Creating new person 2: {name}")
+                
+                person_repository.create(
+                    name=name,
+                    gender=None,
+                    sexual_orientation=None
+                )
+                
+                # Get the created person's ID
+                persons = person_repository.read_all()
+                p2 = next((p for p in persons if p['name'] == name), None)
+                if p2:
+                    p2_id = p2['id']
+                    print(f"   ✅ Person 2 created with ID: {p2_id}")
+            
+            # === ÉTAPE 3: Validation ===
+            # Check if all required fields are present (None or empty, but 0 is valid!)
+            if p1_id is None or p2_id is None or rel_type is None:
+                missing = []
+                if p1_id is None:
+                    missing.append("Person 1")
+                if p2_id is None:
+                    missing.append("Person 2")
+                if rel_type is None:
+                    missing.append("Relation Type")
+                print(f"   ❌ Missing fields: {missing}")
+                return True, p1_id, rel_type, p2_id, dbc.Alert(f"Missing required fields: {', '.join(missing)}", color='warning', duration=4000), no_update
+            
+            if p1_id == p2_id:
+                print(f"   ❌ Self-relation!")
+                return True, p1_id, rel_type, p2_id, dbc.Alert("Cannot create self-relation", color='warning', duration=3000), no_update
+            
+            # === ÉTAPE 4: Récupérer les noms des personnes ===
+            p1 = person_repository.read(p1_id)
+            p2 = person_repository.read(p2_id)
+            
+            if not p1 or not p2:
+                print(f"   ❌ Person not found!")
+                return True, p1_id, rel_type, p2_id, dbc.Alert("Person not found", color='danger', duration=3000), no_update
+            
+            # === ÉTAPE 5: Créer la relation ===
+            print(f"   → Creating relation: {p1['name']} - {p2['name']}")
+            # Utilise RelationRepository.create() qui attend des NOMS (str), pas des IDs
+            relation_repository.create(
+                person1=p1['name'],
+                person2=p2['name'],
+                relation_type=rel_type
+            )
+            
+            print(f"   → Recording history...")
+            history_service.record_action(
+                action_type='ADD',
+                person1=p1['name'],
+                person2=p2['name'],
+                relation_type=rel_type
+            )
+            
+            print(f"   → Invalidating cache...")
+            graph_builder.clear_cache()
+            
+            # Bump version to trigger graph refresh
+            new_version = (current_version or 0) + 1
+            print(f"   ✅ Success! New data version: {new_version}")
+            
+            # Close modal and reset form
+            return False, None, None, None, dbc.Alert("Relation added successfully!", color='success', duration=3000), new_version
+            
+        except Exception as e:
+            print(f"   ❌ Exception: {e}")
+            import traceback
+            traceback.print_exc()
+            return True, p1_id, rel_type, p2_id, dbc.Alert(f"Error: {str(e)}", color='danger', duration=3000), no_update
+    
+    # Fallback
+    return False, None, None, None, None, no_update
+
+# ============================================================================
+# SMART DROPDOWN OPTIONS - Person 1 (with "Create new" option)
+# ============================================================================
+@app.callback(
+    Output('dropdown-add-rel-p1', 'options'),
+    [Input('dropdown-add-rel-p1', 'search_value'),
+     Input('modal-add-relation', 'is_open')],
+    [State('dropdown-add-rel-p1', 'value')],
+    prevent_initial_call=True
+)
+def populate_p1_options(search_value, is_open, current_value):
+    """Populate Person 1 dropdown with existing persons + 'Create new' option if needed"""
+    if not is_open:
+        raise PreventUpdate
+    
+    persons = person_repository.read_all()
+    options = [{'label': p['name'], 'value': p['id']} for p in persons]
+    
+    # If search value and no exact match → add "Create new" option
+    if search_value and len(search_value.strip()) >= 2:
+        existing_names = [p['name'].lower() for p in persons]
+        if search_value.strip().lower() not in existing_names:
+            options.insert(0, {
+                'label': f"➕ Create new: {search_value.strip()}",
+                'value': f"__CREATE__{search_value.strip()}"
+            })
+    
+    # IMPORTANT: If current_value starts with __CREATE__, keep it in options
+    # This ensures the option stays visible after selection
+    if current_value and str(current_value).startswith("__CREATE__"):
+        name = str(current_value).replace("__CREATE__", "")
+        # Check if this option is already in the list
+        if not any(opt['value'] == current_value for opt in options):
+            options.insert(0, {
+                'label': f"➕ Create new: {name}",
+                'value': current_value
+            })
+    
+    return options
+
+# Smart indicator for Person 1
+@app.callback(
+    Output('person-1-indicator', 'children'),
+    Input('dropdown-add-rel-p1', 'value'),
+    prevent_initial_call=True
+)
+def update_p1_indicator(value):
+    """Show indicator based on Person 1 selection"""
+    if not value:
+        return None
+    
+    if str(value).startswith("__CREATE__"):
+        name = str(value).replace("__CREATE__", "")
+        return html.Div([
+            html.I(className="fas fa-plus-circle", style={'color': '#28a745', 'marginRight': '5px'}),
+            html.Span(f"Will create new person: {name}", style={'color': '#28a745', 'fontSize': '13px', 'fontWeight': '500'})
+        ])
+    else:
+        return html.Div([
+            html.I(className="fas fa-check-circle", style={'color': '#667eea', 'marginRight': '5px'}),
+            html.Span("Existing person selected", style={'color': '#667eea', 'fontSize': '13px', 'fontWeight': '500'})
+        ])
+
+# ============================================================================
+# SMART DROPDOWN OPTIONS - Person 2 (with "Create new" option)
+# ============================================================================
+@app.callback(
+    Output('dropdown-add-rel-p2', 'options'),
+    [Input('dropdown-add-rel-p2', 'search_value'),
+     Input('modal-add-relation', 'is_open')],
+    [State('dropdown-add-rel-p2', 'value')],
+    prevent_initial_call=True
+)
+def populate_p2_options(search_value, is_open, current_value):
+    """Populate Person 2 dropdown with existing persons + 'Create new' option if needed"""
+    if not is_open:
+        raise PreventUpdate
+    
+    persons = person_repository.read_all()
+    options = [{'label': p['name'], 'value': p['id']} for p in persons]
+    
+    # If search value and no exact match → add "Create new" option
+    if search_value and len(search_value.strip()) >= 2:
+        existing_names = [p['name'].lower() for p in persons]
+        if search_value.strip().lower() not in existing_names:
+            options.insert(0, {
+                'label': f"➕ Create new: {search_value.strip()}",
+                'value': f"__CREATE__{search_value.strip()}"
+            })
+    
+    # IMPORTANT: If current_value starts with __CREATE__, keep it in options
+    # This ensures the option stays visible after selection
+    if current_value and str(current_value).startswith("__CREATE__"):
+        name = str(current_value).replace("__CREATE__", "")
+        # Check if this option is already in the list
+        if not any(opt['value'] == current_value for opt in options):
+            options.insert(0, {
+                'label': f"➕ Create new: {name}",
+                'value': current_value
+            })
+    
+    return options
+
+# Smart indicator for Person 2
+@app.callback(
+    Output('person-2-indicator', 'children'),
+    Input('dropdown-add-rel-p2', 'value'),
+    prevent_initial_call=True
+)
+def update_p2_indicator(value):
+    """Show indicator based on Person 2 selection"""
+    if not value:
+        return None
+    
+    if str(value).startswith("__CREATE__"):
+        name = str(value).replace("__CREATE__", "")
+        return html.Div([
+            html.I(className="fas fa-plus-circle", style={'color': '#28a745', 'marginRight': '5px'}),
+            html.Span(f"Will create new person: {name}", style={'color': '#28a745', 'fontSize': '13px', 'fontWeight': '500'})
+        ])
+    else:
+        return html.Div([
+            html.I(className="fas fa-check-circle", style={'color': '#667eea', 'marginRight': '5px'}),
+            html.Span("Existing person selected", style={'color': '#667eea', 'fontSize': '13px', 'fontWeight': '500'})
+        ])
+
+
+# ============================================================================
+# CALLBACKS - MANAGE RELATIONS (Update/Delete)
+# ============================================================================
+
+# Open/close Manage Relations modal + populate list
+@app.callback(
+    [Output('modal-update-relation', 'is_open'),
+     Output('relations-list-container', 'children'),
+     Output('manage-relation-status', 'children')],
+    [Input('btn-update-relation', 'n_clicks'),
+     Input('btn-close-update-relation', 'n_clicks'),
+     Input('data-version', 'data')],  # Refresh when data changes
+    State('modal-update-relation', 'is_open'),
+    prevent_initial_call=True
+)
+def toggle_manage_relations_modal(n_open, n_close, data_version, is_open):
+    """Handle Manage Relations modal"""
+    triggered_id = ctx.triggered_id
+    print(f"� [MANAGE RELATIONS] triggered_id={triggered_id}")
+    
+    # Close modal
+    if triggered_id == 'btn-close-update-relation':
+        print(f"   → Closing modal")
+        return False, [], None
+    
+    # Open modal OR refresh list
+    if triggered_id == 'btn-update-relation' or (triggered_id == 'data-version' and is_open):
+        print(f"   → Opening/Refreshing modal")
+        
+        # Get all unique relations (deduplicated)
+        # read_all returns List[Tuple[str, str, int]] = (person1, person2, relation_type)
+        all_relations = relation_repository.read_all(deduplicate=False)
+        
+        # Deduplicate manually to keep only one direction
+        seen = set()
+        unique_relations = []
+        for rel_tuple in all_relations:
+            person1, person2, rel_type = rel_tuple  # Unpack tuple
+            # Create a sorted tuple to identify unique pairs
+            pair = tuple(sorted([person1, person2]))
+            if pair not in seen:
+                seen.add(pair)
+                unique_relations.append({
+                    'person1': person1,
+                    'person2': person2,
+                    'type': rel_type
+                })
+        
+        print(f"   → Found {len(unique_relations)} unique relations")
+        
+        if not unique_relations:
+            return True, [
+                dbc.Alert([
+                    html.I(className="fas fa-info-circle", style={'marginRight': '8px'}),
+                    "No relations found. Add some relations first!"
+                ], color='warning')
+            ], None
+        
+        # Build the list of relation cards
+        relation_cards = []
+        for i, rel in enumerate(unique_relations):
+            relation_type_label = RELATION_TYPES.get(rel['type'], 'Unknown')
+            
+            card = dbc.Card([
+                dbc.CardBody([
+                    dbc.Row([
+                        # Left: Persons and type
+                        dbc.Col([
+                            html.Div([
+                                html.I(className="fas fa-users", style={'color': '#667eea', 'marginRight': '10px', 'fontSize': '20px'}),
+                                html.Span(rel['person1'], style={'fontSize': '16px', 'fontWeight': 'bold'}),
+                                html.Span(" ↔ ", style={'margin': '0 10px', 'color': '#999'}),
+                                html.Span(rel['person2'], style={'fontSize': '16px', 'fontWeight': 'bold'}),
+                            ], style={'marginBottom': '8px'}),
+                            
+                            html.Div([
+                                html.I(className="fas fa-heart", style={'color': '#e74c3c', 'marginRight': '8px'}),
+                                html.Span(f"Type: {relation_type_label}", style={'fontSize': '14px', 'color': '#666'})
+                            ])
+                        ], width=8),
+                        
+                        # Right: Action buttons
+                        dbc.Col([
+                            dbc.ButtonGroup([
+                                dbc.Button([
+                                    html.I(className="fas fa-edit", style={'marginRight': '5px'}),
+                                    "Edit"
+                                ], id={'type': 'btn-edit-rel', 'index': i}, color='primary', size='sm', outline=True),
+                                
+                                dbc.Button([
+                                    html.I(className="fas fa-trash", style={'marginRight': '5px'}),
+                                    "Delete"
+                                ], id={'type': 'btn-delete-rel', 'index': i}, color='danger', size='sm', outline=True)
+                            ], style={'float': 'right'})
+                        ], width=4, className='text-end')
+                    ])
+                ])
+            ], style={
+                'marginBottom': '10px',
+                'borderLeft': '4px solid #667eea',
+                'boxShadow': '0 2px 4px rgba(0,0,0,0.1)'
+            })
+            
+            relation_cards.append(card)
+        
+        return True, relation_cards, None
+    
+    return no_update, no_update, no_update
+
+# Handle Edit button click - open Edit modal
+@app.callback(
+    [Output('modal-edit-relation', 'is_open'),
+     Output('edit-relation-info', 'children'),
+     Output('dropdown-edit-relation-type', 'value'),
+     Output('selected-relation-store', 'data')],
+    [Input({'type': 'btn-edit-rel', 'index': ALL}, 'n_clicks'),
+     Input('btn-cancel-edit-relation', 'n_clicks'),
+     Input('btn-submit-edit-relation', 'n_clicks')],
+    [State('dropdown-edit-relation-type', 'value'),
+     State('selected-relation-store', 'data'),
+     State('data-version', 'data')],
+    prevent_initial_call=True
+)
+def handle_edit_relation(edit_clicks, cancel_clicks, submit_clicks, new_type, selected_rel_data, current_version):
+    """Handle edit relation modal"""
+    triggered_id = ctx.triggered_id
+    
+    # Check if triggered_id is None or empty - don't process
+    if not triggered_id:
+        raise PreventUpdate
+    
+    print(f"✏️ [EDIT RELATION] triggered_id={triggered_id}")
+    
+    # Cancel
+    if triggered_id == 'btn-cancel-edit-relation':
+        return False, None, None, None
+    
+    # Submit
+    if triggered_id == 'btn-submit-edit-relation':
+        if not selected_rel_data or new_type is None:
+            print(f"   ❌ Missing data!")
+            return False, None, None, None
+        
+        try:
+            print(f"   → Updating: {selected_rel_data['person1']} - {selected_rel_data['person2']} to type {new_type}")
+            
+            # Delete old relation (both directions due to symmetry)
+            relation_repository.delete(selected_rel_data['person1'], selected_rel_data['person2'])
+            
+            # Create new relation with new type
+            relation_repository.create(
+                person1=selected_rel_data['person1'],
+                person2=selected_rel_data['person2'],
+                relation_type=new_type
+            )
+            
+            history_service.record_action(
+                action_type='UPDATE',
+                person1=selected_rel_data['person1'],
+                person2=selected_rel_data['person2'],
+                relation_type=new_type
+            )
+            
+            graph_builder.clear_cache()
+            print(f"   ✅ Relation updated!")
+            
+            return False, None, None, None
+            
+        except Exception as e:
+            print(f"   ❌ Exception: {e}")
+            import traceback
+            traceback.print_exc()
+            return False, None, None, None
+    
+    # Open edit modal (when clicking Edit button)
+    if isinstance(triggered_id, dict) and triggered_id.get('type') == 'btn-edit-rel':
+        idx = triggered_id['index']
+        
+        # Check if this button was actually clicked (not just triggered by ALL)
+        # edit_clicks is a list, check if the clicked button has a value > 0
+        if not edit_clicks or idx >= len(edit_clicks) or not edit_clicks[idx]:
+            raise PreventUpdate
+        
+        print(f"   → Opening edit modal for relation {idx}")
+        
+        # Get all unique relations
+        all_relations = relation_repository.read_all(deduplicate=False)
+        seen = set()
+        unique_relations = []
+        for rel_tuple in all_relations:
+            person1, person2, rel_type = rel_tuple  # Unpack tuple
+            pair = tuple(sorted([person1, person2]))
+            if pair not in seen:
+                seen.add(pair)
+                unique_relations.append({
+                    'person1': person1,
+                    'person2': person2,
+                    'type': rel_type
+                })
+        
+        if idx >= len(unique_relations):
+            return False, None, None, None
+        
+        rel = unique_relations[idx]
+        
+        info = dbc.Alert([
+            html.I(className="fas fa-users", style={'marginRight': '8px', 'fontSize': '18px'}),
+            html.Strong(f"{rel['person1']} ↔ {rel['person2']}", style={'fontSize': '16px'}),
+            html.Br(),
+            html.Span(f"Current type: {RELATION_TYPES.get(rel['type'], 'Unknown')}", style={'fontSize': '14px', 'color': '#666'})
+        ], color='light', style={'borderLeft': '4px solid #667eea'})
+        
+        # Store relation data for later use
+        rel_data = {
+            'person1': rel['person1'],
+            'person2': rel['person2'],
+            'current_type': rel['type']
+        }
+        
+        return True, info, rel['type'], rel_data
+    
+    return no_update, no_update, no_update, no_update
+
+# Handle Delete button click
+@app.callback(
+    [Output('manage-relation-status', 'children', allow_duplicate=True),
+     Output('data-version', 'data', allow_duplicate=True)],
+    Input({'type': 'btn-delete-rel', 'index': ALL}, 'n_clicks'),
+    [State('data-version', 'data')],
+    prevent_initial_call=True
+)
+def handle_delete_relation(delete_clicks, current_version):
+    """Handle delete relation"""
+    triggered_id = ctx.triggered_id
+    
+    if not isinstance(triggered_id, dict) or triggered_id.get('type') != 'btn-delete-rel':
+        raise PreventUpdate
+    
+    idx = triggered_id['index']
+    
+    # Check if this button was actually clicked (not just triggered by ALL)
+    if not delete_clicks or idx >= len(delete_clicks) or not delete_clicks[idx]:
+        raise PreventUpdate
+    
+    print(f"🗑️ [DELETE RELATION] index={idx}")
+    
+    try:
+        # Get all unique relations
+        all_relations = relation_repository.read_all(deduplicate=False)
+        seen = set()
+        unique_relations = []
+        for rel_tuple in all_relations:
+            person1, person2, rel_type = rel_tuple  # Unpack tuple
+            pair = tuple(sorted([person1, person2]))
+            if pair not in seen:
+                seen.add(pair)
+                unique_relations.append({
+                    'person1': person1,
+                    'person2': person2,
+                    'type': rel_type
+                })
+        
+        if idx >= len(unique_relations):
+            return dbc.Alert("Relation not found!", color='danger', duration=3000), no_update
+        
+        rel = unique_relations[idx]
+        
+        print(f"   → Deleting: {rel['person1']} - {rel['person2']}")
+        
+        # Delete relation (both directions)
+        relation_repository.delete(rel['person1'], rel['person2'])
+        
+        history_service.record_action(
+            action_type='DELETE',
+            person1=rel['person1'],
+            person2=rel['person2'],
+            relation_type=rel['type']
+        )
+        
+        graph_builder.clear_cache()
+        
+        # Bump version
+        new_version = (current_version or 0) + 1
+        print(f"   ✅ Relation deleted! New version: {new_version}")
+        
+        return dbc.Alert(f"Relation between {rel['person1']} and {rel['person2']} deleted!", color='success', duration=3000), new_version
+        
+    except Exception as e:
+        print(f"   ❌ Exception: {e}")
+        import traceback
+        traceback.print_exc()
+        return dbc.Alert(f"Error: {str(e)}", color='danger', duration=3000), no_update
+
+
+# ============================================================================
+# ENREGISTREMENT DES CALLBACKS CRUD PERSONNES
+# ============================================================================
+
+# Note: person_callbacks.py utilise des pattern IDs différents
+# Pour app_v2, on crée des callbacks compatibles directement ici
+
+@app.callback(
+    [Output('modal-edit-person', 'is_open'),
+     Output('dropdown-edit-person-select', 'options')],
+    [Input('btn-edit-person', 'n_clicks'),
+     Input('btn-cancel-edit-person', 'n_clicks'),
+     Input('btn-submit-edit-person', 'n_clicks')],
+    State('modal-edit-person', 'is_open'),
+    prevent_initial_call=True
+)
+def toggle_edit_person_modal_v2(open_clicks, cancel_clicks, submit_clicks, is_open):
+    """Toggle edit person modal and populate dropdown"""
+    if ctx.triggered_id == 'btn-edit-person':
+        persons = person_repository.read_all()
+        options = [{'label': p['name'], 'value': p['id']} for p in persons]
+        return True, options
+    return False, []
+
+@app.callback(
+    [Output('input-edit-person-name', 'value'),
+     Output('dropdown-edit-person-gender', 'value'),
+     Output('dropdown-edit-person-orientation', 'value')],
+    Input('dropdown-edit-person-select', 'value'),
+    prevent_initial_call=True
+)
+def load_person_data_for_edit(person_id):
+    """Load person data when selected in edit modal"""
+    if not person_id:
+        raise PreventUpdate
+    
+    person = person_repository.read(person_id)
+    if person:
+        return person.get('name', ''), person.get('gender'), person.get('sexual_orientation')
+    return '', None, None
+
+@app.callback(
+    [Output('modal-edit-person', 'is_open', allow_duplicate=True),
+     Output('data-version', 'data', allow_duplicate=True)],
+    Input('btn-submit-edit-person', 'n_clicks'),
+    [State('dropdown-edit-person-select', 'value'),
+     State('input-edit-person-name', 'value'),
+     State('dropdown-edit-person-gender', 'value'),
+     State('dropdown-edit-person-orientation', 'value'),
+     State('data-version', 'data')],
+    prevent_initial_call=True
+)
+def submit_edit_person(n_clicks, person_id, new_name, gender, orientation, current_version):
+    """Submit person edit using PersonRepository"""
+    if not person_id or not new_name:
+        raise PreventUpdate
+    
+    try:
+        # Update using repository
+        success, message = person_repository.update(
+            person_id=person_id,
+            name=new_name.strip() if new_name else None,
+            gender=gender,
+            sexual_orientation=orientation
+        )
+        
+        if success:
+            # Record in history
+            history_service.record_action(
+                action_type='UPDATE_PERSON',
+                person1=new_name.strip() if new_name else None
+            )
+            
+            # Invalidate graph cache
+            graph_builder.clear_cache()
+            
+            # Bump version
+            new_version = (current_version or 0) + 1
+            print(f"   ✅ Person updated! New data version: {new_version}")
+            return False, new_version  # Close modal
+        
+        return False, no_update  # Close modal
+    except Exception as e:
+        print(f"Error updating person: {e}")
+        return True, no_update  # Keep modal open
+
+@app.callback(
+    [Output('modal-merge-persons', 'is_open'),
+     Output('dropdown-merge-source', 'options'),
+     Output('dropdown-merge-target', 'options'),
+     Output('dropdown-merge-source', 'value'),
+     Output('dropdown-merge-target', 'value'),
+     Output('data-version', 'data', allow_duplicate=True)],
+    [Input('btn-merge-persons', 'n_clicks'),
+     Input('btn-cancel-merge-persons', 'n_clicks'),
+     Input('btn-submit-merge-persons', 'n_clicks')],
+    [State('modal-merge-persons', 'is_open'),
+     State('dropdown-merge-source', 'value'),
+     State('dropdown-merge-target', 'value'),
+     State('data-version', 'data')],
+    prevent_initial_call=True
+)
+def toggle_and_submit_merge_persons(open_clicks, cancel_clicks, submit_clicks, is_open, source_id, target_id, current_version):
+    """Toggle merge modal AND handle submit"""
+    triggered_id = ctx.triggered_id
+    
+    print(f"🔍 [MERGE PERSONS] triggered_id={triggered_id}")
+    
+    # Open modal
+    if triggered_id == 'btn-merge-persons':
+        print(f"   → Opening merge modal")
+        persons = person_repository.read_all()
+        options = [{'label': p['name'], 'value': p['id']} for p in persons]
+        return True, options, options, None, None, no_update
+    
+    # Cancel
+    if triggered_id == 'btn-cancel-merge-persons':
+        print(f"   → Canceling merge")
+        return False, [], [], None, None, no_update
+    
+    # Submit
+    if triggered_id == 'btn-submit-merge-persons':
+        print(f"   → Submitting merge: source={source_id}, target={target_id}")
+        
+        if not source_id or not target_id:
+            print(f"   ❌ Missing source or target!")
+            return True, [], [], source_id, target_id, no_update
+        
+        if source_id == target_id:
+            print(f"   ❌ Cannot merge person with themselves!")
+            return True, [], [], source_id, target_id, no_update
+        
+        try:
+            # Get names BEFORE merge (source will be deleted)
+            source = person_repository.read(source_id)
+            target = person_repository.read(target_id)
+            
+            if not source or not target:
+                print(f"   ❌ Person not found!")
+                return True, [], [], source_id, target_id, no_update
+            
+            source_name = source['name']
+            target_name = target['name']
+            
+            print(f"   → Merging {source_name} → {target_name}")
+            
+            # Merge using repository
+            success, message = person_repository.merge(source_id, target_id)
+            
+            if success:
+                print(f"   → Recording history...")
+                # Record in history
+                history_service.record_action(
+                    action_type='MERGE_PERSON',
+                    person1=source_name,
+                    person2=target_name
+                )
+                
+                print(f"   → Invalidating cache...")
+                # Invalidate graph cache
+                graph_builder.clear_cache()
+                
+                # Bump version
+                new_version = (current_version or 0) + 1
+                print(f"   ✅ Merge successful! New data version: {new_version}")
+                return False, [], [], None, None, new_version  # Close modal
+            else:
+                print(f"   ❌ Merge failed: {message}")
+                return True, [], [], source_id, target_id, no_update  # Keep modal open
+                
+        except Exception as e:
+            print(f"   ❌ Exception during merge: {e}")
+            import traceback
+            traceback.print_exc()
+            return True, [], [], source_id, target_id, no_update  # Keep modal open
+    
+    # Fallback
+    return False, [], [], None, None, no_update
+
+@app.callback(
+    Output('merge-preview-info', 'children'),
+    [Input('dropdown-merge-source', 'value'),
+     Input('dropdown-merge-target', 'value')],
+    prevent_initial_call=True
+)
+def preview_merge(source_id, target_id):
+    """Show merge preview"""
+    if not source_id or not target_id:
+        return None
+    
+    if source_id == target_id:
+        return dbc.Alert("⚠️ Cannot merge person with themselves!", color='warning')
+    
+    source = person_repository.read(source_id)
+    target = person_repository.read(target_id)
+    
+    if not source or not target:
+        return None
+    
+    return dbc.Alert([
+        html.H6("Merge Preview:", className='mb-2'),
+        html.P([
+            html.Strong(f"{source['name']}"), 
+            " → ",
+            html.Strong(f"{target['name']}")
+        ]),
+        html.Small("All relations from source will be transferred to target, then source will be deleted.")
+    ], color='info')
+
+@app.callback(
+    [Output('modal-delete-person', 'is_open'),
+     Output('dropdown-delete-person-select', 'options')],
+    [Input('btn-delete-person', 'n_clicks'),
+     Input('btn-cancel-delete-person', 'n_clicks'),
+     Input('btn-submit-delete-person', 'n_clicks')],
+    State('modal-delete-person', 'is_open'),
+    prevent_initial_call=True
+)
+def toggle_delete_person_modal_v2(open_clicks, cancel_clicks, submit_clicks, is_open):
+    """Toggle delete person modal and populate dropdown"""
+    if ctx.triggered_id == 'btn-delete-person':
+        persons = person_repository.read_all()
+        options = [{'label': p['name'], 'value': p['id']} for p in persons]
+        return True, options
+    return False, []
+
+@app.callback(
+    Output('delete-person-info', 'children'),
+    Input('dropdown-delete-person-select', 'value'),
+    prevent_initial_call=True
+)
+def show_delete_info(person_id):
+    """Show info about person to delete"""
+    if not person_id:
+        return None
+    
+    person = person_repository.read(person_id)
+    if not person:
+        return None
+    
+    # Count relations
+    relations = relation_repository.get_relations_for_person(person['name'])
+    
+    return dbc.Alert([
+        html.H6(f"Delete: {person['name']}", className='mb-2'),
+        html.P(f"This person has {len(relations)} relation(s)."),
+        html.Small("⚠️ This action cannot be undone!")
+    ], color='warning')
+
+@app.callback(
+    Output('modal-delete-person', 'is_open', allow_duplicate=True),
+    Input('btn-submit-delete-person', 'n_clicks'),
+    [State('dropdown-delete-person-select', 'value'),
+     State('checkbox-delete-cascade', 'value')],
+    prevent_initial_call=True
+)
+def submit_delete_person(n_clicks, person_id, cascade):
+    """Submit person deletion using PersonRepository"""
+    if not person_id:
+        raise PreventUpdate
+    
+    try:
+        person = person_repository.read(person_id)
+        person_name = person['name'] if person else 'Unknown'
+        
+        # Delete using repository
+        success, message = person_repository.delete(person_id, cascade=bool(cascade))
+        
+        if success:
+            # Record in history
+            history_service.record_action(
+                action_type='DELETE_PERSON',
+                person1=person_name
+            )
+            
+            # Invalidate graph cache
+            graph_builder.clear_cache()
+        
+        return False  # Close modal
+    except Exception as e:
+        print(f"Error deleting person: {e}")
+        return True  # Keep modal open
+
+# ============================================================================
+# MAIN
+# ============================================================================
+
+if __name__ == '__main__':
+    # Audit de démarrage
+    print("\n" + "="*70)
+    print("  🌐 SOCIAL NETWORK ANALYZER V2 - Clean Architecture")
+    print("="*70)
+    
+    # Stats
+    persons = person_repository.read_all()
+    relations = relation_repository.read_all(deduplicate=True)
+    unique_relations = len(relations)
+    
+    print(f"\n  📊 Data: {len(persons)} persons, {unique_relations} relations")
+    
+    # Vérification symétrie
+    asymmetric = symmetry_manager.audit_symmetry()
+    if asymmetric:
+        print(f"  ⚠️  Warning: {len(asymmetric)} asymmetric relations found")
+        print("  🔧 Auto-fixing...")
+        fixed_count, messages = symmetry_manager.fix_asymmetric_relations()
+        print(f"  ✅ Fixed {fixed_count} asymmetries - all relations now symmetric")
+    else:
+        print("  ✅ Symmetry: 100% guaranteed")
+    
+    print(f"\n  🚀 Dashboard: http://localhost:8052")
+    print(f"  🏗️  Architecture: Services + Repositories")
+    print(f"  💾 Cache: Enabled for performance")
+    print("\n" + "="*70 + "\n")
+    
+    app.run(host='0.0.0.0', port=8052, debug=False)

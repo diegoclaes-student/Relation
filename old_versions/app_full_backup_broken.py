@@ -145,7 +145,8 @@ app.index_string = '''
 
 # Layout
 app.layout = html.Div([
-    dcc.Store(id='session-store', data={'logged_in': False, 'username': ''}),
+    # Session et modal - utiliser 'memory' pour éviter les bugs de sessionStorage
+    dcc.Store(id='session-store', data={'logged_in': False, 'username': ''}, storage_type='memory'),
     dcc.Store(id='edit-action-store', data={}),  # Store pour les actions de modification
     dcc.Interval(id='refresh-interval', interval=5000, n_intervals=0),
     
@@ -269,6 +270,10 @@ def show_modal(propose_clicks, admin_clicks, session):
     
     trigger = ctx.triggered[0]['prop_id'].split('.')[0]
     
+    # S'assurer que session est un dict valide
+    if session is None:
+        session = {'logged_in': False, 'username': '', 'remember_me': False}
+    
     if trigger == 'btn-propose':
         # Modal de proposition simplifiée
         persons = sorted(db.get_all_persons())
@@ -296,14 +301,20 @@ def show_modal(propose_clicks, admin_clicks, session):
         ], id='modal', is_open=True, size="lg")
     
     elif trigger == 'btn-admin':
-        # Panel admin
-        if session.get('logged_in'):
+        # Panel admin - vérifier que la session est valide et logged_in est True
+        is_logged_in = session.get('logged_in', False) if isinstance(session, dict) else False
+        
+        if is_logged_in:
             return dbc.Modal([
-                dbc.ModalHeader("🎯 Admin Dashboard"),
+                dbc.ModalHeader([
+                    html.Span("🎯 Admin Dashboard", style={'flex': '1'}),
+                    html.Small(f"👤 {session.get('username', '')}", style={'marginRight': '15px', 'color': '#64748b'})
+                ], style={'display': 'flex', 'alignItems': 'center'}),
                 dbc.ModalBody([
                     html.Div(id='admin-dashboard-content', children=create_admin_dashboard(db)),
                 ], style={'maxHeight': '70vh', 'overflowY': 'auto'}),
                 dbc.ModalFooter([
+                    dbc.Button("🚪 Déconnexion", id='logout-btn', color="warning", className='me-2'),
                     dbc.Button("Fermer", id='admin-modal-close', color="secondary"),
                 ])
             ], id='admin-modal', is_open=True, size="xl")
@@ -376,9 +387,46 @@ def handle_login(n, username, password, session):
     if db.verify_admin(username, password):
         session['logged_in'] = True
         session['username'] = username
+        
         return False, dbc.Alert("✅ Connecté !", color="success"), session
     else:
         return True, dbc.Alert("❌ Identifiants incorrects", color="danger"), session
+
+# Callback pour gérer la déconnexion
+@app.callback(
+    [Output('session-store', 'data', allow_duplicate=True),
+     Output('modal-container', 'children', allow_duplicate=True)],
+    [Input('logout-btn', 'n_clicks')],
+    [State('session-store', 'data')],
+    prevent_initial_call=True
+)
+def handle_logout(n_clicks, session):
+    # Effacer la session complètement
+    session_cleared = {'logged_in': False, 'username': ''}
+    
+    # Afficher un message de confirmation
+    modal = dbc.Modal([
+        dbc.ModalHeader("✅ Déconnexion réussie"),
+        dbc.ModalBody([
+            html.P("Vous avez été déconnecté avec succès."),
+            html.P("La session reste active pendant que le navigateur est ouvert.", 
+                   style={'fontSize': '13px', 'color': '#666'})
+        ]),
+        dbc.ModalFooter([
+            dbc.Button("OK", id='logout-confirm-close', color="primary"),
+        ])
+    ], id='logout-modal', is_open=True)
+    
+    return session_cleared, modal
+
+# Callback pour fermer le modal de confirmation de déconnexion
+@app.callback(
+    Output('modal-container', 'children', allow_duplicate=True),
+    [Input('logout-confirm-close', 'n_clicks')],
+    prevent_initial_call=True
+)
+def close_logout_modal(n_clicks):
+    return None
 
 # Callbacks pour l'admin panel - Relations uniquement
 @app.callback(
@@ -387,11 +435,12 @@ def handle_login(n, username, password, session):
      Input({'type': 'btn-reject', 'index': ALL}, 'n_clicks'),
      Input({'type': 'btn-delete', 'index': ALL}, 'n_clicks'),
      Input('admin-modal-close', 'n_clicks'),
+     Input('logout-btn', 'n_clicks'),
      Input('admin-tabs', 'active_tab')],
     [State('session-store', 'data')],
     prevent_initial_call=True
 )
-def handle_admin_relations(approve, reject, delete, close_clicks, active_tab, session):
+def handle_admin_relations(approve, reject, delete, close_clicks, logout_clicks, active_tab, session):
     if not ctx.triggered:
         return None
     
@@ -400,6 +449,10 @@ def handle_admin_relations(approve, reject, delete, close_clicks, active_tab, se
     # Fermer le panel admin
     if trigger_id == 'admin-modal-close':
         return None
+    
+    # Déconnexion - géré par un autre callback
+    if trigger_id == 'logout-btn':
+        raise dash.exceptions.PreventUpdate
     
     # Changement d'onglet - ne rien faire
     if trigger_id == 'admin-tabs':
@@ -460,8 +513,31 @@ def handle_person_actions(edit_clicks, merge_clicks, delete_clicks, session):
     if not trigger:
         raise dash.exceptions.PreventUpdate
     
+    # Vérifier qu'un bouton a vraiment été cliqué (n_clicks > 0)
     action_type = trigger['type']
     person_name = trigger['index']
+    
+    # Trouver l'index du bouton cliqué et vérifier n_clicks
+    clicked = False
+    if action_type == 'btn-edit-person':
+        for idx, clicks in enumerate(edit_clicks):
+            if clicks and clicks > 0:
+                clicked = True
+                break
+    elif action_type == 'btn-merge-person':
+        for idx, clicks in enumerate(merge_clicks):
+            if clicks and clicks > 0:
+                clicked = True
+                break
+    elif action_type == 'btn-delete-person':
+        for idx, clicks in enumerate(delete_clicks):
+            if clicks and clicks > 0:
+                clicked = True
+                break
+    
+    if not clicked:
+        raise dash.exceptions.PreventUpdate
+    
     username = session.get('username', 'admin')
     
     if action_type == 'btn-edit-person':

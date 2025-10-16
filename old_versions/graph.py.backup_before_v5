@@ -436,6 +436,287 @@ def make_figure(G: nx.DiGraph, pos: Dict[str, Tuple[float, float]], size_factor:
         hover += f"<br><b>📊 Total:</b> {deg_total[i]} connexion{'s' if deg_total[i] > 1 else ''}"
         
         hover_text.append(hover)
+        """
+        Prédit la prochaine relation probable basée sur:
+        1. Les préférences de genre (H/F/Mixte)
+        2. Les connexions communes (amis d'amis)
+        3. La communauté
+        """
+        # Analyser la préférence de genre de la personne
+        gender_pref, gender_desc = analyze_gender_preference(node, G, nodes)
+        
+        # Récupérer TOUTES les relations (sortantes + entrantes)
+        outgoing = set(G.successors(node))
+        incoming = set(G.predecessors(node))
+        all_neighbors = outgoing.union(incoming)
+        
+        # Fonction pour filtrer par genre selon la préférence STRICTE
+        def matches_preference(candidate_name):
+            """Vérifie si le candidat correspond STRICTEMENT à la préférence de genre"""
+            candidate_gender = detect_gender(candidate_name)
+            
+            # Si genre inconnu du candidat, on le rejette pour être sûr
+            if candidate_gender == '?':
+                return False
+            
+            # Si pas de préférence établie, accepter tout le monde
+            if gender_pref == 'UNKNOWN':
+                return True
+            
+            # Si préférence mixte, accepter H et F
+            if gender_pref == 'BOTH':
+                return candidate_gender in ['M', 'F']
+            
+            # Sinon, matcher strictement avec la préférence
+            return candidate_gender == gender_pref
+        
+        if not all_neighbors:
+            # Si pas de connexions, suggérer quelqu'un de la même communauté avec le bon genre
+            same_community = [n for n in nodes 
+                            if node_to_community.get(n) == node_to_community.get(node) 
+                            and n != node
+                            and matches_preference(n)]
+            if same_community:
+                # Choisir celui avec le plus de connexions
+                best = max(same_community, key=lambda n: deg_total[nodes.index(n)])
+                gender_emoji = '👨' if detect_gender(best) == 'M' else '👩' if detect_gender(best) == 'F' else '👤'
+                return best, f"Même communauté {gender_emoji}"
+            return None, None
+        
+        # Calculer les amis d'amis (connexions à 2 degrés) AVEC FILTRE DE GENRE STRICT
+        friends_of_friends = {}
+        for neighbor in all_neighbors:
+            # Regarder dans les deux directions (successeurs ET prédécesseurs)
+            neighbor_connections = set(G.successors(neighbor)).union(set(G.predecessors(neighbor)))
+            
+            for friend in neighbor_connections:
+                if friend != node and friend not in all_neighbors:
+                    # VÉRIFICATION STRICTE DU GENRE
+                    if matches_preference(friend):
+                        # Compter les connexions communes
+                        if friend not in friends_of_friends:
+                            friends_of_friends[friend] = {'common': 0, 'via': []}
+                        friends_of_friends[friend]['common'] += 1
+                        friends_of_friends[friend]['via'].append(neighbor)
+        
+        if friends_of_friends:
+            # Trouver le candidat avec le plus de connexions communes
+            best_candidate = max(friends_of_friends.items(), key=lambda x: x[1]['common'])
+            candidate_name = best_candidate[0]
+            common_count = best_candidate[1]['common']
+            via_person = best_candidate[1]['via'][0]
+            
+            # Emoji selon le genre
+            candidate_gender = detect_gender(candidate_name)
+            gender_emoji = '👨' if candidate_gender == 'M' else '👩' if candidate_gender == 'F' else '�'
+            
+            # Vérification de debug (ne devrait jamais arriver)
+            if gender_pref not in ['BOTH', 'UNKNOWN'] and candidate_gender != gender_pref:
+                print(f"⚠️ WARNING: Prédiction incorrecte pour {node} (pref:{gender_pref}, candidat:{candidate_name}={candidate_gender})")
+            
+            return candidate_name, f"Via {via_person} ({common_count} ami{'s' if common_count > 1 else ''} commun{'s' if common_count > 1 else ''}) {gender_emoji}"
+        
+        # Si pas d'amis d'amis, suggérer quelqu'un de la même communauté avec le bon genre
+        same_community = [n for n in nodes 
+                         if node_to_community.get(n) == node_to_community.get(node) 
+                         and n != node 
+                         and n not in all_neighbors
+                         and matches_preference(n)]
+        if same_community:
+            best = max(same_community, key=lambda n: deg_total[nodes.index(n)])
+            gender_emoji = '👨' if detect_gender(best) == 'M' else '👩' if detect_gender(best) == 'F' else '👤'
+            return best, f"Même communauté {gender_emoji}"
+        
+        return None, None
+    
+    # Tracé des nœuds avec informations enrichies
+    x_nodes = [pos[n][0] for n in nodes]
+    y_nodes = [pos[n][1] for n in nodes]
+    
+    # Générer les hover texts enrichis avec analyse de genre
+    hover_text = []
+    for i, n in enumerate(nodes):
+        # Récupérer les personnes connectées (relations sortantes = "a pécho")
+        outgoing_relations = list(G.successors(n))
+        neighbors_str = ", ".join(outgoing_relations[:5])  # Limiter à 5 pour la lisibilité
+        if len(outgoing_relations) > 5:
+            neighbors_str += f" ... (+{len(outgoing_relations)-5} autres)"
+        
+        # Analyser la préférence de genre
+        gender_pref, gender_desc = analyze_gender_preference(n, G, nodes)
+        
+        # Emoji selon la préférence
+        pref_emoji = {
+            'M': '👨 (Préfère les hommes)',
+            'F': '👩 (Préfère les femmes)',
+            'BOTH': '👥 (Préfère H/F)',
+            'UNKNOWN': '❓ (Préférence inconnue)'
+        }.get(gender_pref, '❓')
+        
+        # Déterminer le genre de la personne elle-même
+        own_gender = detect_gender(n)
+        own_gender_emoji = '👨' if own_gender == 'M' else '👩' if own_gender == 'F' else '👤'
+        
+        # Prédiction de la prochaine relation
+        next_person, reason = predict_next_connection(n)
+        prediction_str = f"<b style='color:#4ECDC4'>→ {next_person}</b><br><span style='color:#999; font-size:11px'>{reason}</span>" if next_person else "<span style='color:#999'>Aucune suggestion</span>"
+        
+        # Construire le hover text complet
+        hover = (
+            f"<b style='font-size:16px; color:#667eea'>{own_gender_emoji} {n}</b><br>"
+            f"<span style='color:#999'>──────────────</span><br>"
+            f"<b>👥 Relations ({len(outgoing_relations)}):</b><br>"
+            f"<span style='font-size:11px'>{neighbors_str if outgoing_relations else 'Aucune'}</span><br><br>"
+            f"<b>💘 Préférence:</b> {pref_emoji}<br>"
+            f"<span style='font-size:11px; color:#999'>{gender_desc}</span><br><br>"
+            f"<b>📊 Total:</b> {deg_total[i]} connexion{'s' if deg_total[i] > 1 else ''}<br>"
+            f"<span style='font-size:11px'>↓ {indeg.get(n, 0)} entrant{'s' if indeg.get(n, 0) > 1 else ''} | "
+            f"↑ {outdeg.get(n, 0)} sortant{'s' if outdeg.get(n, 0) > 1 else ''}</span><br><br>"
+            f"<b>🔮 Prochaine relation prédite:</b><br>"
+            f"{prediction_str}"
+        )
+        hover_text.append(hover)
+        """
+        Prédit la prochaine relation probable basée sur:
+        1. Les préférences de genre (H/F/Mixte)
+        2. Les connexions communes (amis d'amis)
+        3. La communauté
+        """
+        # Analyser la préférence de genre de la personne
+        gender_pref, gender_desc = analyze_gender_preference(node, G, nodes)
+        
+        # Récupérer TOUTES les relations (sortantes + entrantes)
+        outgoing = set(G.successors(node))
+        incoming = set(G.predecessors(node))
+        all_neighbors = outgoing.union(incoming)
+        
+        # Fonction pour filtrer par genre selon la préférence STRICTE
+        def matches_preference(candidate_name):
+            """Vérifie si le candidat correspond STRICTEMENT à la préférence de genre"""
+            candidate_gender = detect_gender(candidate_name)
+            
+            # Si genre inconnu du candidat, on le rejette pour être sûr
+            if candidate_gender == '?':
+                return False
+            
+            # Si pas de préférence établie, accepter tout le monde
+            if gender_pref == 'UNKNOWN':
+                return True
+            
+            # Si préférence mixte, accepter H et F
+            if gender_pref == 'BOTH':
+                return candidate_gender in ['M', 'F']
+            
+            # Sinon, matcher strictement avec la préférence
+            return candidate_gender == gender_pref
+        
+        if not all_neighbors:
+            # Si pas de connexions, suggérer quelqu'un de la même communauté avec le bon genre
+            same_community = [n for n in nodes 
+                            if node_to_community.get(n) == node_to_community.get(node) 
+                            and n != node
+                            and matches_preference(n)]
+            if same_community:
+                # Choisir celui avec le plus de connexions
+                best = max(same_community, key=lambda n: deg_total[nodes.index(n)])
+                gender_emoji = '👨' if detect_gender(best) == 'M' else '👩' if detect_gender(best) == 'F' else '👤'
+                return best, f"Même communauté {gender_emoji}"
+            return None, None
+        
+        # Calculer les amis d'amis (connexions à 2 degrés) AVEC FILTRE DE GENRE STRICT
+        friends_of_friends = {}
+        for neighbor in all_neighbors:
+            # Regarder dans les deux directions (successeurs ET prédécesseurs)
+            neighbor_connections = set(G.successors(neighbor)).union(set(G.predecessors(neighbor)))
+            
+            for friend in neighbor_connections:
+                if friend != node and friend not in all_neighbors:
+                    # VÉRIFICATION STRICTE DU GENRE
+                    if matches_preference(friend):
+                        # Compter les connexions communes
+                        if friend not in friends_of_friends:
+                            friends_of_friends[friend] = {'common': 0, 'via': []}
+                        friends_of_friends[friend]['common'] += 1
+                        friends_of_friends[friend]['via'].append(neighbor)
+        
+        if friends_of_friends:
+            # Trouver le candidat avec le plus de connexions communes
+            best_candidate = max(friends_of_friends.items(), key=lambda x: x[1]['common'])
+            candidate_name = best_candidate[0]
+            common_count = best_candidate[1]['common']
+            via_person = best_candidate[1]['via'][0]
+            
+            # Emoji selon le genre
+            candidate_gender = detect_gender(candidate_name)
+            gender_emoji = '👨' if candidate_gender == 'M' else '👩' if candidate_gender == 'F' else '👤'
+            
+            # Vérification de debug (ne devrait jamais arriver)
+            if gender_pref not in ['BOTH', 'UNKNOWN'] and candidate_gender != gender_pref:
+                print(f"⚠️ WARNING: Prédiction incorrecte pour {node} (pref:{gender_pref}, candidat:{candidate_name}={candidate_gender})")
+            
+            return candidate_name, f"Via {via_person} ({common_count} ami{'s' if common_count > 1 else ''} commun{'s' if common_count > 1 else ''}) {gender_emoji}"
+        
+        # Si pas d'amis d'amis, suggérer quelqu'un de la même communauté avec le bon genre
+        same_community = [n for n in nodes 
+                         if node_to_community.get(n) == node_to_community.get(node) 
+                         and n != node 
+                         and n not in all_neighbors
+                         and matches_preference(n)]
+        if same_community:
+            best = max(same_community, key=lambda n: deg_total[nodes.index(n)])
+            gender_emoji = '👨' if detect_gender(best) == 'M' else '👩' if detect_gender(best) == 'F' else '👤'
+            return best, f"Même communauté {gender_emoji}"
+        
+        return None, None
+    
+    # Tracé des nœuds avec informations enrichies
+    x_nodes = [pos[n][0] for n in nodes]
+    y_nodes = [pos[n][1] for n in nodes]
+    
+    # Générer les hover texts enrichis avec analyse de genre
+    hover_text = []
+    for i, n in enumerate(nodes):
+        # Récupérer les personnes connectées (relations sortantes = "a pécho")
+        outgoing_relations = list(G.successors(n))
+        neighbors_str = ", ".join(outgoing_relations[:5])  # Limiter à 5 pour la lisibilité
+        if len(outgoing_relations) > 5:
+            neighbors_str += f" ... (+{len(outgoing_relations)-5} autres)"
+        
+        # Analyser la préférence de genre
+        gender_pref, gender_desc = analyze_gender_preference(n, G, nodes)
+        
+        # Emoji selon la préférence
+        pref_emoji = {
+            'M': '👨 (Préfère les hommes)',
+            'F': '👩 (Préfère les femmes)',
+            'BOTH': '👥 (Préfère H/F)',
+            'UNKNOWN': '❓ (Préférence inconnue)'
+        }.get(gender_pref, '❓')
+        
+        # Déterminer le genre de la personne elle-même
+        own_gender = detect_gender(n)
+        own_gender_emoji = '👨' if own_gender == 'M' else '👩' if own_gender == 'F' else '👤'
+        
+        # Prédiction de la prochaine relation
+        next_person, reason = predict_next_connection(n)
+        prediction_str = f"<b style='color:#4ECDC4'>→ {next_person}</b><br><span style='color:#999; font-size:11px'>{reason}</span>" if next_person else "<span style='color:#999'>Aucune suggestion</span>"
+        
+        # Construire le hover text complet
+        hover = (
+            f"<b style='font-size:16px; color:#667eea'>{own_gender_emoji} {n}</b><br>"
+            f"<span style='color:#999'>──────────────</span><br>"
+            f"<b>👥 Relations ({len(outgoing_relations)}):</b><br>"
+            f"<span style='font-size:11px'>{neighbors_str if outgoing_relations else 'Aucune'}</span><br><br>"
+            f"<b>💘 Préférence:</b> {pref_emoji}<br>"
+            f"<span style='font-size:11px; color:#999'>{gender_desc}</span><br><br>"
+            f"<b>📊 Total:</b> {deg_total[i]} connexion{'s' if deg_total[i] > 1 else ''}<br>"
+            f"<span style='font-size:11px'>↓ {indeg.get(n, 0)} entrant{'s' if indeg.get(n, 0) > 1 else ''} | "
+            f"↑ {outdeg.get(n, 0)} sortant{'s' if outdeg.get(n, 0) > 1 else ''}</span><br><br>"
+            f"<b>🔮 Prochaine relation prédite:</b><br>"
+            f"{prediction_str}"
+        )
+        hover_text.append(hover)
+    
     # Seuil pour afficher les labels : seulement les gros nœuds (degré > médiane)
     median_deg = sorted(deg_total)[len(deg_total) // 2] if deg_total else 0
     
@@ -475,6 +756,18 @@ def make_figure(G: nx.DiGraph, pos: Dict[str, Tuple[float, float]], size_factor:
     # Créer des traces individuelles avec courbes optimisées
     edge_traces = []
     
+    # Palette de couleurs variées pour différencier les liens
+    edge_colors = [
+        'rgba(102, 126, 234, 0.3)',   # Bleu violet
+        'rgba(237, 100, 166, 0.3)',   # Rose
+        'rgba(255, 159, 64, 0.3)',    # Orange
+        'rgba(75, 192, 192, 0.3)',    # Turquoise
+        'rgba(153, 102, 255, 0.3)',   # Violet
+        'rgba(255, 99, 132, 0.3)',    # Rouge rose
+        'rgba(54, 162, 235, 0.3)',    # Bleu ciel
+        'rgba(255, 206, 86, 0.3)',    # Jaune
+    ]
+    
     # Fonction pour vérifier si un point est proche d'un nœud
     def is_near_node(x, y, exclude_nodes=None):
         """Vérifie si le point (x,y) est trop proche d'un nœud (sauf ceux exclus)"""
@@ -492,11 +785,6 @@ def make_figure(G: nx.DiGraph, pos: Dict[str, Tuple[float, float]], size_factor:
     
     # Créer les arêtes COURBÉES avec évitement intelligent des bulles
     for idx, (src, dst) in enumerate(G.edges()):
-        # Récupérer le type de relation pour cette arête
-        edge_data = G.edges[src, dst]
-        rel_type = edge_data.get('relation_type', 0)
-        rel_label = RELATION_TYPES.get(rel_type, "❓")
-        
         x0, y0 = pos[src]
         x1, y1 = pos[dst]
         
@@ -547,12 +835,8 @@ def make_figure(G: nx.DiGraph, pos: Dict[str, Tuple[float, float]], size_factor:
             edge_x.append(curve_x)
             edge_y.append(curve_y)
         
-        # COULEUR ET STYLE SELON LE TYPE DE RELATION
-        color = RELATION_COLORS.get(rel_type, 'rgba(150, 150, 150, 0.4)')
-        dash_style = RELATION_STYLES.get(rel_type, 'solid')
-        
-        # Ajuster l'épaisseur pour les Couples (type 3)
-        line_width = edge_width * 1.2 if rel_type == 3 else edge_width * 0.8
+        # Choisir une couleur de la palette
+        color = edge_colors[idx % len(edge_colors)]
         
         # Créer une trace pour cet edge
         edge_trace = go.Scatter(
@@ -560,12 +844,11 @@ def make_figure(G: nx.DiGraph, pos: Dict[str, Tuple[float, float]], size_factor:
             y=edge_y,
             mode='lines',
             line=dict(
-                width=line_width,
+                width=edge_width * 0.8,
                 color=color,
-                dash=dash_style,
             ),
             hoverinfo='text',
-            hovertext=f"{src} ↔ {dst}: {rel_label}",
+            hovertext=f"{src} → {dst}",
             showlegend=False,
             opacity=0.7,
         )
@@ -596,14 +879,11 @@ def make_figure(G: nx.DiGraph, pos: Dict[str, Tuple[float, float]], size_factor:
         ),
         plot_bgcolor="#F8F9FA",
         paper_bgcolor="#F8F9FA",
-        # Mode pan pour desktop, zoom via bouton modebar pour mobile
+        # Optimisations MAXIMALES pour fluidité
         dragmode='pan',
         transition={'duration': 0},
-        # Modebar toujours visible pour accès au zoom sur mobile
-        modebar={
-            'bgcolor': 'rgba(0,0,0,0)',
-            'orientation': 'v',
-        },
+        # Désactiver le rendu lors du drag
+        modebar={'bgcolor': 'rgba(0,0,0,0)'},
     )
     
     # Configuration WebGL pour accélération matérielle
@@ -613,6 +893,37 @@ def make_figure(G: nx.DiGraph, pos: Dict[str, Tuple[float, float]], size_factor:
     )
 
     return fig
+
+    edge_trace = go.Scatter(
+        x=edge_x,
+        y=edge_y,
+        line=dict(width=1.5, color=base_arrow_color),
+        hoverinfo="none",
+        mode="lines",
+        name="Relations",
+        opacity=0.75,
+    )
+
+    fig = go.Figure(data=[edge_trace, node_trace, label_trace])
+    fig.update_layout(
+        title=dict(
+            text="Graphe social (relations: ‘a pécho’)",
+            x=0.5,
+            xanchor="center",
+        ),
+        showlegend=False,
+        hovermode="closest",
+        margin=dict(b=20, l=20, r=20, t=50),
+        annotations=annotations,
+        xaxis=dict(showgrid=False, zeroline=False, visible=False),
+        yaxis=dict(showgrid=False, zeroline=False, visible=False),
+    )
+
+    # Rendre le graphe plus grand pour le confort et la clarté
+    # Résolution adaptée à l'écran pour navigation interactive
+    fig.update_layout(width=1400, height=1000)
+    return fig
+
 
 def default_relations() -> Dict[str, List[str]]:
     """Relations de l'énoncé."""

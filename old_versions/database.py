@@ -358,6 +358,87 @@ class RelationDB:
         conn.close()
         return results
     
+    def undo_action(self, history_id: int, performed_by: str = "admin") -> bool:
+        """Annule une action de l'historique avec gestion automatique de la symétrie."""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        # Récupérer l'action de l'historique
+        cursor.execute("""
+            SELECT action_type, person1, person2, relation_type
+            FROM history
+            WHERE id = ?
+        """, (history_id,))
+        
+        action = cursor.fetchone()
+        conn.close()
+        
+        if not action:
+            return False
+        
+        action_type = action['action_type']
+        person1 = action['person1']
+        person2 = action['person2']
+        relation_type = action['relation_type']
+        
+        success = False
+        
+        try:
+            if action_type == 'ADD':
+                # Annuler un ajout = supprimer avec symétrie automatique
+                success = self.delete_relation(person1, person2, relation_type, 
+                                              performed_by, auto_symmetrize=True)
+                details = f"Annulation ajout: {person1} ↔ {person2} (avec symétrie)"
+                
+            elif action_type == 'DELETE':
+                # Annuler une suppression = recréer avec symétrie automatique
+                conn = self.get_connection()
+                cursor = conn.cursor()
+                
+                # Ajouter relation directe
+                cursor.execute("""
+                    INSERT OR IGNORE INTO relations (person1, person2, relation_type)
+                    VALUES (?, ?, ?)
+                """, (person1, person2, relation_type))
+                
+                # Ajouter relation inverse (symétrie)
+                cursor.execute("""
+                    INSERT OR IGNORE INTO relations (person1, person2, relation_type)
+                    VALUES (?, ?, ?)
+                """, (person2, person1, relation_type))
+                
+                conn.commit()
+                conn.close()
+                success = True
+                details = f"Annulation suppression: {person1} ↔ {person2} (avec symétrie)"
+                
+            elif action_type == 'APPROVE':
+                # Annuler une approbation = supprimer et remettre en pending
+                self.delete_relation(person1, person2, relation_type, 
+                                   performed_by, auto_symmetrize=True)
+                
+                # Remettre en pending
+                conn = self.get_connection()
+                cursor = conn.cursor()
+                cursor.execute("""
+                    INSERT OR IGNORE INTO pending_relations (person1, person2, relation_type, submitted_by, notes)
+                    VALUES (?, ?, ?, ?, ?)
+                """, (person1, person2, relation_type, "system", "Annulation approbation"))
+                conn.commit()
+                conn.close()
+                success = True
+                details = f"Annulation approbation: {person1} → {person2} remis en attente"
+            
+            if success:
+                # Logger l'annulation
+                self.log_action("UNDO", person1, person2, relation_type, performed_by, details)
+                
+        except Exception as e:
+            print(f"❌ Erreur lors de l'annulation: {e}")
+            success = False
+        
+        return success
+    
     def delete_relation(self, person1: str, person2: str, relation_type: int, 
                        deleted_by: str = "admin", auto_symmetrize: bool = True) -> bool:
         """Supprime une relation avec option de symétrie."""
