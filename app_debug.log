@@ -1,0 +1,102 @@
+✅ Base de données existante: /Users/diegoclaes/Code/Relation/social_network.db
+⚠️  Warning: Could not import old database module: [Errno 2] No such file or directory: '/Users/diegoclaes/Code/Relation/database.py'
+
+======================================================================
+  🗺️  CENTRALE POTINS MAPS - V2
+======================================================================
+
+  📊 Data: 14 persons, 13 relations
+  ✅ Symmetry: 100% guaranteed
+
+  🚀 Dashboard: http://localhost:8052
+  🏗️  Architecture: Services + Repositories
+  💾 Cache: Enabled for performance
+
+======================================================================
+
+Dash is running on http://0.0.0.0:8052/
+
+ * Serving Flask app 'app_v2'
+ * Debug mode: off
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8052
+ * Running on http://192.168.129.32:8052
+[33mPress CTRL+C to quit[0m
+192.168.129.32 - - [19/Oct/2025 00:19:05] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:06] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:17] "GET / HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:18] "GET /_dash-layout HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:18] "GET /_dash-dependencies HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:18] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:18] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+192.168.129.32 - - [19/Oct/2025 00:19:18] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+192.168.129.32 - - [19/Oct/2025 00:19:18] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+192.168.129.32 - - [19/Oct/2025 00:19:18] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+192.168.129.32 - - [19/Oct/2025 00:19:18] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+192.168.129.32 - - [19/Oct/2025 00:19:18] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+192.168.129.32 - - [19/Oct/2025 00:19:18] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:18] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:19] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:20] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:20] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:20] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:25] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:28] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:31] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:31] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:31] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+192.168.129.32 - - [19/Oct/2025 00:19:31] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+192.168.129.32 - - [19/Oct/2025 00:19:33] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:34] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:34] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:34] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+192.168.129.32 - - [19/Oct/2025 00:19:34] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+192.168.129.32 - - [19/Oct/2025 00:19:34] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+192.168.129.32 - - [19/Oct/2025 00:19:34] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+192.168.129.32 - - [19/Oct/2025 00:19:34] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:34] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+192.168.129.32 - - [19/Oct/2025 00:19:34] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:34] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:34] "POST /_dash-update-component HTTP/1.1" 200 -
+  File "/opt/miniconda3/lib/python3.13/threading.py", line 1014, in _bootstrap
+    self._bootstrap_inner()
+  File "/opt/miniconda3/lib/python3.13/threading.py", line 1043, in _bootstrap_inner
+    self.run()
+  File "/opt/miniconda3/lib/python3.13/threading.py", line 994, in run
+    self._target(*self._args, **self._kwargs)
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/thread.py", line 93, in _worker
+    work_item.run()
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/opt/miniconda3/lib/python3.13/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+  File "/opt/miniconda3/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+  File "/opt/miniconda3/lib/python3.13/asyncio/base_events.py", line 712, in run_until_complete
+    self.run_forever()
+  File "/opt/miniconda3/lib/python3.13/asyncio/base_events.py", line 683, in run_forever
+    self._run_once()
+  File "/opt/miniconda3/lib/python3.13/asyncio/base_events.py", line 2042, in _run_once
+    handle._run()
+  File "/opt/miniconda3/lib/python3.13/asyncio/events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 230, in new_loop_wrap
+    await awaitable
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1822, in handle_relation_approval
+    result = pending_submission_repository.approve_relation(relation_id)
+  File "/Users/diegoclaes/Code/Relation/database/pending_submissions.py", line 206, in approve_relation
+    traceback.print_stack()
+192.168.129.32 - - [19/Oct/2025 00:19:35] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:49] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:49] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:49] "POST /_dash-update-component HTTP/1.1" 200 -
+192.168.129.32 - - [19/Oct/2025 00:19:49] "POST /_dash-update-component HTTP/1.1" 200 -

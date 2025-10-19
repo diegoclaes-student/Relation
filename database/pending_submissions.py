@@ -51,6 +51,7 @@ class PendingSubmissionRepository:
     def submit_person(name: str, submitted_by: str) -> Optional[int]:
         """Soumet une nouvelle personne pour approbation"""
         try:
+            print(f"📝 [DB] Submitting person: name='{name}', submitted_by='{submitted_by}'")
             conn = sqlite3.connect(DB_PATH)
             cur = conn.cursor()
             
@@ -62,16 +63,19 @@ class PendingSubmissionRepository:
             """, (name, submitted_by, now))
             
             submission_id = cur.lastrowid
+            print(f"✅ [DB] Person inserted with ID: {submission_id}")
             conn.commit()
             conn.close()
             return submission_id
-        except:
+        except Exception as e:
+            print(f"❌ [DB] Error inserting person: {str(e)}")
             return None
     
     @staticmethod
     def submit_relation(person1: str, person2: str, relation_type: int, submitted_by: str) -> Optional[int]:
         """Soumet une nouvelle relation pour approbation"""
         try:
+            print(f"📝 [DB] Submitting relation: person1='{person1}', person2='{person2}', type={relation_type}, by='{submitted_by}'")
             conn = sqlite3.connect(DB_PATH)
             cur = conn.cursor()
             
@@ -84,15 +88,18 @@ class PendingSubmissionRepository:
             """, (person1, person2, relation_type, submitted_by, now))
             
             submission_id = cur.lastrowid
+            print(f"✅ [DB] Relation inserted with ID: {submission_id}")
             conn.commit()
             conn.close()
             return submission_id
-        except:
+        except Exception as e:
+            print(f"❌ [DB] Error inserting relation: {str(e)}")
             return None
     
     @staticmethod
     def get_pending_persons() -> List[Dict]:
         """Récupère toutes les personnes en attente"""
+        print(f"🔍 [DB] Getting pending persons...")
         conn = sqlite3.connect(DB_PATH)
         cur = conn.cursor()
         
@@ -112,12 +119,14 @@ class PendingSubmissionRepository:
                 'status': row[4]
             })
         
+        print(f"✅ [DB] Found {len(submissions)} pending persons: {submissions}")
         conn.close()
         return submissions
     
     @staticmethod
     def get_pending_relations() -> List[Dict]:
         """Récupère toutes les relations en attente"""
+        print(f"🔍 [DB] Getting pending relations...")
         conn = sqlite3.connect(DB_PATH)
         cur = conn.cursor()
         
@@ -139,6 +148,7 @@ class PendingSubmissionRepository:
                 'status': row[6]
             })
         
+        print(f"✅ [DB] Found {len(submissions)} pending relations: {submissions}")
         conn.close()
         return submissions
     
@@ -146,6 +156,7 @@ class PendingSubmissionRepository:
     def approve_person(submission_id: int) -> bool:
         """Approuve une personne et l'ajoute à la base"""
         try:
+            print(f"🔍 [DB] Approving person with ID: {submission_id}")
             from database.persons import person_repository
             
             conn = sqlite3.connect(DB_PATH)
@@ -159,13 +170,16 @@ class PendingSubmissionRepository:
             
             row = cur.fetchone()
             if not row:
+                print(f"❌ [DB] No pending person found with ID: {submission_id}")
                 conn.close()
                 return False
             
             name = row[0]
+            print(f"✅ [DB] Found person: {name}")
             
             # Ajouter la personne
-            person_repository.add_person(name)
+            person_repository.create(name)
+            print(f"✅ [DB] Person added to main database")
             
             # Marquer comme approuvée
             cur.execute("""
@@ -174,15 +188,23 @@ class PendingSubmissionRepository:
             
             conn.commit()
             conn.close()
+            print(f"✅ [DB] Person approved successfully")
             return True
         except Exception as e:
-            print(f"Error approving person: {e}")
+            print(f"❌ [DB] Error approving person: {e}")
+            import traceback
+            traceback.print_exc()
             return False
     
     @staticmethod
     def approve_relation(submission_id: int) -> bool:
         """Approuve une relation et l'ajoute à la base"""
         try:
+            import traceback
+            print(f"🔍 [DB] Approving relation with ID: {submission_id}")
+            print(f"📍 [DB] Called from:")
+            traceback.print_stack()
+            
             from database.relations import relation_repository
             
             conn = sqlite3.connect(DB_PATH)
@@ -196,13 +218,16 @@ class PendingSubmissionRepository:
             
             row = cur.fetchone()
             if not row:
+                print(f"❌ [DB] No pending relation found with ID: {submission_id}")
                 conn.close()
                 return False
             
             person1, person2, relation_type = row
+            print(f"✅ [DB] Found relation: {person1} <-> {person2} (type={relation_type})")
             
             # Ajouter la relation
-            relation_repository.add_relation(person1, person2, relation_type)
+            relation_repository.create(person1, person2, relation_type)
+            print(f"✅ [DB] Relation added to main database")
             
             # Marquer comme approuvée
             cur.execute("""
@@ -211,9 +236,12 @@ class PendingSubmissionRepository:
             
             conn.commit()
             conn.close()
+            print(f"✅ [DB] Relation approved successfully")
             return True
         except Exception as e:
-            print(f"Error approving relation: {e}")
+            print(f"❌ [DB] Error approving relation: {e}")
+            import traceback
+            traceback.print_exc()
             return False
     
     @staticmethod

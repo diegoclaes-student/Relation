@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Centrale Potins Maps - V2
+Social Network Analyzer - V2
 Architecture 100% propre avec Services + Repositories
 """
 
@@ -24,10 +24,9 @@ from utils.validators import Validator
 from graph import build_graph, compute_layout, make_figure
 
 # Import système authentification V7
-from database.users import user_repository, pending_account_repository
+from database.users import user_repository
 from database.pending_submissions import pending_submission_repository
 from services.auth import auth_service
-from services.activity_log import log_event
 from components.auth_components import (
     create_login_modal, 
     create_register_modal,
@@ -52,7 +51,7 @@ app = dash.Dash(
     suppress_callback_exceptions=True
 )
 
-app.title = "Centrale Potins Maps"
+app.title = "Social Network Analyzer V2"
 
 # Configuration Flask session pour authentification
 server = app.server
@@ -73,22 +72,9 @@ app.index_string = '''
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* PALETTE PREMIUM : Bleu marine profond + Blanc cassé */
-        :root {
-            --primary-dark: #1a2332;
-            --primary-medium: #2d3e50;
-            --primary-light: #4a5f7f;
-            --accent: #3a7bd5;
-            --bg-light: #f8f9fa;
-            --text-dark: #1a2332;
-            --text-light: #f8f9fa;
-            --border-subtle: rgba(255, 255, 255, 0.08);
-            --shadow-soft: rgba(26, 35, 50, 0.15);
-        }
-        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-            background: #e8ecef;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
         }
         
@@ -98,33 +84,30 @@ app.index_string = '''
         }
         
         .header-bar {
-            background: var(--primary-dark);
-            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
             padding: 20px 30px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 12px var(--shadow-soft);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 3px solid var(--accent);
         }
         
         .header-bar h1 {
-            color: var(--text-light);
+            color: #1d1d1f;
             font-size: 28px;
-            font-weight: 600;
+            font-weight: 700;
             margin: 0;
-            letter-spacing: -0.5px;
         }
         
         .header-badge {
-            background: var(--primary-medium);
-            color: var(--text-light);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             padding: 8px 16px;
-            border-radius: 6px;
+            border-radius: 20px;
             font-size: 12px;
-            font-weight: 500;
-            border: 1px solid var(--border-subtle);
+            font-weight: 600;
         }
         
         .content-grid {
@@ -135,12 +118,11 @@ app.index_string = '''
         }
         
         .graph-panel {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 2px 12px var(--shadow-soft);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             min-height: 600px;
-            border: 1px solid #e0e4e8;
         }
         
         #network-graph {
@@ -149,92 +131,86 @@ app.index_string = '''
         }
         
         .controls-panel {
-            background: white;
-            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
             padding: 25px;
-            box-shadow: 0 2px 12px var(--shadow-soft);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             max-height: calc(100vh - 160px);
             overflow-y: auto;
-            border: 1px solid #e0e4e8;
         }
         
-        .controls-panel::-webkit-scrollbar { width: 6px; }
-        .controls-panel::-webkit-scrollbar-track { background: #f8f9fa; border-radius: 10px; }
-        .controls-panel::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 10px; }
+        .controls-panel::-webkit-scrollbar { width: 8px; }
+        .controls-panel::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 10px; }
+        .controls-panel::-webkit-scrollbar-thumb { background: rgba(102, 126, 234, 0.5); border-radius: 10px; }
         
         .section-title {
-            color: var(--text-dark);
-            font-size: 16px;
-            font-weight: 600;
+            color: #1d1d1f;
+            font-size: 18px;
+            font-weight: 700;
             margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #e0e4e8;
-            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .control-group { margin-bottom: 20px; }
         
         .control-label {
             display: block;
-            color: var(--text-dark);
+            color: #1d1d1f;
             font-size: 13px;
-            font-weight: 500;
-            margin-bottom: 8px;
+            font-weight: 600;
+            margin-bottom: 6px;
         }
         
-        /* Boutons premium - Sans dégradé */
         .btn-primary {
-            background: var(--primary-dark);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
-            border-radius: 6px;
+            border-radius: 10px;
             padding: 10px 20px;
-            font-weight: 500;
-            color: var(--text-light);
-            box-shadow: 0 2px 8px var(--shadow-soft);
-            transition: all 0.2s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
         
         .btn-primary:hover {
-            background: var(--primary-medium);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px var(--shadow-soft);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
         }
         
         .btn-outline {
-            border: 1px solid var(--primary-dark);
+            border: 2px solid #667eea;
             background: transparent;
-            color: var(--primary-dark);
-            border-radius: 6px;
+            color: #667eea;
+            border-radius: 10px;
             padding: 8px 16px;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.2s;
         }
         
         .btn-outline:hover {
-            background: var(--primary-dark);
-            color: var(--text-light);
+            background: #667eea;
+            color: white;
         }
         
         .stats-card {
-            background: var(--primary-dark);
-            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
             padding: 20px;
-            color: var(--text-light);
-            box-shadow: 0 2px 8px var(--shadow-soft);
+            color: white;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
             margin-top: 20px;
-            border-left: 3px solid var(--accent);
         }
         
-        .stats-card h5 { font-size: 14px; margin-bottom: 12px; font-weight: 600; opacity: 0.9; }
-        .stat-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
-        .stat-value { font-weight: 600; font-size: 15px; color: var(--accent); }
+        .stats-card h5 { font-size: 16px; margin-bottom: 12px; font-weight: 700; }
+        .stat-item { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+        .stat-value { font-weight: 700; font-size: 16px; }
         
         .action-section {
-            background: #f8f9fa;
-            border-radius: 8px;
+            background: #f5f5f7;
+            border-radius: 12px;
             padding: 15px;
             margin-top: 20px;
-            border: 1px solid #e0e4e8;
         }
         
         .action-buttons {
@@ -274,17 +250,16 @@ app.index_string = '''
         }
         
         /* Form controls styling */
-        .Select-control, .dropdown, input[type="text"], input[type="number"], textarea, input[type="password"] {
+        .Select-control, .dropdown, input[type="text"], input[type="number"], textarea {
             border-radius: 8px;
-            border: 1px solid rgba(26, 35, 50, 0.2);
+            border: 1px solid rgba(0, 0, 0, 0.1);
             padding: 10px 15px;
             font-size: 14px;
-            background: rgba(248, 249, 250, 0.95);
         }
         
-        input[type="text"]:focus, input[type="number"]:focus, textarea:focus, input[type="password"]:focus {
-            border-color: #2d3e50;
-            box-shadow: 0 0 0 3px rgba(45, 62, 80, 0.15);
+        input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
             outline: none;
         }
         
@@ -297,35 +272,6 @@ app.index_string = '''
         /* ============================================= */
         /* RESPONSIVE DESIGN - TABLETTE & MOBILE */
         /* ============================================= */
-        
-        /* Animations */
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        /* Hamburger hover effect */
-        #hamburger-btn-graph:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 24px rgba(26, 35, 50, 0.6);
-        }
-        
-        /* Zoom buttons hover effect */
-        #btn-zoom-in:hover, #btn-zoom-out:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 16px rgba(47, 128, 237, 0.5);
-        }
-        
-        /* Mobile: Ensure buttons are clickable above the graph */
-        #btn-zoom-in, #btn-zoom-out, #btn-fullscreen, #hamburger-btn-graph {
-            pointer-events: auto;
-        }
         
         /* Tablette (< 1200px) */
         @media (max-width: 1200px) {
@@ -360,14 +306,12 @@ app.index_string = '''
             }
             
             .graph-panel {
-                padding: 0;
-                min-height: calc(100vh - 60px); /* Prend tout l'espace disponible */
-                margin: 0;
-                position: relative;
+                padding: 15px;
+                min-height: calc(66vh - 100px); /* 2/3 de l'écran */
             }
             
             #network-graph {
-                height: calc(100vh - 60px) !important; /* Tout l'espace moins le header */
+                height: calc(66vh - 100px) !important; /* 2/3 de l'écran */
                 width: 100% !important;
             }
             
@@ -405,74 +349,32 @@ app.index_string = '''
         
         /* Mobile Small (< 480px) */
         @media (max-width: 480px) {
-            /* FIXE: Empêcher tout scroll de la page */
-            html, body {
-                overflow: hidden !important;
-                position: fixed !important;
-                width: 100% !important;
-                height: 100% !important;
-            }
-            
             .main-container {
-                padding: 5px;
-                overflow: hidden !important;
-                height: 100vh !important;
+                padding: 8px;
             }
             
-            /* Header compact sur mobile */
             .header-bar {
-                padding: 8px 12px !important;
-                border-radius: 8px;
-                min-height: 50px;
-                margin-bottom: 8px;
+                padding: 12px 15px;
+                border-radius: 12px;
             }
             
             .header-bar h1 {
-                font-size: 16px !important;
-                margin: 0;
-            }
-            
-            .header-bar h1 i {
-                font-size: 14px !important;
-                margin-right: 6px !important;
-            }
-            
-            /* Boutons auth compacts - cacher texte, garder icônes */
-            .auth-header-btn {
-                padding: 8px 12px !important;
-                font-size: 12px !important;
-                min-height: 36px !important;
-            }
-            
-            .auth-btn-text {
-                display: inline !important;
-                font-size: 11px;
-            }
-            
-            /* Pour très petit écran, cacher complètement le texte */
-            @media (max-width: 360px) {
-                .auth-btn-text {
-                    display: none !important;
-                }
-                .auth-header-btn {
-                    padding: 8px !important;
-                    min-width: 36px;
-                }
+                font-size: 18px;
             }
             
             .header-badge {
-                padding: 4px 10px;
-                font-size: 10px;
+                padding: 6px 12px;
+                font-size: 11px;
             }
             
             .graph-panel {
                 padding: 10px;
-                min-height: calc(75vh - 70px); /* Plus bas : 75% au lieu de 66% */
+                min-height: calc(66vh - 80px); /* 2/3 de l'écran */
                 border-radius: 12px;
             }
             
             #network-graph {
-                height: calc(75vh - 70px) !important; /* Plus bas : 75% au lieu de 66% */
+                height: calc(66vh - 80px) !important; /* 2/3 de l'écran */
                 width: 100% !important;
             }
             
@@ -544,45 +446,6 @@ app.index_string = '''
                 padding: 10px 16px;
                 font-size: 13px;
             }
-        }
-        
-        /* Bouton plein écran */
-        #btn-fullscreen {
-            transition: all 0.3s ease;
-        }
-        
-        #btn-fullscreen:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.3);
-        }
-        
-        #btn-fullscreen:active {
-            transform: scale(0.95);
-        }
-        
-        /* Mode plein écran activé */
-        .fullscreen-mode {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            z-index: 9999 !important;
-            background: white !important;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-        
-        .fullscreen-mode .graph-panel {
-            width: 100% !important;
-            height: 100vh !important;
-            padding: 0 !important;
-            border-radius: 0 !important;
-        }
-        
-        .fullscreen-mode #network-graph {
-            height: 100vh !important;
-            width: 100vw !important;
         }
         
         /* Touch optimizations pour mobile */
@@ -663,324 +526,58 @@ app.index_string = '''
         }
     </style>
     <script>
-        var graphDiv = null;
-        var zoomButtonsReady = false;
-        
-        // Attendre que Plotly soit chargé
-        var plotlyCheckInterval = setInterval(function() {
-            if (window.Plotly && window.Plotly.newPlot) {
-                clearInterval(plotlyCheckInterval);
-                setupGraph();
-            }
-        }, 100);
-        
-        function setupGraph() {
-            graphDiv = document.getElementById('network-graph');
-            if (!graphDiv) {
-                setTimeout(setupGraph, 500);
-                return;
-            }
-            
-            // Utiliser MutationObserver pour détecter quand Plotly ajoute le SVG
-            var observer = new MutationObserver(function(mutations) {
-                var plotlySvg = graphDiv.querySelector('.svg-container');
-                
-                if (plotlySvg && !zoomButtonsReady) {
-                    if (graphDiv.data && graphDiv.data.length > 0 && (graphDiv.layout || graphDiv._fullLayout)) {
-                        observer.disconnect();
-                        if (!zoomButtonsReady) {
-                            initZoomButtons();
-                            zoomButtonsReady = true;
-                        }
-                    }
-                }
-            });
-            
-            observer.observe(graphDiv, {
-                childList: true,
-                subtree: true,
-                attributes: true
-            });
-            
-            // Timeout de secours
-            setTimeout(function() {
-                if (!zoomButtonsReady) {
-                    observer.disconnect();
-                    initZoomButtons();
-                    zoomButtonsReady = true;
-                }
-            }, 5000);
-        }
-        
-        function initZoomButtons() {
-            var zoomInBtn = document.getElementById('btn-zoom-in');
-            var zoomOutBtn = document.getElementById('btn-zoom-out');
-            
-            // Fonction utilitaire pour gérer click ET touch
-            function attachZoomListener(btn, factor) {
-                if (!btn) return;
-                
-                // Événement click (PC)
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    zoomGraph(factor);
-                });
-                
-                // Événement touch (Mobile)
-                btn.addEventListener('touchstart', function(e) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    zoomGraph(factor);
-                }, false);
-                
-                // Aussi sur touchend pour plus de compatibilité
-                btn.addEventListener('touchend', function(e) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                }, false);
-            }
-            
-            attachZoomListener(zoomInBtn, 1.5);
-            attachZoomListener(zoomOutBtn, 0.67);
-        }
-        
-        function zoomGraph(factor) {
-            if (!graphDiv) return;
-            
-            var svgContainer = graphDiv.querySelector('.svg-container');
-            if (!svgContainer) return;
-            
-            var plotlyGraphDiv = getPlotlyGraphDiv();
-            if (!plotlyGraphDiv) return;
-            
-            var layout = plotlyGraphDiv._fullLayout || plotlyGraphDiv.layout;
-            if (!layout || !layout.xaxis || !layout.yaxis) return;
-            
-            var xRange = layout.xaxis.range;
-            var yRange = layout.yaxis.range;
-            
-            if (!xRange || !yRange) return;
-            
-            var xCenter = (xRange[0] + xRange[1]) / 2;
-            var yCenter = (yRange[0] + yRange[1]) / 2;
-            
-            var xSpan = (xRange[1] - xRange[0]) / factor / 2;
-            var ySpan = (yRange[1] - yRange[0]) / factor / 2;
-            
-            var newXRange = [xCenter - xSpan, xCenter + xSpan];
-            var newYRange = [yCenter - ySpan, yCenter + ySpan];
-            
-            try {
-                window.Plotly.relayout(plotlyGraphDiv, {
-                    'xaxis.range': newXRange,
-                    'yaxis.range': newYRange
-                }, {responsive: true});
-            } catch (e) {}
-        }
-        
-        // === HELPER: Trouver le Plotly graph div ===
-        function getPlotlyGraphDiv() {
-            if (!graphDiv) return null;
-            
-            var plotlyGraphDiv = null;
-            var children = graphDiv.querySelectorAll('*');
-            
-            for (var i = 0; i < children.length; i++) {
-                if (children[i].data && Array.isArray(children[i].data) && children[i]._fullLayout) {
-                    plotlyGraphDiv = children[i];
-                    break;
-                }
-            }
-            
-            if (!plotlyGraphDiv && window.Plotly && window.Plotly.getPlotly) {
-                try {
-                    plotlyGraphDiv = window.Plotly.getPlotly('network-graph');
-                } catch (e) {}
-            }
-            
-            if (!plotlyGraphDiv && graphDiv.data) {
-                plotlyGraphDiv = graphDiv;
-            }
-            
-            return plotlyGraphDiv;
-        }
-        
-        // === PINCH-TO-ZOOM (2 doigts sur mobile) - SOLUTION PROFESSIONNELLE ===
-        var pinchState = {
-            active: false,
-            initialDistance: 0,
-            initialRanges: null,
-            lastUpdate: 0
-        };
-        
-        function getDistance(touches) {
-            if (touches.length < 2) return 0;
-            var dx = touches[0].clientX - touches[1].clientX;
-            var dy = touches[0].clientY - touches[1].clientY;
-            return Math.sqrt(dx * dx + dy * dy);
-        }
-        
-        function handleTouchStart(e) {
-            // Seulement si exactement 2 doigts
-            if (e.touches.length !== 2) {
-                pinchState.active = false;
-                return;
-            }
-            
-            // Ne pas intercepter si ça vient d'un bouton
-            if (e.target.closest('#btn-zoom-in, #btn-zoom-out, #btn-fullscreen, #hamburger-btn-graph')) {
-                return;
-            }
-            
-            var plotlyGraphDiv = getPlotlyGraphDiv();
-            if (!plotlyGraphDiv) return;
-            
-            var layout = plotlyGraphDiv._fullLayout || plotlyGraphDiv.layout;
-            if (!layout || !layout.xaxis || !layout.yaxis) return;
-            if (!layout.xaxis.range || !layout.yaxis.range) return;
-            
-            // Initialiser le pinch
-            pinchState.active = true;
-            pinchState.initialDistance = getDistance(e.touches);
-            pinchState.initialRanges = {
-                x: [layout.xaxis.range[0], layout.xaxis.range[1]],
-                y: [layout.yaxis.range[0], layout.yaxis.range[1]]
-            };
-            pinchState.lastUpdate = Date.now();
-            
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        
-        function handleTouchMove(e) {
-            if (!pinchState.active || e.touches.length !== 2) return;
-            if (!pinchState.initialRanges || pinchState.initialDistance === 0) return;
-            
-            // Throttle: max 60fps (16ms entre chaque update)
-            var now = Date.now();
-            if (now - pinchState.lastUpdate < 16) return;
-            pinchState.lastUpdate = now;
-            
-            var currentDistance = getDistance(e.touches);
-            if (currentDistance === 0) return;
-            
-            // Calculer le ratio PAR RAPPORT À LA DISTANCE INITIALE (pas la dernière!)
-            var scale = pinchState.initialDistance / currentDistance;
-            
-            // Limiter le zoom (entre 1/10 et 10x de la vue initiale)
-            if (scale < 0.1) scale = 0.1;
-            if (scale > 10) scale = 10;
-            
-            var plotlyGraphDiv = getPlotlyGraphDiv();
-            if (!plotlyGraphDiv) return;
-            
-            // Calculer les nouvelles ranges en gardant le centre fixe
-            var xCenter = (pinchState.initialRanges.x[0] + pinchState.initialRanges.x[1]) / 2;
-            var yCenter = (pinchState.initialRanges.y[0] + pinchState.initialRanges.y[1]) / 2;
-            
-            var xSpan = (pinchState.initialRanges.x[1] - pinchState.initialRanges.x[0]) / 2 * scale;
-            var ySpan = (pinchState.initialRanges.y[1] - pinchState.initialRanges.y[0]) / 2 * scale;
-            
-            var newXRange = [xCenter - xSpan, xCenter + xSpan];
-            var newYRange = [yCenter - ySpan, yCenter + ySpan];
-            
-            try {
-                window.Plotly.relayout(plotlyGraphDiv, {
-                    'xaxis.range': newXRange,
-                    'yaxis.range': newYRange
-                });
-            } catch (err) {
-                // Ignorer les erreurs silencieusement
-            }
-            
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        
-        function handleTouchEnd(e) {
-            // Reset si moins de 2 doigts
-            if (e.touches.length < 2) {
-                pinchState.active = false;
-                pinchState.initialDistance = 0;
-                pinchState.initialRanges = null;
-            }
-        }
-        
-        // Attacher les event listeners au graphDiv quand il est prêt
-        function attachPinchZoomListeners() {
-            if (!graphDiv) {
-                setTimeout(attachPinchZoomListeners, 100);
-                return;
-            }
-            
-            graphDiv.addEventListener('touchstart', handleTouchStart, false);
-            graphDiv.addEventListener('touchmove', handleTouchMove, false);
-            graphDiv.addEventListener('touchend', handleTouchEnd, false);
-        }
-        
-        // Initialiser quand le DOM est prêt
+        // Script pour activer pinch-to-zoom sur graphes Plotly mobile
         document.addEventListener('DOMContentLoaded', function() {
-            setupGraph();
-            
-            // Attacher pinch-zoom après que le graphe soit chargé
+            // Attendre que Plotly soit chargé
             setTimeout(function() {
-                attachPinchZoomListeners();
-            }, 1000);
-            
-            // === PLEIN ÉCRAN ===
-            setTimeout(function() {
-                var fullscreenBtn = document.getElementById('btn-fullscreen');
-                var fullscreenIcon = document.getElementById('fullscreen-icon');
-                var graphPanel = document.querySelector('.graph-panel');
-                var isFullscreen = false;
-                
-                if (fullscreenBtn && graphPanel) {
-                    fullscreenBtn.addEventListener('click', function() {
-                        isFullscreen = !isFullscreen;
-                        if (isFullscreen) {
-                            graphPanel.classList.add('fullscreen-mode');
-                            if (fullscreenIcon) {
-                                fullscreenIcon.className = 'fas fa-compress';
-                            }
-                        } else {
-                            graphPanel.classList.remove('fullscreen-mode');
-                            if (fullscreenIcon) {
-                                fullscreenIcon.className = 'fas fa-expand';
-                            }
-                        }
-                        // Forcer Plotly à se redimensionner
-                        setTimeout(function() {
-                            if (graphDiv && window.Plotly) {
-                                window.Plotly.Plots.resize(graphDiv);
-                            }
-                        }, 100);
-                    });
-                }
-            }, 500);
-            
-            // === MENU HAMBURGER ===
-            setTimeout(function() {
-                var hamburgerBtn = document.getElementById('hamburger-btn-graph');
-                var hamburgerMenu = document.getElementById('hamburger-menu');
-                
-                if (hamburgerBtn && hamburgerMenu) {
-                    hamburgerBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        var isVisible = hamburgerMenu.style.display !== 'none';
-                        hamburgerMenu.style.display = isVisible ? 'none' : 'block';
-                    });
+                var graphDiv = document.getElementById('network-graph');
+                if (graphDiv && graphDiv.on) {
+                    // Configurer les événements tactiles Plotly
+                    var lastDistance = 0;
+                    var isPinching = false;
                     
-                    // Fermer le menu si on clique ailleurs
-                    document.addEventListener('click', function(e) {
-                        if (hamburgerMenu && hamburgerMenu.style.display !== 'none') {
-                            if (!hamburgerMenu.contains(e.target) && e.target !== hamburgerBtn) {
-                                hamburgerMenu.style.display = 'none';
+                    graphDiv.addEventListener('touchstart', function(e) {
+                        if (e.touches.length === 2) {
+                            isPinching = true;
+                            var dx = e.touches[0].clientX - e.touches[1].clientX;
+                            var dy = e.touches[0].clientY - e.touches[1].clientY;
+                            lastDistance = Math.sqrt(dx * dx + dy * dy);
+                            e.preventDefault();
+                        }
+                    }, {passive: false});
+                    
+                    graphDiv.addEventListener('touchmove', function(e) {
+                        if (e.touches.length === 2 && isPinching) {
+                            var dx = e.touches[0].clientX - e.touches[1].clientX;
+                            var dy = e.touches[0].clientY - e.touches[1].clientY;
+                            var distance = Math.sqrt(dx * dx + dy * dy);
+                            
+                            if (lastDistance > 0) {
+                                var scale = distance / lastDistance;
+                                if (scale > 1.01 || scale < 0.99) { // Seuil pour éviter les micro-mouvements
+                                    // Zoom in ou out
+                                    var update = {
+                                        'xaxis.range[0]': graphDiv.layout.xaxis.range[0] / scale,
+                                        'xaxis.range[1]': graphDiv.layout.xaxis.range[1] / scale,
+                                        'yaxis.range[0]': graphDiv.layout.yaxis.range[0] / scale,
+                                        'yaxis.range[1]': graphDiv.layout.yaxis.range[1] / scale
+                                    };
+                                    Plotly.relayout(graphDiv, update);
+                                }
                             }
+                            lastDistance = distance;
+                            e.preventDefault();
+                        }
+                    }, {passive: false});
+                    
+                    graphDiv.addEventListener('touchend', function(e) {
+                        if (e.touches.length < 2) {
+                            isPinching = false;
+                            lastDistance = 0;
                         }
                     });
                 }
-            }, 500);
+            }, 1000);
         });
     </script>
 </head>
@@ -996,10 +593,11 @@ app.index_string = '''
 # ============================================================================
 
 def create_public_layout():
-    """Vue publique (non-authentifié) : Graph + Propose + Login (simplifié)"""
+    """Vue publique (non-authentifié) : Graph + Search + Propose + Login"""
     return html.Div([
-        # Store et Interval (pas Location ni user-session, déjà dans layout principal)
         dcc.Store(id='data-version', data=0),
+        dcc.Store(id='user-session', storage_type='session'),
+        dcc.Location(id='url', refresh=False),
         dcc.Interval(id='auto-refresh', interval=30000, n_intervals=0),
         
         # Header public
@@ -1007,177 +605,84 @@ def create_public_layout():
         
         # Main Content - Graph en lecture seule
         html.Div([
-            # Graph Panel - Full width (pas de sidebar lourde)
+            # Graph Panel
             html.Div([
                 dcc.Graph(
                     id='network-graph',
                     config={
-                        'displayModeBar': False,  # Masquer la barre d'outils (surtout sur mobile)
+                        'displayModeBar': True,
                         'scrollZoom': True,
                         'displaylogo': False,
+                        'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
                         'doubleClick': 'reset',
+                        'modeBarButtonsToAdd': ['resetScale2d'],
                         'responsive': True,
                         'showTips': False,
-                        'touchAction': 'auto',
-                        'editable': False,
-                    }
-                ),
-                
-                # Boutons de contrôle superposés sur le graphe
-                # Menu hamburger (en haut à DROITE)
-                html.Div([
-                    html.I(className="fas fa-bars", style={
-                        'fontSize': '18px', 
-                        'color': 'white',
-                    })
-                ], id='hamburger-btn-graph', style={
-                    'position': 'absolute',
-                    'top': '15px',
-                    'right': '15px',
-                    'width': '48px',
-                    'height': '48px',
-                    'background': 'var(--primary-dark)',
-                    'borderRadius': '50%',
-                    'display': 'flex',
-                    'alignItems': 'center',
-                    'justifyContent': 'center',
-                    'boxShadow': '0 4px 12px rgba(0,0,0,0.2)',
-                    'cursor': 'pointer',
-                    'transition': 'all 0.3s ease',
-                    'zIndex': '1000',
-                    'border': '2px solid white',
-                }, title="Menu"),
-                
-                # Bouton Zoom + (à droite sous le hamburger)
-                html.Div([
-                    html.I(className="fas fa-plus", style={'fontSize': '18px', 'color': 'white'})
-                ], id='btn-zoom-in', style={
-                    'position': 'absolute',
-                    'bottom': '75px',
-                    'right': '15px',
-                    'width': '40px',
-                    'height': '40px',
-                    'background': 'rgba(47, 128, 237, 0.95)',
-                    'borderRadius': '8px',
-                    'display': 'flex',
-                    'alignItems': 'center',
-                    'justifyContent': 'center',
-                    'boxShadow': '0 2px 8px rgba(0,0,0,0.2)',
-                    'cursor': 'pointer',
-                    'transition': 'all 0.2s ease',
-                    'zIndex': '1000',
-                    'border': '2px solid white',
-                    'userSelect': 'none',
-                    'touchAction': 'manipulation',
-                    'WebkitTouchCallout': 'none',
-                }, title="Zoom avant"),
-                
-                # Bouton Zoom - (sous le +)
-                html.Div([
-                    html.I(className="fas fa-minus", style={'fontSize': '18px', 'color': 'white'})
-                ], id='btn-zoom-out', style={
-                    'position': 'absolute',
-                    'bottom': '25px',
-                    'right': '15px',
-                    'width': '40px',
-                    'height': '40px',
-                    'background': 'rgba(47, 128, 237, 0.95)',
-                    'borderRadius': '8px',
-                    'display': 'flex',
-                    'alignItems': 'center',
-                    'justifyContent': 'center',
-                    'boxShadow': '0 2px 8px rgba(0,0,0,0.2)',
-                    'cursor': 'pointer',
-                    'transition': 'all 0.2s ease',
-                    'zIndex': '1000',
-                    'border': '2px solid white',
-                    'userSelect': 'none',
-                    'touchAction': 'manipulation',
-                    'WebkitTouchCallout': 'none',
-                }, title="Zoom arrière"),
-                
-                # Bouton plein écran (en bas à GAUCHE)
-                html.Div([
-                    html.I(className="fas fa-expand", id='fullscreen-icon')
-                ], id='btn-fullscreen', style={
-                    'position': 'absolute',
-                    'bottom': '15px',
-                    'left': '15px',
-                    'width': '48px',
-                    'height': '48px',
-                    'background': 'rgba(47, 128, 237, 0.95)',
-                    'borderRadius': '50%',
-                    'display': 'flex',
-                    'alignItems': 'center',
-                    'justifyContent': 'center',
-                    'boxShadow': '0 4px 12px rgba(0,0,0,0.2)',
-                    'cursor': 'pointer',
-                    'transition': 'all 0.3s ease',
-                    'zIndex': '1000',
-                    'color': 'white',
-                    'fontSize': '20px',
-                    'border': '2px solid white',
-                }, title="Mode plein écran"),
-                
-                # Menu déroulant hamburger (DANS le graph-panel pour position: absolute)
-                html.Div([
-                    html.Div("Contribute", style={
-                        'fontSize': '12px', 
-                        'fontWeight': '600', 
-                        'marginBottom': '12px',
-                        'color': 'var(--text-dark)',
-                        'textAlign': 'left',
-                        'paddingBottom': '8px',
-                        'borderBottom': '1px solid #e0e4e8',
-                        'textTransform': 'uppercase',
-                        'letterSpacing': '0.5px'
-                    }),
-                    dbc.Button([
-                        html.I(className="fas fa-user-plus", style={'marginRight': '8px'}),
-                        "Proposer une personne"
-                    ], id='btn-propose-person', size='sm', className='w-100 mb-2', style={
-                        'fontSize': '12px',
-                        'padding': '8px 12px',
-                        'background': 'var(--primary-dark)',
-                        'border': 'none',
-                        'color': 'white',
-                        'borderRadius': '4px'
-                    }),
-                    
-                    dbc.Button([
-                        html.I(className="fas fa-link", style={'marginRight': '8px'}),
-                        "Proposer une relation"
-                    ], id='btn-propose-relation', size='sm', className='w-100', style={
-                        'fontSize': '12px',
-                        'padding': '8px 12px',
-                        'background': 'var(--primary-dark)',
-                        'border': 'none',
-                        'color': 'white',
-                        'borderRadius': '4px'
-                    }),
-                ], id='hamburger-menu', style={
-                    'position': 'absolute',
-                    'top': '65px',
-                    'right': '15px',
-                    'background': 'white',
-                    'padding': '15px',
-                    'borderRadius': '8px',
-                    'boxShadow': '0 4px 20px rgba(0,0,0,0.3)',
-                    'minWidth': '220px',
-                    'border': '2px solid white',
-                    'display': 'none',  # Caché par défaut
-                    'zIndex': '999',
-                }),
-            ], className='graph-panel', style={'gridColumn': '1 / -1', 'position': 'relative'}),  # Full width
+                    },
+                    style={'height': '600px', 'width': '100%'}
+                )
+            ], className='graph-panel'),
             
-            # Dropdowns cachés pour compatibilité callbacks
+            # Controls Panel - Version simplifiée
             html.Div([
-                dcc.Dropdown(id='layout-dropdown', value='community', style={'display': 'none'}),
-                dcc.Dropdown(id='color-dropdown', value='community', style={'display': 'none'}),
-                html.Div(id='stats-display', style={'display': 'none'}),
-            ]),
+                # Graph Controls
+                html.Div([
+                    html.Div("🎨 Graph Settings", className='section-title'),
+                    
+                    html.Div([
+                        html.Label("Layout Algorithm", className='control-label'),
+                        dcc.Dropdown(
+                            id='layout-dropdown',
+                            options=[
+                                {'label': '🎯 Community Detection', 'value': 'community'},
+                                {'label': '🌸 Spring Force', 'value': 'spring'},
+                                {'label': '🔷 Kamada-Kawai', 'value': 'kk'},
+                                {'label': '⭐ Spectral', 'value': 'spectral'},
+                            ],
+                            value='community',
+                            clearable=False,
+                        )
+                    ], className='control-group'),
+                    
+                    html.Div([
+                        html.Label("Color Scheme", className='control-label'),
+                        dcc.Dropdown(
+                            id='color-dropdown',
+                            options=[
+                                {'label': '🎨 By Community', 'value': 'community'},
+                                {'label': '📈 By Connections', 'value': 'degree'},
+                            ],
+                            value='community',
+                            clearable=False,
+                        )
+                    ], className='control-group'),
+                ]),
+                
+                # Stats Card
+                html.Div([
+                    html.H5("📊 Network Statistics"),
+                    html.Div(id='stats-display')
+                ], className='stats-card'),
+                
+                # Public Actions
+                html.Div([
+                    html.Div("✨ Contribute", className='section-title'),
+                    html.Div([
+                        dbc.Button([
+                            html.I(className="fas fa-user-plus", style={'marginRight': '8px'}),
+                            "Propose Person"
+                        ], id='btn-propose-person', color='success', className='w-100', outline=True),
+                        
+                        dbc.Button([
+                            html.I(className="fas fa-link", style={'marginRight': '8px'}),
+                            "Propose Relation"
+                        ], id='btn-propose-relation', color='success', className='w-100', outline=True),
+                    ], className='action-buttons'),
+                ], className='action-section'),
+                
+            ], className='controls-panel'),
             
-        ], className='content-grid', style={'gridTemplateColumns': '1fr'}),  # 1 colonne
+        ], className='content-grid'),
         
         # Modals auth
         create_login_modal(),
@@ -1194,8 +699,9 @@ def create_admin_layout(user):
     is_admin = user.get('is_admin', False)
     
     return html.Div([
-        # Store et Interval (pas Location ni user-session, déjà dans layout principal)
         dcc.Store(id='data-version', data=0),
+        dcc.Store(id='user-session', storage_type='session'),
+        dcc.Location(id='url', refresh=False),
         dcc.Interval(id='auto-refresh', interval=30000, n_intervals=0),
         
         # Header admin
@@ -1219,7 +725,8 @@ def create_admin_layout(user):
                                 'modeBarButtonsToAdd': ['resetScale2d'],
                                 'responsive': True,
                                 'showTips': False,
-                            }
+                            },
+                            style={'height': '600px', 'width': '100%'}
                         )
                     ], className='graph-panel'),
                     
@@ -1559,10 +1066,6 @@ def create_admin_layout(user):
             dcc.Dropdown(id='dropdown-add-gender', style={'display': 'none'}),
         ], style={'display': 'none'}),
         
-        # Modals auth (needed for admin too!)
-        create_propose_person_modal(),
-        create_propose_relation_modal(),
-        
     ], className='main-container')
 
 
@@ -1573,700 +1076,376 @@ def create_admin_layout(user):
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     dcc.Store(id='user-session', storage_type='session'),
-    html.Div(id='page-content')
-])
-
-# ============================================================================
-# CALLBACK ROUTING - Display page based on auth
-# ============================================================================
-
-@app.callback(
-    Output('page-content', 'children'),
-    Input('url', 'pathname'),
-    State('user-session', 'data')
-)
-def display_page(pathname, user_session):
-    """Route vers vue publique ou admin selon authentification"""
-    # Récupérer user depuis Flask session
-    user = session.get('user', None)
-    log_event("navigation", "display_page", {
-        "pathname": pathname,
-        "authenticated": auth_service.is_authenticated(user)
-    })
+    html.Div(id='page-content'),
     
-    if auth_service.is_authenticated(user):
-        # User authentifié → Vue admin complète
-        return create_admin_layout(user)
-    else:
-        # User non-authentifié → Vue publique
-        return create_public_layout()
-
-
-# ============================================================================
-# CALLBACKS AUTHENTIFICATION
-# ============================================================================
-
-# Login
-@app.callback(
-    [Output('modal-login', 'is_open', allow_duplicate=True),
-     Output('login-error', 'children'),
-     Output('url', 'pathname', allow_duplicate=True)],
-    Input('btn-submit-login', 'n_clicks'),
-    [State('input-login-username', 'value'),
-     State('input-login-password', 'value')],
-    prevent_initial_call=True
-)
-def handle_login(n_clicks, username, password):
-    """Gérer la connexion utilisateur"""
-    if not n_clicks:
-        raise PreventUpdate
+    # Hidden store to trigger graph refresh (pour compatibilité)
+    dcc.Store(id='data-version', data=0),
     
-    log_event("auth", "login_attempt", {
-        "username": username,
-        "has_password": bool(password)
-    })
-
-    if not username or not password:
-        return True, dbc.Alert("Please enter username and password", color='danger'), no_update
+    # Auto-refresh interval
+    dcc.Interval(id='auto-refresh', interval=30000, n_intervals=0),
     
-    # Tentative de connexion
-    user = auth_service.login(username, password)
+    # Header
+    html.Div([
+        html.H1([
+            html.I(className="fas fa-project-diagram", style={'marginRight': '10px'}),
+            "Social Network Analyzer"
+        ]),
+        html.Span("V2 - Clean Architecture", className='header-badge')
+    ], className='header-bar'),
     
-    if user:
-        # Succès : stocker dans Flask session
-        session['user'] = user
-        session.permanent = True
-        log_event("auth", "login_success", {"username": username})
-        return False, '', '/'  # Fermer modal, clear error, refresh page
-    else:
-        # Échec
-        log_event("auth", "login_failure", {"username": username})
-        return True, dbc.Alert("Invalid username or password", color='danger'), no_update
-
-
-# Logout
-@app.callback(
-    Output('url', 'pathname', allow_duplicate=True),
-    Input('btn-logout', 'n_clicks'),
-    prevent_initial_call=True
-)
-def handle_logout(n_clicks):
-    """Déconnecter l'utilisateur"""
-    if not n_clicks:
-        raise PreventUpdate
-    
-    # Supprimer user de Flask session
-    log_event("auth", "logout", {
-        "username": session.get('user', {}).get('username')
-    })
-    session.pop('user', None)
-    return '/'  # Refresh page → affichera vue publique
-
-
-# Register
-@app.callback(
-    [Output('modal-register', 'is_open', allow_duplicate=True),
-     Output('register-error', 'children'),
-     Output('register-success', 'children')],
-    Input('btn-submit-register', 'n_clicks'),
-    [State('input-register-username', 'value'),
-     State('input-register-password', 'value'),
-     State('input-register-confirm', 'value')],
-    prevent_initial_call=True
-)
-def handle_register(n_clicks, username, password, confirm):
-    """Gérer la demande d'inscription"""
-    if not n_clicks:
-        raise PreventUpdate
-    
-    log_event("auth", "register_attempt", {
-        "username": username,
-        "has_password": bool(password),
-        "has_confirm": bool(confirm)
-    })
-
-    # Validation
-    if not username or not password or not confirm:
-        return True, dbc.Alert("Please fill all fields", color='danger'), ''
-    
-    if password != confirm:
-        return True, dbc.Alert("Passwords don't match", color='danger'), ''
-    
-    if len(password) < 6:
-        return True, dbc.Alert("Password must be at least 6 characters", color='danger'), ''
-    
-    # Demande d'inscription
-    success, message = auth_service.register_request(username, password)
-    
-    if success:
-        log_event("auth", "register_request_success", {"username": username})
-        return True, '', dbc.Alert(message, color='success')
-    else:
-        log_event("auth", "register_request_failure", {
-            "username": username,
-            "message": message
-        })
-        return True, dbc.Alert(message, color='danger'), ''
-
-
-# Toggle modals
-@app.callback(
-    Output('modal-login', 'is_open'),
-    [Input('btn-open-login', 'n_clicks'),
-     Input('btn-cancel-login', 'n_clicks')],
-    State('modal-login', 'is_open'),
-    prevent_initial_call=True
-)
-def toggle_login_modal(n_open, n_cancel, is_open):
-    """Ouvrir/fermer modal login"""
-    log_event("ui", "toggle_login_modal", {
-        "open_clicks": n_open,
-        "cancel_clicks": n_cancel,
-        "was_open": is_open
-    })
-    return not is_open
-
-
-@app.callback(
-    Output('modal-register', 'is_open'),
-    [Input('btn-open-register', 'n_clicks'),
-     Input('btn-cancel-register', 'n_clicks')],
-    State('modal-register', 'is_open'),
-    prevent_initial_call=True
-)
-def toggle_register_modal(n_open, n_cancel, is_open):
-    """Ouvrir/fermer modal register"""
-    log_event("ui", "toggle_register_modal", {
-        "open_clicks": n_open,
-        "cancel_clicks": n_cancel,
-        "was_open": is_open
-    })
-    return not is_open
-
-
-@app.callback(
-    Output('modal-propose-person', 'is_open'),
-    [Input('btn-propose-person', 'n_clicks'),
-     Input('btn-cancel-propose-person', 'n_clicks'),
-     Input('btn-submit-propose-person', 'n_clicks')],
-    State('modal-propose-person', 'is_open'),
-    prevent_initial_call=True
-)
-def toggle_propose_person_modal(n_open, n_cancel, n_submit, is_open):
-    """Ouvrir/fermer modal propose person"""
-    ctx_triggered = ctx.triggered_id
-    log_event("ui", "toggle_propose_person_modal", {
-        "triggered": ctx_triggered,
-        "open_clicks": n_open,
-        "cancel_clicks": n_cancel,
-        "submit_clicks": n_submit,
-        "was_open": is_open
-    })
-    if ctx_triggered in ['btn-cancel-propose-person', 'btn-submit-propose-person']:
-        return False
-    return not is_open
-
-
-@app.callback(
-    Output('modal-propose-relation', 'is_open'),
-    [Input('btn-propose-relation', 'n_clicks'),
-     Input('btn-cancel-propose-relation', 'n_clicks'),
-     Input('btn-submit-propose-relation', 'n_clicks')],
-    State('modal-propose-relation', 'is_open'),
-    prevent_initial_call=True
-)
-def toggle_propose_relation_modal(n_open, n_cancel, n_submit, is_open):
-    """Ouvrir/fermer modal propose relation"""
-    ctx_triggered = ctx.triggered_id
-    log_event("ui", "toggle_propose_relation_modal", {
-        "triggered": ctx_triggered,
-        "open_clicks": n_open,
-        "cancel_clicks": n_cancel,
-        "submit_clicks": n_submit,
-        "was_open": is_open
-    })
-    if ctx_triggered in ['btn-cancel-propose-relation', 'btn-submit-propose-relation']:
-        return False
-    return not is_open
-
-
-# Propose person
-@app.callback(
-    [Output('propose-person-error', 'children'),
-     Output('propose-person-success', 'children')],
-    Input('btn-submit-propose-person', 'n_clicks'),
-    [State('input-propose-person-name', 'value'),
-     State('user-session', 'data')],
-    prevent_initial_call=True
-)
-def handle_propose_person(n_clicks, name, user_session):
-    """Gérer la proposition d'une nouvelle personne"""
-    if not n_clicks:
-        raise PreventUpdate
-    
-    print(f"🔍 PROPOSE PERSON: n_clicks={n_clicks}, name={name}")
-    
-    user = session.get('user', None)
-    submitted_by = user.get('username', 'anonymous') if user else 'anonymous'
-    
-    print(f"👤 Submitted by: {submitted_by}")
-    
-    if not name or not name.strip():
-        print(f"❌ Validation error: empty name")
-        return dbc.Alert("Please enter a name", color='danger'), ''
-    
-    try:
-        submission_id = pending_submission_repository.submit_person(name.strip(), submitted_by)
-        print(f"✅ Person submitted successfully with ID: {submission_id}")
-        return '', dbc.Alert(f"✅ Person '{name}' proposed! Waiting for admin approval.", color='success')
-    except Exception as e:
-        print(f"❌ Error submitting person: {str(e)}")
-        return dbc.Alert(f"Error: {str(e)}", color='danger'), ''
-
-
-# Propose relation
-@app.callback(
-    [Output('propose-relation-error', 'children'),
-     Output('propose-relation-success', 'children')],
-    Input('btn-submit-propose-relation', 'n_clicks'),
-    [State('dropdown-propose-rel-p1', 'value'),
-     State('dropdown-propose-rel-p2', 'value'),
-     State('dropdown-propose-rel-type', 'value'),
-     State('user-session', 'data')],
-    prevent_initial_call=True
-)
-def handle_propose_relation(n_clicks, person1, person2, rel_type, user_session):
-    """Gérer la proposition d'une nouvelle relation (avec création de personnes si nécessaire)"""
-    if not n_clicks:
-        raise PreventUpdate
-    
-    log_event("proposal", "propose_relation_start", {
-        "n_clicks": n_clicks,
-        "person1": person1,
-        "person2": person2,
-        "relation_type": rel_type
-    })
-    
-    print(f"🔍 PROPOSE RELATION: n_clicks={n_clicks}, person1={person1}, person2={person2}, rel_type={rel_type}")
-    
-    # Récupérer username depuis user_session ou mettre anonymous
-    submitted_by = 'anonymous'
-    if user_session and isinstance(user_session, dict):
-        submitted_by = user_session.get('username', 'anonymous')
-    
-    print(f"👤 Submitted by: {submitted_by}")
-    
-    if not person1 or not person2 or rel_type is None:
-        error_msg = "Veuillez sélectionner les deux personnes et un type de relation"
-        print(f"❌ Validation error: {error_msg}")
-        log_event("proposal", "propose_relation_validation_error", {"reason": "missing_fields"})
-        return dbc.Alert(error_msg, color='danger'), ''
-    
-    # Extract real names from __CREATE__ prefix if present
-    p1_name = person1.replace("__CREATE__", "") if str(person1).startswith("__CREATE__") else person1
-    p2_name = person2.replace("__CREATE__", "") if str(person2).startswith("__CREATE__") else person2
-    
-    print(f"📝 Real names: p1={p1_name}, p2={p2_name}")
-    
-    if p1_name == p2_name:
-        error_msg = "Impossible de créer une relation avec la même personne"
-        print(f"❌ Same person error: {error_msg}")
-        log_event("proposal", "propose_relation_validation_error", {"reason": "same_person"})
-        return dbc.Alert(error_msg, color='danger'), ''
-    
-    try:
-        # Create new persons if needed
-        created_persons = []
-        if str(person1).startswith("__CREATE__"):
-            print(f"➕ Creating new person: {p1_name}")
-            success, msg = person_repository.create(p1_name)
-            if success:
-                created_persons.append(p1_name)
-                log_event("proposal", "create_person_inline", {"name": p1_name, "success": True})
-                print(f"✅ Person created: {p1_name}")
-            else:
-                print(f"❌ Failed to create person {p1_name}: {msg}")
-                log_event("proposal", "create_person_inline_failed", {"name": p1_name, "error": msg})
-                return dbc.Alert(f"Erreur création personne '{p1_name}': {msg}", color='danger'), ''
+    # Main Content
+    html.Div([
+        # Graph Panel
+        html.Div([
+            dcc.Graph(
+                id='network-graph',
+                config={
+                    'displayModeBar': True,
+                    'scrollZoom': True,
+                    'displaylogo': False,
+                    'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
+                    'doubleClick': 'reset',  # Double tap pour reset
+                    'modeBarButtonsToAdd': ['resetScale2d'],  # Bouton reset zoom
+                    'responsive': True,  # Responsive sur mobile
+                    'showTips': False,  # Pas de tips pour mobile
+                },
+                style={'height': '600px', 'width': '100%'}
+            )
+        ], className='graph-panel'),
         
-        if str(person2).startswith("__CREATE__"):
-            print(f"➕ Creating new person: {p2_name}")
-            success, msg = person_repository.create(p2_name)
-            if success:
-                created_persons.append(p2_name)
-                log_event("proposal", "create_person_inline", {"name": p2_name, "success": True})
-                print(f"✅ Person created: {p2_name}")
-            else:
-                print(f"❌ Failed to create person {p2_name}: {msg}")
-                log_event("proposal", "create_person_inline_failed", {"name": p2_name, "error": msg})
-                return dbc.Alert(f"Erreur création personne '{p2_name}': {msg}", color='danger'), ''
+        # Controls Panel
+        html.Div([
+            # Graph Controls
+            html.Div([
+                html.Div("🎨 Graph Settings", className='section-title'),
+                
+                html.Div([
+                    html.Label("Layout Algorithm", className='control-label'),
+                    dcc.Dropdown(
+                        id='layout-dropdown',
+                        options=[
+                            {'label': '🎯 Community Detection', 'value': 'community'},
+                            {'label': '🌸 Spring Force', 'value': 'spring'},
+                            {'label': '🔷 Kamada-Kawai', 'value': 'kk'},
+                            {'label': '⭐ Spectral', 'value': 'spectral'},
+                        ],
+                        value='community',
+                        clearable=False,
+                    )
+                ], className='control-group'),
+                
+                html.Div([
+                    html.Label("Color Scheme", className='control-label'),
+                    dcc.Dropdown(
+                        id='color-dropdown',
+                        options=[
+                            {'label': '🎨 By Community', 'value': 'community'},
+                            {'label': '📈 By Connections', 'value': 'degree'},
+                        ],
+                        value='community',
+                        clearable=False,
+                    )
+                ], className='control-group'),
+            ]),
+            
+            # Stats Card
+            html.Div([
+                html.H5("📊 Network Statistics"),
+                html.Div(id='stats-display')
+            ], className='stats-card'),
+            
+            # Actions Section
+            html.Div([
+                html.Div("⚡ Quick Actions", className='section-title'),
+                html.Div([
+                    dbc.Button([
+                        html.I(className="fas fa-user-plus", style={'marginRight': '8px'}),
+                        "Add Person"
+                    ], id='btn-add-person', color='primary', className='w-100'),
+                    
+                    dbc.Button([
+                        html.I(className="fas fa-link", style={'marginRight': '8px'}),
+                        "Add Relation"
+                    ], id='btn-add-relation', color='primary', className='w-100'),
+                    
+                    dbc.Button([
+                        html.I(className="fas fa-sync-alt", style={'marginRight': '8px'}),
+                        "Update Relation"
+                    ], id='btn-update-relation', color='info', className='w-100'),
+                    
+                    dbc.Button([
+                        html.I(className="fas fa-edit", style={'marginRight': '8px'}),
+                        "Edit Person"
+                    ], id='btn-edit-person', outline=True, color='primary', className='w-100'),
+                    
+                    dbc.Button([
+                        html.I(className="fas fa-users", style={'marginRight': '8px'}),
+                        "Merge Persons"
+                    ], id='btn-merge-persons', outline=True, color='primary', className='w-100'),
+                    
+                    dbc.Button([
+                        html.I(className="fas fa-trash", style={'marginRight': '8px'}),
+                        "Delete Person"
+                    ], id='btn-delete-person', outline=True, color='danger', className='w-100'),
+                ], className='action-buttons'),
+            ], className='action-section'),
+            
+            # History Section
+            html.Div([
+                html.Div("📝 Recent Actions", className='section-title'),
+                html.Div(id='history-display', style={'fontSize': '12px', 'color': '#666'})
+            ], style={'marginTop': '20px'}),
+            
+        ], className='controls-panel'),
         
-        print(f"💾 Saving relation proposal: {p1_name} <-> {p2_name} (type={rel_type})")
-        submission_id = pending_submission_repository.submit_relation(p1_name, p2_name, rel_type, submitted_by)
-        
-        log_event("proposal", "propose_relation_submitted", {
-            "submission_id": submission_id,
-            "person1": p1_name,
-            "person2": p2_name,
-            "relation_type": rel_type,
-            "submitted_by": submitted_by,
-            "created_persons": created_persons
-        })
-        
-        success_msg = f"✅ Relation proposée ! En attente d'approbation admin."
-        if created_persons:
-            success_msg += f" Nouvelle(s) personne(s) créée(s): {', '.join(created_persons)}"
-        
-        print(f"✅ SUCCESS: {success_msg}")
-        return '', dbc.Alert(success_msg, color='success')
-    except Exception as e:
-        error_msg = f"Erreur: {str(e)}"
-        print(f"❌ ERROR: {error_msg}")
-        log_event("proposal", "propose_relation_error", {"error": str(e)})
-        return dbc.Alert(error_msg, color='danger'), ''
-
-
-# SMART DROPDOWN OPTIONS - Propose Relation Person 1 (with "Create new" option)
-@app.callback(
-    Output('dropdown-propose-rel-p1', 'options'),
-    [Input('dropdown-propose-rel-p1', 'search_value'),
-     Input('modal-propose-relation', 'is_open')],
-    [State('dropdown-propose-rel-p1', 'value')],
-    prevent_initial_call=False
-)
-def populate_propose_p1_options(search_value, is_open, current_value):
-    """Populate Person 1 dropdown with existing persons + 'Create new' option if needed"""
-    if not is_open:
-        raise PreventUpdate
+    ], className='content-grid'),
     
-    persons = person_repository.read_all()
-    options = [{'label': p['name'], 'value': p['name']} for p in persons]
+    # ============================================================================
+    # MODALS
+    # ============================================================================
     
-    # If search value and no exact match → add "Create new" option
-    if search_value and len(search_value.strip()) >= 2:
-        existing_names = [p['name'].lower() for p in persons]
-        if search_value.strip().lower() not in existing_names:
-            options.insert(0, {
-                'label': f"➕ Créer: {search_value.strip()}",
-                'value': f"__CREATE__{search_value.strip()}"
-            })
+    # Modal Add Person
+    dbc.Modal([
+        dbc.ModalHeader(dbc.ModalTitle("➕ Add New Person")),
+        dbc.ModalBody([
+            html.Div([
+                html.Label("Name", className='control-label'),
+                dbc.Input(id='input-add-name', type='text', placeholder='Enter name')
+            ], className='control-group'),
+        ]),
+        dbc.ModalFooter([
+            dbc.Button("Cancel", id='btn-cancel-add-person', color='secondary'),
+            dbc.Button("Add Person", id='btn-submit-add-person', color='primary')
+        ])
+    ], id='modal-add-person', is_open=False),
     
-    # Keep __CREATE__ option visible after selection
-    if current_value and str(current_value).startswith("__CREATE__"):
-        name = str(current_value).replace("__CREATE__", "")
-        if not any(opt['value'] == current_value for opt in options):
-            options.insert(0, {
-                'label': f"➕ Créer: {name}",
-                'value': current_value
-            })
+    # Modal Edit Person
+    dbc.Modal([
+        dbc.ModalHeader(dbc.ModalTitle("✏️ Edit Person")),
+        dbc.ModalBody([
+            html.Div([
+                html.Label("Select Person", className='control-label'),
+                dcc.Dropdown(id='dropdown-edit-person-select', placeholder='Select person to edit')
+            ], className='control-group'),
+            
+            html.Div([
+                html.Label("New Name", className='control-label'),
+                dbc.Input(id='input-edit-person-name', type='text', placeholder='Enter new name')
+            ], className='control-group'),
+        ]),
+        dbc.ModalFooter([
+            dbc.Button("Cancel", id='btn-cancel-edit-person', color='secondary'),
+            dbc.Button("Save Changes", id='btn-submit-edit-person', color='primary')
+        ])
+    ], id='modal-edit-person', is_open=False),
     
-    return options
-
-
-# SMART DROPDOWN OPTIONS - Propose Relation Person 2 (with "Create new" option)
-@app.callback(
-    Output('dropdown-propose-rel-p2', 'options'),
-    [Input('dropdown-propose-rel-p2', 'search_value'),
-     Input('modal-propose-relation', 'is_open')],
-    [State('dropdown-propose-rel-p2', 'value')],
-    prevent_initial_call=False
-)
-def populate_propose_p2_options(search_value, is_open, current_value):
-    """Populate Person 2 dropdown with existing persons + 'Create new' option if needed"""
-    if not is_open:
-        raise PreventUpdate
+    # Modal Merge Persons
+    dbc.Modal([
+        dbc.ModalHeader(dbc.ModalTitle("🔀 Merge Persons")),
+        dbc.ModalBody([
+            html.Div([
+                html.Label("Source Person (will be deleted)", className='control-label'),
+                dcc.Dropdown(id='dropdown-merge-source', placeholder='Select source person')
+            ], className='control-group'),
+            
+            html.Div([
+                html.Label("Target Person (will be kept)", className='control-label'),
+                dcc.Dropdown(id='dropdown-merge-target', placeholder='Select target person')
+            ], className='control-group'),
+            
+            html.Div(id='merge-preview-info', style={'marginTop': '15px'}),
+        ]),
+        dbc.ModalFooter([
+            dbc.Button("Cancel", id='btn-cancel-merge-persons', color='secondary'),
+            dbc.Button("Merge", id='btn-submit-merge-persons', color='warning')
+        ])
+    ], id='modal-merge-persons', is_open=False),
     
-    persons = person_repository.read_all()
-    options = [{'label': p['name'], 'value': p['name']} for p in persons]
+    # Modal Delete Person
+    dbc.Modal([
+        dbc.ModalHeader(dbc.ModalTitle("🗑️ Delete Person")),
+        dbc.ModalBody([
+            html.Div([
+                html.Label("Select Person to Delete", className='control-label'),
+                dcc.Dropdown(id='dropdown-delete-person-select', placeholder='Select person')
+            ], className='control-group'),
+            
+            html.Div(id='delete-person-info', style={'marginTop': '15px'}),
+            
+            html.Div([
+                dbc.Checkbox(
+                    id='checkbox-delete-cascade',
+                    label='Also delete all relations',
+                    value=True
+                )
+            ], style={'marginTop': '15px'}),
+        ]),
+        dbc.ModalFooter([
+            dbc.Button("Cancel", id='btn-cancel-delete-person', color='secondary'),
+            dbc.Button("Delete", id='btn-submit-delete-person', color='danger')
+        ])
+    ], id='modal-delete-person', is_open=False),
     
-    # If search value and no exact match → add "Create new" option
-    if search_value and len(search_value.strip()) >= 2:
-        existing_names = [p['name'].lower() for p in persons]
-        if search_value.strip().lower() not in existing_names:
-            options.insert(0, {
-                'label': f"➕ Créer: {search_value.strip()}",
-                'value': f"__CREATE__{search_value.strip()}"
-            })
+    # Modal Add Relation - REDESIGNED FOR INTUITIVE UX
+    dbc.Modal([
+        dbc.ModalHeader(dbc.ModalTitle("🔗 Add New Relation")),
+        dbc.ModalBody([
+            # Helper text - clear and simple
+            dbc.Alert([
+                html.I(className="fas fa-magic", style={'marginRight': '8px'}),
+                html.Strong("Just type names! "),
+                "Existing persons will appear, or you can create new ones on the fly."
+            ], color="info", style={'fontSize': '14px', 'padding': '10px 15px', 'marginBottom': '20px'}),
+            
+            # Person 1 - Smart Input
+            html.Div([
+                html.Label([
+                    html.I(className="fas fa-user", style={'marginRight': '8px', 'color': '#667eea'}),
+                    "First Person"
+                ], style={'fontSize': '16px', 'fontWeight': 'bold', 'marginBottom': '10px', 'display': 'block'}),
+                
+                dcc.Dropdown(
+                    id='dropdown-add-rel-p1',
+                    placeholder='🔍 Type a name... (existing or new)',
+                    searchable=True,
+                    clearable=True,
+                    style={'fontSize': '15px'}
+                ),
+                
+                # Smart indicator
+                html.Div(id='person-1-indicator', style={'marginTop': '8px', 'minHeight': '24px'}),
+                
+            ], style={'marginBottom': '25px', 'padding': '15px', 'backgroundColor': '#f8f9ff', 'borderRadius': '8px'}),
+            
+            # Person 2 - Smart Input
+            html.Div([
+                html.Label([
+                    html.I(className="fas fa-user", style={'marginRight': '8px', 'color': '#667eea'}),
+                    "Second Person"
+                ], style={'fontSize': '16px', 'fontWeight': 'bold', 'marginBottom': '10px', 'display': 'block'}),
+                
+                dcc.Dropdown(
+                    id='dropdown-add-rel-p2',
+                    placeholder='🔍 Type a name... (existing or new)',
+                    searchable=True,
+                    clearable=True,
+                    style={'fontSize': '15px'}
+                ),
+                
+                # Smart indicator
+                html.Div(id='person-2-indicator', style={'marginTop': '8px', 'minHeight': '24px'}),
+                
+            ], style={
+                'marginBottom': '25px',
+                'padding': '15px',
+                'backgroundColor': '#f8f9ff',
+                'borderRadius': '8px'
+            }),
+            
+            # Relation Type - Smart Input
+            html.Div([
+                html.Label([
+                    html.I(className="fas fa-heart", style={'marginRight': '8px', 'color': '#e74c3c'}),
+                    "Relation Type"
+                ], style={'fontSize': '16px', 'fontWeight': 'bold', 'marginBottom': '10px', 'display': 'block'}),
+                
+                dcc.Dropdown(
+                    id='dropdown-add-rel-type',
+                    options=[{'label': RELATION_TYPES[k], 'value': k} for k in RELATION_TYPES.keys()],
+                    placeholder='Select type... (💋 Bisou, 😴 Dodo, etc.)',
+                    clearable=False,
+                    style={'fontSize': '15px'}
+                ),
+                
+            ], style={
+                'marginBottom': '20px',
+                'padding': '15px',
+                'backgroundColor': '#fff5f5',
+                'borderRadius': '8px'
+            }),
+            
+            # Status display
+            html.Div(id='add-relation-status', style={'marginTop': '10px'})
+        ]),
+        dbc.ModalFooter([
+            dbc.Button("Cancel", id='btn-cancel-add-relation', color='secondary'),
+            dbc.Button("Add Relation", id='btn-submit-add-relation', color='primary')
+        ])
+    ], id='modal-add-relation', is_open=False, size='lg'),  # size='lg' pour plus d'espace
     
-    # Keep __CREATE__ option visible after selection
-    if current_value and str(current_value).startswith("__CREATE__"):
-        name = str(current_value).replace("__CREATE__", "")
-        if not any(opt['value'] == current_value for opt in options):
-            options.insert(0, {
-                'label': f"➕ Créer: {name}",
-                'value': current_value
-            })
+    # Modal Update/Delete Relation - REDESIGNED
+    dbc.Modal([
+        dbc.ModalHeader(dbc.ModalTitle("� Manage Relations")),
+        dbc.ModalBody([
+            # Helper text
+            dbc.Alert([
+                html.I(className="fas fa-info-circle", style={'marginRight': '8px'}),
+                html.Strong("All relations: "),
+                "Click on a relation type to edit it, or click the delete button to remove it."
+            ], color="info", style={'fontSize': '14px', 'padding': '10px 15px', 'marginBottom': '20px'}),
+            
+            # Relations list (will be populated dynamically)
+            html.Div(id='relations-list-container', style={'maxHeight': '500px', 'overflowY': 'auto'}),
+            
+            # Status message
+            html.Div(id='manage-relation-status', style={'marginTop': '15px'})
+        ]),
+        dbc.ModalFooter([
+            dbc.Button("Close", id='btn-close-update-relation', color='secondary')
+        ])
+    ], id='modal-update-relation', is_open=False, size='xl'),  # xl size for more space
     
-    return options
-
-
-# ============================================================================
-# CALLBACKS ADMIN PANEL
-# ============================================================================
-
-# Refresh admin panel - INITIAL LOAD
-@app.callback(
-    [Output('pending-accounts-list', 'children'),
-     Output('pending-persons-list', 'children'),
-     Output('pending-relations-list', 'children')],
-    [Input('btn-refresh-admin', 'n_clicks'),
-     Input('auto-refresh', 'n_intervals')],
-    State('user-session', 'data'),
-    prevent_initial_call=False
-)
-def refresh_admin_panel(n_clicks, n_intervals, user_session):
-    """Rafraîchir les listes du panel admin - Initial Load + Auto-refresh"""
-    print(f"🔄 REFRESH ADMIN PANEL called (initial/auto-refresh)")
-    user = session.get('user', None)
+    # Modal Edit Relation Type (appears when clicking a relation)
+    dbc.Modal([
+        dbc.ModalHeader(dbc.ModalTitle("✏️ Edit Relation Type")),
+        dbc.ModalBody([
+            html.Div(id='edit-relation-info', style={'marginBottom': '20px'}),
+            
+            html.Div([
+                html.Label([
+                    html.I(className="fas fa-heart", style={'marginRight': '8px', 'color': '#e74c3c'}),
+                    "New Relation Type"
+                ], style={'fontSize': '16px', 'fontWeight': 'bold', 'marginBottom': '10px', 'display': 'block'}),
+                
+                dcc.Dropdown(
+                    id='dropdown-edit-relation-type',
+                    options=[{'label': RELATION_TYPES[k], 'value': k} for k in RELATION_TYPES.keys()],
+                    placeholder='Select new type...',
+                    style={'fontSize': '15px'}
+                )
+            ], style={
+                'padding': '15px',
+                'backgroundColor': '#fff5f5',
+                'borderRadius': '8px'
+            }),
+            
+            html.Div(id='edit-relation-status', style={'marginTop': '15px'})
+        ]),
+        dbc.ModalFooter([
+            dbc.Button("Cancel", id='btn-cancel-edit-relation', color='secondary'),
+            dbc.Button("Save Changes", id='btn-submit-edit-relation', color='primary')
+        ])
+    ], id='modal-edit-relation', is_open=False),
     
-    # Vérifier si admin
-    if not auth_service.is_admin(user):
-        print(f"❌ Access denied - user is not admin")
-        return (
-            html.P("Accès refusé", className='text-muted'),
-            html.P("Accès refusé", className='text-muted'),
-            html.P("Accès refusé", className='text-muted')
-        )
+    # Hidden store for selected relation to edit/delete
+    dcc.Store(id='selected-relation-store', data=None),
     
-    print(f"✅ User is admin, fetching pending submissions...")
+    # Hidden components for compatibility (not shown to user)
+    html.Div([
+        dcc.Dropdown(id='dropdown-add-gender', style={'display': 'none'}),
+        dcc.Dropdown(id='dropdown-add-orientation', style={'display': 'none'}),
+        dcc.Dropdown(id='dropdown-edit-person-gender', style={'display': 'none'}),
+        dcc.Dropdown(id='dropdown-edit-person-orientation', style={'display': 'none'}),
+        dcc.Dropdown(id='dropdown-new-p1-gender', style={'display': 'none'}),
+        dcc.Dropdown(id='dropdown-new-p1-orientation', style={'display': 'none'}),
+        dcc.Dropdown(id='dropdown-new-p2-gender', style={'display': 'none'}),
+        dcc.Dropdown(id='dropdown-new-p2-orientation', style={'display': 'none'}),
+    ], style={'display': 'none'}),
     
-    from components.admin_panel import (
-        render_pending_accounts_list,
-        render_pending_persons_list,
-        render_pending_relations_list
-    )
+    # Store components (no duplicate Interval - already defined at top)
+    dcc.Store(id='session-store', data={}),
     
-    # Récupérer les données
-    accounts = pending_account_repository.get_pending_requests()
-    persons = pending_submission_repository.get_pending_persons()
-    relations = pending_submission_repository.get_pending_relations()
-    
-    print(f"📊 Admin panel data: accounts={len(accounts)}, persons={len(persons)}, relations={len(relations)}")
-    
-    return (
-        render_pending_accounts_list(accounts),
-        render_pending_persons_list(persons),
-        render_pending_relations_list(relations)
-    )
-
-
-# Refresh admin panel - AFTER PERSON PROPOSED
-@app.callback(
-    [Output('pending-accounts-list', 'children', allow_duplicate=True),
-     Output('pending-persons-list', 'children', allow_duplicate=True),
-     Output('pending-relations-list', 'children', allow_duplicate=True)],
-    Input('btn-submit-propose-person', 'n_clicks'),
-    State('user-session', 'data'),
-    prevent_initial_call=True
-)
-def refresh_admin_panel_after_propose_person(n_clicks, user_session):
-    """Rafraîchir après proposition d'une personne"""
-    print(f"🔄 REFRESH ADMIN PANEL - after propose person")
-    user = session.get('user', None)
-    
-    if not auth_service.is_admin(user):
-        print(f"❌ Access denied - not admin")
-        raise PreventUpdate
-    
-    from components.admin_panel import (
-        render_pending_accounts_list,
-        render_pending_persons_list,
-        render_pending_relations_list
-    )
-    
-    accounts = pending_account_repository.get_pending_requests()
-    persons = pending_submission_repository.get_pending_persons()
-    relations = pending_submission_repository.get_pending_relations()
-    
-    print(f"📊 Updated data: accounts={len(accounts)}, persons={len(persons)}, relations={len(relations)}")
-    
-    return (
-        render_pending_accounts_list(accounts),
-        render_pending_persons_list(persons),
-        render_pending_relations_list(relations)
-    )
-
-
-# Refresh admin panel - AFTER RELATION PROPOSED
-@app.callback(
-    [Output('pending-accounts-list', 'children', allow_duplicate=True),
-     Output('pending-persons-list', 'children', allow_duplicate=True),
-     Output('pending-relations-list', 'children', allow_duplicate=True)],
-    Input('btn-submit-propose-relation', 'n_clicks'),
-    State('user-session', 'data'),
-    prevent_initial_call=True
-)
-def refresh_admin_panel_after_propose_relation(n_clicks, user_session):
-    """Rafraîchir après proposition d'une relation"""
-    print(f"🔄 REFRESH ADMIN PANEL - after propose relation")
-    user = session.get('user', None)
-    
-    if not auth_service.is_admin(user):
-        print(f"❌ Access denied - not admin")
-        raise PreventUpdate
-    
-    from components.admin_panel import (
-        render_pending_accounts_list,
-        render_pending_persons_list,
-        render_pending_relations_list
-    )
-    
-    accounts = pending_account_repository.get_pending_requests()
-    persons = pending_submission_repository.get_pending_persons()
-    relations = pending_submission_repository.get_pending_relations()
-    
-    print(f"📊 Updated data: accounts={len(accounts)}, persons={len(persons)}, relations={len(relations)}")
-    
-    return (
-        render_pending_accounts_list(accounts),
-        render_pending_persons_list(persons),
-        render_pending_relations_list(relations)
-    )
-
-
-# Approve/Reject Accounts (pattern matching)
-@app.callback(
-    Output('pending-accounts-list', 'children', allow_duplicate=True),
-    [Input({'type': 'approve-account', 'index': ALL}, 'n_clicks'),
-     Input({'type': 'reject-account', 'index': ALL}, 'n_clicks')],
-    State('user-session', 'data'),
-    prevent_initial_call=True
-)
-def handle_account_approval(approve_clicks, reject_clicks, user_session):
-    """Gérer l'approbation/rejet de comptes"""
-    user = session.get('user', None)
-    
-    if not auth_service.is_admin(user):
-        return "Access Denied"
-    
-    ctx_triggered = ctx.triggered_id
-    if not ctx_triggered:
-        raise PreventUpdate
-    
-    # Vérifier qu'au moins un bouton a vraiment été cliqué
-    if all(c is None for c in approve_clicks) and all(c is None for c in reject_clicks):
-        raise PreventUpdate
-    
-    account_id = ctx_triggered['index']
-    action_type = ctx_triggered['type']
-    
-    if action_type == 'approve-account':
-        pending_account_repository.approve_request(account_id)
-    elif action_type == 'reject-account':
-        pending_account_repository.reject_request(account_id)
-    
-    # Rafraîchir la liste
-    from components.admin_panel import render_pending_accounts_list
-    accounts = pending_account_repository.get_pending_requests()
-    return render_pending_accounts_list(accounts)
-
-
-# Approve/Reject Persons (pattern matching)
-@app.callback(
-    Output('pending-persons-list', 'children', allow_duplicate=True),
-    [Input({'type': 'approve-person', 'index': ALL}, 'n_clicks'),
-     Input({'type': 'reject-person', 'index': ALL}, 'n_clicks')],
-    State('user-session', 'data'),
-    prevent_initial_call=True
-)
-def handle_person_approval(approve_clicks, reject_clicks, user_session):
-    """Gérer l'approbation/rejet de personnes"""
-    print(f"🔍 PERSON APPROVAL: approve_clicks={approve_clicks}, reject_clicks={reject_clicks}")
-    user = session.get('user', None)
-    
-    if not auth_service.is_admin(user):
-        print(f"❌ Access denied - not admin")
-        return "Access Denied"
-    
-    ctx_triggered = ctx.triggered_id
-    print(f"🎯 Triggered: {ctx_triggered}")
-    
-    if not ctx_triggered:
-        raise PreventUpdate
-    
-    # Vérifier qu'au moins un bouton a vraiment été cliqué
-    if all(c is None for c in approve_clicks) and all(c is None for c in reject_clicks):
-        print(f"⚠️ No real click detected - preventing update")
-        raise PreventUpdate
-    
-    person_id = ctx_triggered['index']
-    action_type = ctx_triggered['type']
-    
-    print(f"📝 Action: {action_type} for person ID: {person_id}")
-    
-    if action_type == 'approve-person':
-        result = pending_submission_repository.approve_person(person_id)
-        print(f"✅ Approval result: {result}")
-    elif action_type == 'reject-person':
-        pending_submission_repository.reject_person(person_id)
-    
-    # Rafraîchir la liste
-    from components.admin_panel import render_pending_persons_list
-    persons = pending_submission_repository.get_pending_persons()
-    return render_pending_persons_list(persons)
-
-
-# Approve/Reject Relations (pattern matching)
-@app.callback(
-    Output('pending-relations-list', 'children', allow_duplicate=True),
-    [Input({'type': 'approve-relation', 'index': ALL}, 'n_clicks'),
-     Input({'type': 'reject-relation', 'index': ALL}, 'n_clicks')],
-    State('user-session', 'data'),
-    prevent_initial_call=True
-)
-def handle_relation_approval(approve_clicks, reject_clicks, user_session):
-    """Gérer l'approbation/rejet de relations"""
-    log_event("admin", "relation_approval_callback", {
-        "approve_clicks": approve_clicks,
-        "reject_clicks": reject_clicks
-    })
-    
-    user = session.get('user', None)
-    
-    if not auth_service.is_admin(user):
-        log_event("admin", "relation_approval_denied", {"reason": "not_admin"})
-        return "Access Denied"
-    
-    ctx_triggered = ctx.triggered_id
-    if not ctx_triggered:
-        log_event("admin", "relation_approval_no_trigger", {"reason": "no_triggered_id"})
-        raise PreventUpdate
-    
-    # Vérifier qu'au moins un bouton a vraiment été cliqué (pas juste None)
-    # Si tous les clicks sont None, c'est que les boutons viennent d'apparaître
-    if all(c is None for c in approve_clicks) and all(c is None for c in reject_clicks):
-        log_event("admin", "relation_approval_no_real_click", {
-            "approve_clicks": approve_clicks,
-            "reject_clicks": reject_clicks
-        })
-        raise PreventUpdate
-    
-    relation_id = ctx_triggered['index']
-    action_type = ctx_triggered['type']
-    
-    log_event("admin", "relation_action", {
-        "action": action_type,
-        "relation_id": relation_id
-    })
-    
-    if action_type == 'approve-relation':
-        result = pending_submission_repository.approve_relation(relation_id)
-        log_event("admin", "relation_approved", {
-            "relation_id": relation_id,
-            "success": result
-        })
-    elif action_type == 'reject-relation':
-        result = pending_submission_repository.reject_relation(relation_id)
-        log_event("admin", "relation_rejected", {
-            "relation_id": relation_id,
-            "success": result
-        })
-    
-    # Rafraîchir la liste
-    from components.admin_panel import render_pending_relations_list
-    relations = pending_submission_repository.get_pending_relations()
-    return render_pending_relations_list(relations)
-
+], className='main-container')
 
 # ============================================================================
 # CALLBACKS - GRAPH
@@ -2590,12 +1769,6 @@ def toggle_and_submit_add_relation(open_clicks, cancel_clicks, submit_clicks, is
     return False, None, None, None, None, no_update
 
 # ============================================================================
-# CALLBACKS - INITIALIZE DROPDOWN OPTIONS ON MODAL OPEN
-# ============================================================================
-
-# SUPPRIMÉ - Causait conflit avec les callbacks existants
-
-# ============================================================================
 # SMART DROPDOWN OPTIONS - Person 1 (with "Create new" option)
 # ============================================================================
 @app.callback(
@@ -2603,7 +1776,7 @@ def toggle_and_submit_add_relation(open_clicks, cancel_clicks, submit_clicks, is
     [Input('dropdown-add-rel-p1', 'search_value'),
      Input('modal-add-relation', 'is_open')],
     [State('dropdown-add-rel-p1', 'value')],
-    prevent_initial_call=False
+    prevent_initial_call=True
 )
 def populate_p1_options(search_value, is_open, current_value):
     """Populate Person 1 dropdown with existing persons + 'Create new' option if needed"""
@@ -2666,7 +1839,7 @@ def update_p1_indicator(value):
     [Input('dropdown-add-rel-p2', 'search_value'),
      Input('modal-add-relation', 'is_open')],
     [State('dropdown-add-rel-p2', 'value')],
-    prevent_initial_call=False
+    prevent_initial_call=True
 )
 def populate_p2_options(search_value, is_open, current_value):
     """Populate Person 2 dropdown with existing persons + 'Create new' option if needed"""
@@ -3306,7 +2479,7 @@ def submit_delete_person(n_clicks, person_id, cascade):
 if __name__ == '__main__':
     # Audit de démarrage
     print("\n" + "="*70)
-    print("  🗺️  CENTRALE POTINS MAPS - V2")
+    print("  🌐 SOCIAL NETWORK ANALYZER V2 - Clean Architecture")
     print("="*70)
     
     # Stats

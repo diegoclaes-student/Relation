@@ -197,6 +197,7 @@ class PendingAccountRepository:
     @staticmethod
     def get_pending_requests() -> List[Dict]:
         """Récupère toutes les demandes en attente"""
+        print(f"🔍 [DB] Getting pending account requests...")
         conn = sqlite3.connect(DB_PATH)
         cur = conn.cursor()
         
@@ -215,6 +216,7 @@ class PendingAccountRepository:
                 'status': row[3]
             })
         
+        print(f"✅ [DB] Found {len(requests)} pending account requests: {requests}")
         conn.close()
         return requests
     

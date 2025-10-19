@@ -1,0 +1,1895 @@
+✅ Base de données existante: /Users/diegoclaes/Code/Relation/social_network.db
+⚠️  Warning: Could not import old database module: [Errno 2] No such file or directory: '/Users/diegoclaes/Code/Relation/database.py'
+
+======================================================================
+  🗺️  CENTRALE POTINS MAPS - V2
+======================================================================
+
+  📊 Data: 10 persons, 5 relations
+  ✅ Symmetry: 100% guaranteed
+
+  🚀 Dashboard: http://localhost:8052
+  🏗️  Architecture: Services + Repositories
+  💾 Cache: Enabled for performance
+
+======================================================================
+
+Dash is running on http://0.0.0.0:8052/
+
+ * Serving Flask app 'app_v2'
+ * Debug mode: off
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8052
+ * Running on http://192.168.1.13:8052
+[33mPress CTRL+C to quit[0m
+127.0.0.1 - - [17/Oct/2025 15:22:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:22:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:22:52] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:22:52] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:22:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:22:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:23:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:23:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:23:33] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:23:33] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:23:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:23:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:34] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:34] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:40] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:40] "GET /_favicon.ico?v=3.2.0 HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:40] "GET /_dash-layout HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:40] "GET /_dash-dependencies HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:40] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:40] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+127.0.0.1 - - [17/Oct/2025 15:24:40] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+127.0.0.1 - - [17/Oct/2025 15:24:40] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+127.0.0.1 - - [17/Oct/2025 15:24:40] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+127.0.0.1 - - [17/Oct/2025 15:24:40] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+127.0.0.1 - - [17/Oct/2025 15:24:40] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+127.0.0.1 - - [17/Oct/2025 15:24:40] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:40] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:43] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:47] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:50] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:50] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:52] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:52] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:54] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:55] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:56] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:56] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:57] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:57] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:57] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:58] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:24:59] "POST /_dash-update-component HTTP/1.1" 200 -
+🔍 PROPOSE RELATION: n_clicks=1, person1=__CREATE__TEst2, person2=__CREATE__Test3, rel_type=0
+👤 Submitted by: anonymous
+📝 Real names: p1=TEst2, p2=Test3
+➕ Creating new person: TEst2
+➕ Creating new person: Test3
+💾 Saving relation proposal: TEst2 <-> Test3 (type=0)
+127.0.0.1 - - [17/Oct/2025 15:25:02] "POST /_dash-update-component HTTP/1.1" 200 -
+✅ SUCCESS: ✅ Relation proposée ! En attente d'approbation admin. Nouvelle(s) personne(s) créée(s): TEst2, Test3
+127.0.0.1 - - [17/Oct/2025 15:25:02] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:25:02] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+127.0.0.1 - - [17/Oct/2025 15:25:02] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+127.0.0.1 - - [17/Oct/2025 15:25:03] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:25:04] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:25:04] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:25:04] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+127.0.0.1 - - [17/Oct/2025 15:25:04] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+127.0.0.1 - - [17/Oct/2025 15:25:04] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+127.0.0.1 - - [17/Oct/2025 15:25:04] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:25:04] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:25:04] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:25:04,636] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:25:04] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+[2025-10-17 15:25:07,589] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:25:07] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+[2025-10-17 15:25:09,132] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:25:09] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+[2025-10-17 15:25:10,786] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:25:10] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:25:10] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:25:10] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:25:10] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:25:18] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:25:18] "GET /_dash-layout HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:25:18] "GET /_dash-dependencies HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:25:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:25:18] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+127.0.0.1 - - [17/Oct/2025 15:25:18] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+127.0.0.1 - - [17/Oct/2025 15:25:18] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+127.0.0.1 - - [17/Oct/2025 15:25:18] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+127.0.0.1 - - [17/Oct/2025 15:25:18] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+[2025-10-17 15:25:18,741] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:25:18] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:25:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:25:18] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+127.0.0.1 - - [17/Oct/2025 15:25:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:25:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:25:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:25:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:25:51] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:25:51] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:25:51] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:25:51,183] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:25:51] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:25:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:25:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:26:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:26:30] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:26:37] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:26:37] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:26:37,754] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:26:37] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:26:37] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:26:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:26:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:27:08] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:27:08] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:27:08] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:27:08,156] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:27:08] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:27:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:27:29] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:27:49,068] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:27:49] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:27:49] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:27:49] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:27:49] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:27:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:27:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:28:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:28:24] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:28:24,747] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:28:24] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:28:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:28:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:28:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:28:49] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:28:49,934] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:28:49] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:28:49] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:28:50] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:28:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:28:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:29:21] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:29:21,652] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:29:21] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:29:21] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:29:21] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:29:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:29:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:29:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:29:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:30:21] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:30:21] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:30:21,272] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:30:21] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:30:21] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:30:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:30:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:30:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:30:44] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:30:44,204] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:30:44] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:30:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:30:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:30:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:31:14] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:31:14,413] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:31:14] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:31:14] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:31:14] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:31:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:31:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:31:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:31:47] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:31:47] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:31:50,646] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:31:50] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:31:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:31:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:32:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:32:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:32:40] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:32:40] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:32:40] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:32:40,748] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:32:40] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:32:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:32:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:33:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:33:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:33:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:33:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:33:47] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:33:47,079] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:33:47] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:33:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:33:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:34:13] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:34:13,161] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:34:13] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:34:13] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:34:13] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:34:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:34:29] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:34:43,373] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:34:43] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:34:43] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:34:43] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:34:43] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:34:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:34:59] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:35:12,230] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:35:12] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:35:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:35:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:35:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:35:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:35:29] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:35:42,190] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:35:42] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:35:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:35:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:35:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:35:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:35:59] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:36:12,174] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:36:12] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:36:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:36:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:36:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:36:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:36:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:36:42] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:36:42,262] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:36:42] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:36:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:36:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:36:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:36:59] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:37:12,216] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:37:12] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:37:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:37:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:37:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:37:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:37:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:37:42] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:37:42,182] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:37:42] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:37:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:37:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:37:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:37:59] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:38:12,236] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:38:12] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:38:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:38:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:38:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:38:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:38:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:38:42] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:38:42,428] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:38:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:38:42] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:38:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:38:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:38:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:39:12] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:39:12,420] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:39:12] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:39:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:39:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:39:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:39:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:39:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:39:42] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:39:42,436] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:39:42] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:39:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:39:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:39:59] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:40:12,391] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:40:12] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:40:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:40:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:40:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:40:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:40:29] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:40:42,375] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:40:42] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:40:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:40:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:40:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:40:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:40:59] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:41:12,485] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:41:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:41:12] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:41:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:41:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:41:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:41:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:41:42] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:41:42,453] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:41:42] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:41:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:41:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:41:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:41:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:42:12] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:42:12,408] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:42:12] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:42:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:42:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:42:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:42:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:42:42] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:42:42,422] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:42:42] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:42:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:42:42] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:42:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:42:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:43:12] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:43:12,464] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:43:12] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:43:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:43:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:43:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:43:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:43:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:43:46] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:43:45,971] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:43:46] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:43:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:43:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:43:59] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:44:12,414] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:44:12] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:44:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:44:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:44:12] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:44:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:44:29] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:44:48,870] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:44:48] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:44:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:44:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:44:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:44:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:44:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:45:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:45:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:45:18] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:45:18,864] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:45:18] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:45:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:45:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:45:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:45:48] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:45:48] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:45:48,906] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:45:48] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:45:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:45:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:46:19] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:46:19] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:46:20] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:46:20,064] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:46:20] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:46:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:46:29] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:46:49] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:46:50] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:46:50] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:46:50,075] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:46:50] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:46:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:46:59] "POST /_dash-update-component HTTP/1.1" 200 -
+[2025-10-17 15:47:19,968] ERROR in app: Exception on /_dash-update-component [POST]
+Traceback (most recent call last):
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/opt/miniconda3/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 262, in __call__
+    return call_result.result()
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/miniconda3/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/miniconda3/lib/python3.13/site-packages/asgiref/sync.py", line 302, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/dash.py", line 1478, in async_dispatch
+    response_data = ctx.run(partial_func)
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 688, in add_context
+    raise err
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 679, in add_context
+    output_value = _invoke_callback(func, *func_args, **func_kwargs)  # type: ignore[reportArgumentType]
+  File "/opt/miniconda3/lib/python3.13/site-packages/dash/_callback.py", line 59, in _invoke_callback
+    return func(*args, **kwargs)  # %% callback invoked %%
+  File "/Users/diegoclaes/Code/Relation/app_v2.py", line 1534, in refresh_admin_panel
+    accounts = user_repository.get_pending_requests()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRepository' object has no attribute 'get_pending_requests'
+127.0.0.1 - - [17/Oct/2025 15:47:19] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:47:19] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 500 -
+127.0.0.1 - - [17/Oct/2025 15:47:20] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [17/Oct/2025 15:47:20] "POST /_dash-update-component HTTP/1.1" 200 -
