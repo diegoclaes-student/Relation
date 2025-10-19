@@ -215,6 +215,82 @@ def _enforce_min_separation(pos: Dict[str, Tuple[float, float]], min_dist: float
     return pos
 
 
+def _compute_circular(G: nx.Graph, seed: int) -> Dict[str, Tuple[float, float]]:
+    """Layout circulaire - tous les nœuds en cercle"""
+    Gu = G.to_undirected()
+    return nx.circular_layout(Gu, scale=2.0)
+
+
+def _compute_hierarchical(G: nx.Graph, seed: int) -> Dict[str, Tuple[float, float]]:
+    """Layout hiérarchique - nœuds organisés par niveaux"""
+    Gu = G.to_undirected()
+    # Utiliser le degré pour déterminer les niveaux
+    degrees = dict(Gu.degree())
+    
+    # Grouper par degré
+    levels = {}
+    for node, degree in degrees.items():
+        level = min(degree, 5)  # Max 6 niveaux
+        if level not in levels:
+            levels[level] = []
+        levels[level].append(node)
+    
+    pos = {}
+    import math as _math
+    
+    # Placer chaque niveau
+    for level in sorted(levels.keys(), reverse=True):
+        nodes = levels[level]
+        n = len(nodes)
+        radius = 2.0 + level * 0.8
+        
+        for i, node in enumerate(nodes):
+            angle = 2 * _math.pi * i / max(1, n)
+            x = radius * _math.cos(angle)
+            y = radius * _math.sin(angle)
+            pos[node] = (x, y)
+    
+    return pos
+
+
+def _compute_radial(G: nx.Graph, seed: int, center_node: Optional[str] = None) -> Dict[str, Tuple[float, float]]:
+    """Layout radial - un nœud central avec les autres autour"""
+    Gu = G.to_undirected()
+    
+    # Choisir le centre: le nœud avec le plus de connexions
+    if not center_node or center_node not in Gu:
+        center_node = max(Gu.nodes(), key=lambda n: Gu.degree(n))
+    
+    pos = {}
+    import math as _math
+    
+    # Centre à (0, 0)
+    pos[center_node] = (0.0, 0.0)
+    
+    # Autres nœuds en cercle autour
+    neighbors = list(Gu.neighbors(center_node))
+    other_nodes = [n for n in Gu.nodes() if n != center_node and n not in neighbors]
+    
+    all_others = neighbors + other_nodes
+    n = len(all_others)
+    
+    # Voisins plus proches
+    for i, node in enumerate(neighbors):
+        angle = 2 * _math.pi * i / max(1, len(neighbors))
+        x = 1.5 * _math.cos(angle)
+        y = 1.5 * _math.sin(angle)
+        pos[node] = (x, y)
+    
+    # Autres plus loin
+    for i, node in enumerate(other_nodes):
+        angle = 2 * _math.pi * i / max(1, len(other_nodes))
+        x = 3.0 * _math.cos(angle)
+        y = 3.0 * _math.sin(angle)
+        pos[node] = (x, y)
+    
+    return pos
+
+
 def _compute_spring(G: nx.Graph, seed: int, spread: float) -> Dict[str, Tuple[float, float]]:
     Gu = G.to_undirected()
     n = max(1, Gu.number_of_nodes())
@@ -278,8 +354,8 @@ def _compute_community_layout(G: nx.Graph, seed: int, spread: float) -> Dict[str
 def compute_layout(G: nx.Graph, seed: int = 42, spread: float = 2.0, min_separation: float = 0.03, mode: str = "community", center_node: Optional[str] = None, repulsion: float = 1.0) -> Dict[str, Tuple[float, float]]:
     """Calcule une disposition 2D lisible.
 
-    mode: 'community' | 'spring' | 'kk' | 'spectral'
-    center_node: optionnel, nom du nœud à placer au centre (0,0)
+    mode: 'community' | 'spring' | 'kk' | 'spectral' | 'circular' | 'hierarchical' | 'radial'
+    center_node: optionnel, nom du nœud à placer au centre (pour 'radial')
     repulsion: facteur multiplicateur pour la force de répulsion (1.0 = normal)
     """
     # Ajuster min_separation avec le facteur repulsion
@@ -291,18 +367,26 @@ def compute_layout(G: nx.Graph, seed: int = 42, spread: float = 2.0, min_separat
         raw = _compute_kk(G, seed)
     elif mode == "spectral":
         raw = _compute_spectral(G, seed)
+    elif mode == "circular":
+        raw = _compute_circular(G, seed)
+    elif mode == "hierarchical":
+        raw = _compute_hierarchical(G, seed)
+    elif mode == "radial":
+        raw = _compute_radial(G, seed, center_node)
     else:
         raw = _compute_community_layout(G, seed, spread * repulsion)
 
     pos = {n: (float(x), float(y)) for n, (x, y) in raw.items()}
     
     # Si un nœud central est spécifié, translater pour le mettre à (0,0)
-    if center_node and center_node in pos:
+    if center_node and center_node in pos and mode != "radial":
         cx, cy = pos[center_node]
         pos = {n: (x - cx, y - cy) for n, (x, y) in pos.items()}
     
-    # Répulsion locale plus forte pour éviter les chevauchements
-    pos = _enforce_min_separation(pos, min_dist=adjusted_min_sep, steps=12, damping=0.75)
+    # Répulsion locale plus forte pour éviter les chevauchements (sauf pour circular et hierarchical)
+    if mode not in ["circular", "hierarchical"]:
+        pos = _enforce_min_separation(pos, min_dist=adjusted_min_sep, steps=12, damping=0.75)
+    
     return pos
 
 

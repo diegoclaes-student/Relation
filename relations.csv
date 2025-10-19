@@ -1,11 +1,3 @@
-# Format: Person1;Person2;RelationType
-# Types de relations:
-# 0 = Bisous
-# 1 = Dodo ensemble
-# 2 = Baise
-# 3 = Couple
-#
-# Person1;Person2;Type
 Alex P;Leo O;2
 Alex P;Myrdin;0
 Alexandre B;Thiphaine;0

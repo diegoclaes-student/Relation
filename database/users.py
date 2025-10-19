@@ -114,6 +114,32 @@ class UserRepository:
         return None
     
     @staticmethod
+    def get_user_by_id(user_id: int) -> Optional[Dict]:
+        """Récupère un utilisateur par ID"""
+        conn = sqlite3.connect(DB_PATH)
+        cur = conn.cursor()
+        
+        cur.execute("""
+            SELECT id, username, password_hash, is_admin, created_at, last_login, is_active
+            FROM users WHERE id = ? AND is_active = 1
+        """, (user_id,))
+        
+        row = cur.fetchone()
+        conn.close()
+        
+        if row:
+            return {
+                'id': row[0],
+                'username': row[1],
+                'password_hash': row[2],
+                'is_admin': bool(row[3]),
+                'created_at': row[4],
+                'last_login': row[5],
+                'is_active': bool(row[6])
+            }
+        return None
+    
+    @staticmethod
     def authenticate(username: str, password: str) -> Optional[Dict]:
         """Authentifie un utilisateur"""
         user = UserRepository.get_user_by_username(username)
@@ -162,6 +188,123 @@ class UserRepository:
             conn = sqlite3.connect(DB_PATH)
             cur = conn.cursor()
             cur.execute("UPDATE users SET is_active = 0 WHERE id = ?", (user_id,))
+            conn.commit()
+            conn.close()
+            return True
+        except:
+            return False
+    
+    @staticmethod
+    def promote_to_admin(user_id: int) -> bool:
+        """Promeut un utilisateur à administrateur"""
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            cur = conn.cursor()
+            cur.execute("UPDATE users SET is_admin = 1 WHERE id = ?", (user_id,))
+            conn.commit()
+            conn.close()
+            return True
+        except:
+            return False
+    
+    @staticmethod
+    def demote_from_admin(user_id: int) -> bool:
+        """Rétrograde un administrateur"""
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            cur = conn.cursor()
+            cur.execute("UPDATE users SET is_admin = 0 WHERE id = ?", (user_id,))
+            conn.commit()
+            conn.close()
+            return True
+        except:
+            return False
+    
+    @staticmethod
+    def get_pending_users() -> List[Dict]:
+        """Récupère les utilisateurs en attente d'approbation"""
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            conn.row_factory = sqlite3.Row
+            cur = conn.cursor()
+            
+            cur.execute("""
+                SELECT id, username, requested_at FROM pending_accounts 
+                WHERE status = 'pending'
+                ORDER BY requested_at DESC
+            """)
+            
+            rows = cur.fetchall()
+            conn.close()
+            return [dict(row) for row in rows]
+        except:
+            return []
+    
+    @staticmethod
+    def get_pending_user_by_id(pending_id: int) -> Optional[Dict]:
+        """Récupère un utilisateur en attente par ID"""
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            cur = conn.cursor()
+            
+            cur.execute("""
+                SELECT id, username, requested_at FROM pending_accounts 
+                WHERE id = ? AND status = 'pending'
+            """, (pending_id,))
+            
+            row = cur.fetchone()
+            conn.close()
+            
+            if row:
+                return {
+                    'id': row[0],
+                    'username': row[1],
+                    'requested_at': row[2]
+                }
+            return None
+        except:
+            return None
+    
+    @staticmethod
+    def approve_pending_user(pending_id: int, make_admin: bool = False) -> bool:
+        """Approuve un utilisateur en attente"""
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            cur = conn.cursor()
+            
+            # Get the pending user
+            cur.execute("SELECT username, password_hash FROM pending_accounts WHERE id = ?", (pending_id,))
+            row = cur.fetchone()
+            
+            if not row:
+                conn.close()
+                return False
+            
+            username, password_hash = row
+            
+            # Create the user
+            cur.execute("""
+                INSERT INTO users (username, password_hash, is_admin, created_at, is_active)
+                VALUES (?, ?, ?, ?, 1)
+            """, (username, password_hash, 1 if make_admin else 0, datetime.now().isoformat()))
+            
+            # Remove from pending
+            cur.execute("DELETE FROM pending_accounts WHERE id = ?", (pending_id,))
+            
+            conn.commit()
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"Error approving user: {e}")
+            return False
+    
+    @staticmethod
+    def reject_pending_user(pending_id: int) -> bool:
+        """Rejette un utilisateur en attente"""
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            cur = conn.cursor()
+            cur.execute("DELETE FROM pending_accounts WHERE id = ?", (pending_id,))
             conn.commit()
             conn.close()
             return True

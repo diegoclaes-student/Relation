@@ -202,10 +202,9 @@ class PendingSubmissionRepository:
         try:
             import traceback
             print(f"🔍 [DB] Approving relation with ID: {submission_id}")
-            print(f"📍 [DB] Called from:")
-            traceback.print_stack()
             
             from database.relations import relation_repository
+            from database.persons import person_repository
             
             conn = sqlite3.connect(DB_PATH)
             cur = conn.cursor()
@@ -224,6 +223,21 @@ class PendingSubmissionRepository:
             
             person1, person2, relation_type = row
             print(f"✅ [DB] Found relation: {person1} <-> {person2} (type={relation_type})")
+            
+            # IMPORTANT: Créer les personnes s'il y a un __CREATE__ prefix
+            if str(person1).startswith("__CREATE__"):
+                p1_name = str(person1).replace("__CREATE__", "").strip()
+                print(f"   → Creating new person 1: {p1_name}")
+                person_repository.create(p1_name, gender=None, sexual_orientation=None)
+                person1 = p1_name
+            
+            if str(person2).startswith("__CREATE__"):
+                p2_name = str(person2).replace("__CREATE__", "").strip()
+                print(f"   → Creating new person 2: {p2_name}")
+                person_repository.create(p2_name, gender=None, sexual_orientation=None)
+                person2 = p2_name
+            
+            print(f"   ✅ Final names: person1={person1}, person2={person2}")
             
             # Ajouter la relation
             relation_repository.create(person1, person2, relation_type)

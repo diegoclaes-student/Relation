@@ -37,6 +37,8 @@ from components.auth_components import (
     create_admin_header
 )
 from components.admin_panel import create_admin_panel_tab
+from components.history_tab import create_history_tab
+from components.user_management import create_user_management_tab
 
 # ============================================================================
 # CONFIGURATION APP
@@ -677,22 +679,23 @@ app.index_string = '''
         function setupGraph() {
             graphDiv = document.getElementById('network-graph');
             if (!graphDiv) {
-                setTimeout(setupGraph, 500);
+                setTimeout(setupGraph, 100);
                 return;
             }
             
-            // Utiliser MutationObserver pour détecter quand Plotly ajoute le SVG
+            console.log('✅ Graph div found, initializing zoom buttons immediately');
+            
+            // Initialiser les boutons dès maintenant, pas besoin d'attendre
+            initZoomButtons();
+            zoomButtonsReady = true;
+            
+            // Observer pour réinitialiser si le graphe est rechargé
             var observer = new MutationObserver(function(mutations) {
                 var plotlySvg = graphDiv.querySelector('.svg-container');
                 
                 if (plotlySvg && !zoomButtonsReady) {
-                    if (graphDiv.data && graphDiv.data.length > 0 && (graphDiv.layout || graphDiv._fullLayout)) {
-                        observer.disconnect();
-                        if (!zoomButtonsReady) {
-                            initZoomButtons();
-                            zoomButtonsReady = true;
-                        }
-                    }
+                    initZoomButtons();
+                    zoomButtonsReady = true;
                 }
             });
             
@@ -701,48 +704,43 @@ app.index_string = '''
                 subtree: true,
                 attributes: true
             });
-            
-            // Timeout de secours
-            setTimeout(function() {
-                if (!zoomButtonsReady) {
-                    observer.disconnect();
-                    initZoomButtons();
-                    zoomButtonsReady = true;
-                }
-            }, 5000);
         }
         
         function initZoomButtons() {
             var zoomInBtn = document.getElementById('btn-zoom-in');
             var zoomOutBtn = document.getElementById('btn-zoom-out');
             
+            console.log('🔍 Initializing zoom buttons:', zoomInBtn ? '✅ In' : '❌ In', zoomOutBtn ? '✅ Out' : '❌ Out');
+            
             // Fonction utilitaire pour gérer click ET touch
-            function attachZoomListener(btn, factor) {
+            function attachZoomListener(btn, factor, name) {
                 if (!btn) return;
                 
+                // Retirer les anciens listeners (cloner le bouton)
+                var newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+                
                 // Événement click (PC)
-                btn.addEventListener('click', function(e) {
+                newBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
                     e.preventDefault();
+                    console.log('🖱️ Zoom ' + name + ' clicked');
                     zoomGraph(factor);
-                });
+                }, false);
                 
                 // Événement touch (Mobile)
-                btn.addEventListener('touchstart', function(e) {
+                newBtn.addEventListener('touchstart', function(e) {
                     e.stopPropagation();
                     e.preventDefault();
+                    console.log('👆 Zoom ' + name + ' touched');
                     zoomGraph(factor);
-                }, false);
-                
-                // Aussi sur touchend pour plus de compatibilité
-                btn.addEventListener('touchend', function(e) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                }, false);
+                }, {passive: false});
             }
             
-            attachZoomListener(zoomInBtn, 1.5);
-            attachZoomListener(zoomOutBtn, 0.67);
+            attachZoomListener(zoomInBtn, 1.5, 'in');
+            attachZoomListener(zoomOutBtn, 0.67, 'out');
+            
+            console.log('✅ Zoom buttons initialized and ready');
         }
         
         function zoomGraph(factor) {
@@ -910,78 +908,114 @@ app.index_string = '''
         // Attacher les event listeners au graphDiv quand il est prêt
         function attachPinchZoomListeners() {
             if (!graphDiv) {
-                setTimeout(attachPinchZoomListeners, 100);
-                return;
+                graphDiv = document.getElementById('network-graph');
+                if (!graphDiv) {
+                    setTimeout(attachPinchZoomListeners, 50);
+                    return;
+                }
             }
             
-            graphDiv.addEventListener('touchstart', handleTouchStart, false);
-            graphDiv.addEventListener('touchmove', handleTouchMove, false);
+            console.log('✅ Attaching pinch-zoom listeners');
+            graphDiv.addEventListener('touchstart', handleTouchStart, {passive: false});
+            graphDiv.addEventListener('touchmove', handleTouchMove, {passive: false});
             graphDiv.addEventListener('touchend', handleTouchEnd, false);
         }
+        
+        // === FONCTION POUR INITIALISER TOUS LES BOUTONS ===
+        var buttonsInitialized = false;
+        
+        function initAllButtons() {
+            if (buttonsInitialized) return;
+            
+            var fullscreenBtn = document.getElementById('btn-fullscreen');
+            var hamburgerBtn = document.getElementById('hamburger-btn-graph');
+            
+            // Vérifier que les éléments essentiels existent
+            if (!fullscreenBtn || !hamburgerBtn) {
+                return; // Réessayer plus tard
+            }
+            
+            buttonsInitialized = true;
+            console.log('✅ Initializing all buttons NOW');
+            
+            // === PLEIN ÉCRAN ===
+            var fullscreenIcon = document.getElementById('fullscreen-icon');
+            var graphPanel = document.querySelector('.graph-panel');
+            var isFullscreen = false;
+            
+            if (fullscreenBtn && graphPanel) {
+                fullscreenBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    isFullscreen = !isFullscreen;
+                    if (isFullscreen) {
+                        graphPanel.classList.add('fullscreen-mode');
+                        if (fullscreenIcon) {
+                            fullscreenIcon.className = 'fas fa-compress';
+                        }
+                    } else {
+                        graphPanel.classList.remove('fullscreen-mode');
+                        if (fullscreenIcon) {
+                            fullscreenIcon.className = 'fas fa-expand';
+                        }
+                    }
+                    // Forcer Plotly à se redimensionner
+                    setTimeout(function() {
+                        if (graphDiv && window.Plotly) {
+                            window.Plotly.Plots.resize(graphDiv);
+                        }
+                    }, 100);
+                }, false);
+                console.log('✅ Fullscreen button initialized');
+            }
+            
+            // === MENU HAMBURGER ===
+            var hamburgerMenu = document.getElementById('hamburger-menu');
+            
+            if (hamburgerBtn && hamburgerMenu) {
+                hamburgerBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    var isVisible = hamburgerMenu.style.display !== 'none';
+                    hamburgerMenu.style.display = isVisible ? 'none' : 'block';
+                }, false);
+                
+                // Fermer le menu si on clique ailleurs
+                document.addEventListener('click', function(e) {
+                    if (hamburgerMenu && hamburgerMenu.style.display !== 'none') {
+                        if (!hamburgerMenu.contains(e.target) && e.target !== hamburgerBtn) {
+                            hamburgerMenu.style.display = 'none';
+                        }
+                    }
+                });
+                console.log('✅ Hamburger menu initialized');
+            }
+        }
+        
+        // === INITIALISATION AUTOMATIQUE AVEC MUTATIONOBSERVER ===
+        var buttonsObserver = new MutationObserver(function(mutations) {
+            if (!buttonsInitialized) {
+                initAllButtons();
+            }
+        });
+        
+        // Observer le body pour détecter quand les boutons sont ajoutés
+        buttonsObserver.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
         
         // Initialiser quand le DOM est prêt
         document.addEventListener('DOMContentLoaded', function() {
             setupGraph();
-            
-            // Attacher pinch-zoom après que le graphe soit chargé
-            setTimeout(function() {
-                attachPinchZoomListeners();
-            }, 1000);
-            
-            // === PLEIN ÉCRAN ===
-            setTimeout(function() {
-                var fullscreenBtn = document.getElementById('btn-fullscreen');
-                var fullscreenIcon = document.getElementById('fullscreen-icon');
-                var graphPanel = document.querySelector('.graph-panel');
-                var isFullscreen = false;
-                
-                if (fullscreenBtn && graphPanel) {
-                    fullscreenBtn.addEventListener('click', function() {
-                        isFullscreen = !isFullscreen;
-                        if (isFullscreen) {
-                            graphPanel.classList.add('fullscreen-mode');
-                            if (fullscreenIcon) {
-                                fullscreenIcon.className = 'fas fa-compress';
-                            }
-                        } else {
-                            graphPanel.classList.remove('fullscreen-mode');
-                            if (fullscreenIcon) {
-                                fullscreenIcon.className = 'fas fa-expand';
-                            }
-                        }
-                        // Forcer Plotly à se redimensionner
-                        setTimeout(function() {
-                            if (graphDiv && window.Plotly) {
-                                window.Plotly.Plots.resize(graphDiv);
-                            }
-                        }, 100);
-                    });
-                }
-            }, 500);
-            
-            // === MENU HAMBURGER ===
-            setTimeout(function() {
-                var hamburgerBtn = document.getElementById('hamburger-btn-graph');
-                var hamburgerMenu = document.getElementById('hamburger-menu');
-                
-                if (hamburgerBtn && hamburgerMenu) {
-                    hamburgerBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        var isVisible = hamburgerMenu.style.display !== 'none';
-                        hamburgerMenu.style.display = isVisible ? 'none' : 'block';
-                    });
-                    
-                    // Fermer le menu si on clique ailleurs
-                    document.addEventListener('click', function(e) {
-                        if (hamburgerMenu && hamburgerMenu.style.display !== 'none') {
-                            if (!hamburgerMenu.contains(e.target) && e.target !== hamburgerBtn) {
-                                hamburgerMenu.style.display = 'none';
-                            }
-                        }
-                    });
-                }
-            }, 500);
+            attachPinchZoomListeners();
+            initAllButtons(); // Essayer immédiatement
         });
+        
+        // Essayer aussi après un court délai (sécurité Dash)
+        setTimeout(function() {
+            initAllButtons();
+        }, 100);
     </script>
 </head>
 <body>
@@ -998,9 +1032,7 @@ app.index_string = '''
 def create_public_layout():
     """Vue publique (non-authentifié) : Graph + Propose + Login (simplifié)"""
     return html.Div([
-        # Store et Interval (pas Location ni user-session, déjà dans layout principal)
-        dcc.Store(id='data-version', data=0),
-        dcc.Interval(id='auto-refresh', interval=30000, n_intervals=0),
+        # Store et Interval already in main layout
         
         # Header public
         create_public_header(),
@@ -1025,12 +1057,12 @@ def create_public_layout():
                 
                 # Boutons de contrôle superposés sur le graphe
                 # Menu hamburger (en haut à DROITE)
-                html.Div([
+                html.Button([
                     html.I(className="fas fa-bars", style={
                         'fontSize': '18px', 
                         'color': 'white',
                     })
-                ], id='hamburger-btn-graph', style={
+                ], id='hamburger-btn-graph', n_clicks=0, style={
                     'position': 'absolute',
                     'top': '15px',
                     'right': '15px',
@@ -1049,9 +1081,9 @@ def create_public_layout():
                 }, title="Menu"),
                 
                 # Bouton Zoom + (à droite sous le hamburger)
-                html.Div([
+                html.Button([
                     html.I(className="fas fa-plus", style={'fontSize': '18px', 'color': 'white'})
-                ], id='btn-zoom-in', style={
+                ], id='btn-zoom-in', n_clicks=0, style={
                     'position': 'absolute',
                     'bottom': '75px',
                     'right': '15px',
@@ -1073,9 +1105,9 @@ def create_public_layout():
                 }, title="Zoom avant"),
                 
                 # Bouton Zoom - (sous le +)
-                html.Div([
+                html.Button([
                     html.I(className="fas fa-minus", style={'fontSize': '18px', 'color': 'white'})
-                ], id='btn-zoom-out', style={
+                ], id='btn-zoom-out', n_clicks=0, style={
                     'position': 'absolute',
                     'bottom': '25px',
                     'right': '15px',
@@ -1097,9 +1129,9 @@ def create_public_layout():
                 }, title="Zoom arrière"),
                 
                 # Bouton plein écran (en bas à GAUCHE)
-                html.Div([
+                html.Button([
                     html.I(className="fas fa-expand", id='fullscreen-icon')
-                ], id='btn-fullscreen', style={
+                ], id='btn-fullscreen', n_clicks=0, style={
                     'position': 'absolute',
                     'bottom': '15px',
                     'left': '15px',
@@ -1121,6 +1153,103 @@ def create_public_layout():
                 
                 # Menu déroulant hamburger (DANS le graph-panel pour position: absolute)
                 html.Div([
+                    # Sélecteur de Layout
+                    html.Div("🎨 Mode de Visualisation", style={
+                        'fontSize': '12px', 
+                        'fontWeight': '600', 
+                        'marginBottom': '8px',
+                        'color': 'var(--text-dark)',
+                        'textAlign': 'left',
+                    }),
+                    dcc.Dropdown(
+                        id='layout-selector',
+                        options=[
+                            {'label': '🌐 Communautés', 'value': 'community'},
+                            {'label': '⭕ Circulaire', 'value': 'circular'},
+                            {'label': '🌳 Hiérarchique', 'value': 'hierarchical'},
+                            {'label': '🎯 Radial', 'value': 'radial'},
+                            {'label': '🔀 Force-Directed', 'value': 'spring'},
+                            {'label': '📊 Kamada-Kawai', 'value': 'kk'},
+                            {'label': '✨ Spectral', 'value': 'spectral'},
+                        ],
+                        value='community',
+                        style={
+                            'width': '100%',
+                            'padding': '6px',
+                            'borderRadius': '4px',
+                            'border': '1px solid #ddd',
+                            'fontSize': '12px',
+                            'marginBottom': '12px'
+                        },
+                        clearable=False
+                    ),
+                    html.Hr(style={'margin': '12px 0', 'borderColor': '#e0e4e8'}),
+                    
+                    html.Div("⚙️ Paramètres", style={
+                        'fontSize': '12px', 
+                        'fontWeight': '600', 
+                        'marginBottom': '12px',
+                        'color': 'var(--text-dark)',
+                        'textAlign': 'left',
+                    }),
+                    
+                    # 1. Rechercher personne
+                    html.Div([
+                        html.Label("🔍 Chercher une personne:", style={'fontSize': '11px', 'fontWeight': '500', 'marginBottom': '4px'}),
+                        dcc.Dropdown(
+                            id='search-person',
+                            placeholder='Tapez un nom...',
+                            searchable=True,
+                            clearable=True,
+                            value=None,
+                            style={'fontSize': '12px'},
+                        ),
+                    ], style={'marginBottom': '12px'}),
+                    
+                    # 2. Taille des bulles
+                    html.Div([
+                        html.Label("📊 Taille des bulles:", style={'fontSize': '11px', 'fontWeight': '500', 'marginBottom': '4px'}),
+                        dcc.Slider(
+                            id='node-size-slider',
+                            min=5,
+                            max=30,
+                            step=1,
+                            value=15,
+                            marks={5: '5', 10: '10', 15: '15', 20: '20', 30: '30'},
+                            tooltip={"placement": "bottom", "always_visible": True},
+                        ),
+                    ], style={'marginBottom': '12px'}),
+                    
+                    # 3. Distance / Répulsion entre bulles
+                    html.Div([
+                        html.Label("📏 Distance / Répulsion:", style={'fontSize': '11px', 'fontWeight': '500', 'marginBottom': '4px'}),
+                        dcc.Slider(
+                            id='repulsion-slider',
+                            min=0.5,
+                            max=10.0,
+                            step=0.1,
+                            value=1.0,
+                            marks={0.5: '0.5', 2.0: '2.0', 5.0: '5.0', 10.0: '10.0'},
+                            tooltip={"placement": "bottom", "always_visible": True},
+                        ),
+                    ], style={'marginBottom': '12px'}),
+                    
+                    # 4. Force pour éviter croisement des liens
+                    html.Div([
+                        html.Label("⚡ Force anti-croisement:", style={'fontSize': '11px', 'fontWeight': '500', 'marginBottom': '4px'}),
+                        dcc.Slider(
+                            id='edge-tension-slider',
+                            min=0.0,
+                            max=1.0,
+                            step=0.1,
+                            value=0.5,
+                            marks={0.0: 'Faible', 0.5: 'Moyen', 1.0: 'Fort'},
+                            tooltip={"placement": "bottom", "always_visible": True},
+                        ),
+                    ], style={'marginBottom': '12px'}),
+                    
+                    html.Hr(style={'margin': '12px 0', 'borderColor': '#e0e4e8'}),
+                    
                     html.Div("Contribute", style={
                         'fontSize': '12px', 
                         'fontWeight': '600', 
@@ -1194,9 +1323,7 @@ def create_admin_layout(user):
     is_admin = user.get('is_admin', False)
     
     return html.Div([
-        # Store et Interval (pas Location ni user-session, déjà dans layout principal)
-        dcc.Store(id='data-version', data=0),
-        dcc.Interval(id='auto-refresh', interval=30000, n_intervals=0),
+        # Store et Interval already in main layout
         
         # Header admin
         create_admin_header(username, is_admin),
@@ -1209,7 +1336,7 @@ def create_admin_layout(user):
                     # Graph Panel
                     html.Div([
                         dcc.Graph(
-                            id='network-graph',
+                            id='network-graph-admin',
                             config={
                                 'displayModeBar': True,
                                 'scrollZoom': True,
@@ -1232,7 +1359,7 @@ def create_admin_layout(user):
                             html.Div([
                                 html.Label("Layout Algorithm", className='control-label'),
                                 dcc.Dropdown(
-                                    id='layout-dropdown',
+                                    id='layout-selector',
                                     options=[
                                         {'label': '🎯 Community Detection', 'value': 'community'},
                                         {'label': '🌸 Spring Force', 'value': 'spring'},
@@ -1258,6 +1385,64 @@ def create_admin_layout(user):
                             ], className='control-group'),
                         ]),
                         
+                        # Additional Graph Controls - Sliders and search
+                        html.Hr(style={'margin': '15px 0'}),
+                        
+                        # Search person
+                        html.Div([
+                            html.Label("🔍 Search Person", className='control-label'),
+                            dcc.Dropdown(
+                                id='search-person',
+                                placeholder='Find a person...',
+                                searchable=True,
+                                clearable=True,
+                                value=None,
+                                style={'fontSize': '12px'},
+                            ),
+                        ], className='control-group'),
+                        
+                        # Node size slider
+                        html.Div([
+                            html.Label("📊 Node Size", className='control-label'),
+                            dcc.Slider(
+                                id='node-size-slider',
+                                min=5,
+                                max=30,
+                                step=1,
+                                value=15,
+                                marks={5: '5', 15: '15', 30: '30'},
+                                tooltip={"placement": "bottom", "always_visible": True},
+                            ),
+                        ], className='control-group'),
+                        
+                        # Repulsion slider
+                        html.Div([
+                            html.Label("📏 Repulsion", className='control-label'),
+                            dcc.Slider(
+                                id='repulsion-slider',
+                                min=0.5,
+                                max=10.0,
+                                step=0.1,
+                                value=1.0,
+                                marks={0.5: '0.5', 5.0: '5.0', 10.0: '10.0'},
+                                tooltip={"placement": "bottom", "always_visible": True},
+                            ),
+                        ], className='control-group'),
+                        
+                        # Edge tension slider
+                        html.Div([
+                            html.Label("⚡ Edge Tension", className='control-label'),
+                            dcc.Slider(
+                                id='edge-tension-slider',
+                                min=0.0,
+                                max=1.0,
+                                step=0.1,
+                                value=0.5,
+                                marks={0.0: 'Low', 0.5: 'Med', 1.0: 'High'},
+                                tooltip={"placement": "bottom", "always_visible": True},
+                            ),
+                        ], className='control-group'),
+                        
                         # Stats Card
                         html.Div([
                             html.H5("📊 Network Statistics"),
@@ -1275,11 +1460,6 @@ def create_admin_layout(user):
                     html.Div("⚡ Actions", className='section-title', style={'marginBottom': '20px'}),
                     
                     html.Div([
-                        dbc.Button([
-                            html.I(className="fas fa-user-plus", style={'marginRight': '8px'}),
-                            "Add Person"
-                        ], id='btn-add-person', color='primary', size='lg', className='mb-3'),
-                        
                         dbc.Button([
                             html.I(className="fas fa-link", style={'marginRight': '8px'}),
                             "Add Relation"
@@ -1325,24 +1505,30 @@ def create_admin_layout(user):
                 ]
             ),
             
+            # Tab 4: History (si admin)
+            dbc.Tab(
+                label="📋 Historique" if is_admin else "🚫 History Only",
+                tab_id='tab-history',
+                disabled=not is_admin,
+                children=[
+                    create_history_tab() if is_admin else html.Div("Access Denied", style={'padding': '30px'})
+                ]
+            ),
+            
+            # Tab 5: User Management (si admin)
+            dbc.Tab(
+                label="👥 Utilisateurs" if is_admin else "🚫 Users Only",
+                tab_id='tab-users',
+                disabled=not is_admin,
+                children=[
+                    create_user_management_tab() if is_admin else html.Div("Access Denied", style={'padding': '30px'})
+                ]
+            ),
+            
         ], id='main-tabs', active_tab='tab-network', style={'marginTop': '20px'}),
         
         # Tous les modals
         # Modal Add Person
-        dbc.Modal([
-            dbc.ModalHeader(dbc.ModalTitle("➕ Add New Person")),
-            dbc.ModalBody([
-                html.Div([
-                    html.Label("Name", className='control-label'),
-                    dbc.Input(id='input-add-name', type='text', placeholder='Enter name')
-                ], className='control-group'),
-            ]),
-            dbc.ModalFooter([
-                dbc.Button("Cancel", id='btn-cancel-add-person', color='secondary'),
-                dbc.Button("Add Person", id='btn-submit-add-person', color='primary')
-            ])
-        ], id='modal-add-person', is_open=False),
-        
         # Modal Edit Person
         dbc.Modal([
             dbc.ModalHeader(dbc.ModalTitle("✏️ Edit Person")),
@@ -1554,11 +1740,6 @@ def create_admin_layout(user):
         # Hidden store for selected relation to edit/delete
         dcc.Store(id='selected-relation-store', data=None),
         
-        # Hidden components for compatibility (not shown to user)
-        html.Div([
-            dcc.Dropdown(id='dropdown-add-gender', style={'display': 'none'}),
-        ], style={'display': 'none'}),
-        
         # Modals auth (needed for admin too!)
         create_propose_person_modal(),
         create_propose_relation_modal(),
@@ -1573,6 +1754,8 @@ def create_admin_layout(user):
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     dcc.Store(id='user-session', storage_type='session'),
+    dcc.Store(id='data-version', data=0),  # Global store for both public and admin
+    dcc.Interval(id='auto-refresh', interval=30000, n_intervals=0),  # Global interval
     html.Div(id='page-content')
 ])
 
@@ -1614,12 +1797,14 @@ def display_page(pathname, user_session):
     Input('btn-submit-login', 'n_clicks'),
     [State('input-login-username', 'value'),
      State('input-login-password', 'value')],
-    prevent_initial_call=True
+    prevent_initial_call='initial_duplicate'
 )
 def handle_login(n_clicks, username, password):
     """Gérer la connexion utilisateur"""
-    if not n_clicks:
-        raise PreventUpdate
+    if not n_clicks or not ctx.triggered:
+        return no_update, '', no_update
+    
+    print(f"✅ [PUBLIC] LOGIN ATTEMPT: {username}")
     
     log_event("auth", "login_attempt", {
         "username": username,
@@ -1636,10 +1821,12 @@ def handle_login(n_clicks, username, password):
         # Succès : stocker dans Flask session
         session['user'] = user
         session.permanent = True
+        print(f"✅ [PUBLIC] LOGIN SUCCESS: {username}")
         log_event("auth", "login_success", {"username": username})
         return False, '', '/'  # Fermer modal, clear error, refresh page
     else:
         # Échec
+        print(f"❌ [PUBLIC] LOGIN FAILED: {username}")
         log_event("auth", "login_failure", {"username": username})
         return True, dbc.Alert("Invalid username or password", color='danger'), no_update
 
@@ -1648,14 +1835,15 @@ def handle_login(n_clicks, username, password):
 @app.callback(
     Output('url', 'pathname', allow_duplicate=True),
     Input('btn-logout', 'n_clicks'),
-    prevent_initial_call=True
+    prevent_initial_call='initial_duplicate'
 )
 def handle_logout(n_clicks):
     """Déconnecter l'utilisateur"""
-    if not n_clicks:
-        raise PreventUpdate
+    if not n_clicks or not ctx.triggered:
+        return no_update
     
     # Supprimer user de Flask session
+    print(f"✅ [PUBLIC] LOGOUT: {session.get('user', {}).get('username')}")
     log_event("auth", "logout", {
         "username": session.get('user', {}).get('username')
     })
@@ -1672,12 +1860,14 @@ def handle_logout(n_clicks):
     [State('input-register-username', 'value'),
      State('input-register-password', 'value'),
      State('input-register-confirm', 'value')],
-    prevent_initial_call=True
+    prevent_initial_call='initial_duplicate'
 )
 def handle_register(n_clicks, username, password, confirm):
     """Gérer la demande d'inscription"""
-    if not n_clicks:
-        raise PreventUpdate
+    if not n_clicks or not ctx.triggered:
+        return no_update, '', ''
+    
+    print(f"✅ [PUBLIC] REGISTER ATTEMPT: {username}")
     
     log_event("auth", "register_attempt", {
         "username": username,
@@ -1699,9 +1889,11 @@ def handle_register(n_clicks, username, password, confirm):
     success, message = auth_service.register_request(username, password)
     
     if success:
+        print(f"✅ [PUBLIC] REGISTER SUCCESS: {username}")
         log_event("auth", "register_request_success", {"username": username})
         return True, '', dbc.Alert(message, color='success')
     else:
+        print(f"❌ [PUBLIC] REGISTER FAILED: {username} - {message}")
         log_event("auth", "register_request_failure", {
             "username": username,
             "message": message
@@ -1715,10 +1907,15 @@ def handle_register(n_clicks, username, password, confirm):
     [Input('btn-open-login', 'n_clicks'),
      Input('btn-cancel-login', 'n_clicks')],
     State('modal-login', 'is_open'),
-    prevent_initial_call=True
+    prevent_initial_call=False
 )
 def toggle_login_modal(n_open, n_cancel, is_open):
     """Ouvrir/fermer modal login"""
+    if not ctx.triggered:
+        return is_open
+    
+    print(f"✅ [PUBLIC] Toggle login modal")
+    
     log_event("ui", "toggle_login_modal", {
         "open_clicks": n_open,
         "cancel_clicks": n_cancel,
@@ -1732,10 +1929,15 @@ def toggle_login_modal(n_open, n_cancel, is_open):
     [Input('btn-open-register', 'n_clicks'),
      Input('btn-cancel-register', 'n_clicks')],
     State('modal-register', 'is_open'),
-    prevent_initial_call=True
+    prevent_initial_call=False
 )
 def toggle_register_modal(n_open, n_cancel, is_open):
     """Ouvrir/fermer modal register"""
+    if not ctx.triggered:
+        return is_open
+    
+    print(f"✅ [PUBLIC] Toggle register modal")
+    
     log_event("ui", "toggle_register_modal", {
         "open_clicks": n_open,
         "cancel_clicks": n_cancel,
@@ -1750,11 +1952,16 @@ def toggle_register_modal(n_open, n_cancel, is_open):
      Input('btn-cancel-propose-person', 'n_clicks'),
      Input('btn-submit-propose-person', 'n_clicks')],
     State('modal-propose-person', 'is_open'),
-    prevent_initial_call=True
+    prevent_initial_call=False
 )
 def toggle_propose_person_modal(n_open, n_cancel, n_submit, is_open):
     """Ouvrir/fermer modal propose person"""
+    if not ctx.triggered:
+        return is_open
+    
     ctx_triggered = ctx.triggered_id
+    print(f"✅ [PUBLIC] Toggle propose person modal: {ctx_triggered}")
+    
     log_event("ui", "toggle_propose_person_modal", {
         "triggered": ctx_triggered,
         "open_clicks": n_open,
@@ -1773,11 +1980,16 @@ def toggle_propose_person_modal(n_open, n_cancel, n_submit, is_open):
      Input('btn-cancel-propose-relation', 'n_clicks'),
      Input('btn-submit-propose-relation', 'n_clicks')],
     State('modal-propose-relation', 'is_open'),
-    prevent_initial_call=True
+    prevent_initial_call=False
 )
 def toggle_propose_relation_modal(n_open, n_cancel, n_submit, is_open):
     """Ouvrir/fermer modal propose relation"""
+    if not ctx.triggered:
+        return is_open
+    
     ctx_triggered = ctx.triggered_id
+    print(f"✅ [PUBLIC] Toggle propose relation modal: {ctx_triggered}")
+    
     log_event("ui", "toggle_propose_relation_modal", {
         "triggered": ctx_triggered,
         "open_clicks": n_open,
@@ -1801,10 +2013,10 @@ def toggle_propose_relation_modal(n_open, n_cancel, n_submit, is_open):
 )
 def handle_propose_person(n_clicks, name, user_session):
     """Gérer la proposition d'une nouvelle personne"""
-    if not n_clicks:
-        raise PreventUpdate
+    if not n_clicks or not ctx.triggered:
+        return '', ''
     
-    print(f"🔍 PROPOSE PERSON: n_clicks={n_clicks}, name={name}")
+    print(f"✅ [PUBLIC] PROPOSE PERSON: n_clicks={n_clicks}, name={name}")
     
     user = session.get('user', None)
     submitted_by = user.get('username', 'anonymous') if user else 'anonymous'
@@ -1837,8 +2049,8 @@ def handle_propose_person(n_clicks, name, user_session):
 )
 def handle_propose_relation(n_clicks, person1, person2, rel_type, user_session):
     """Gérer la proposition d'une nouvelle relation (avec création de personnes si nécessaire)"""
-    if not n_clicks:
-        raise PreventUpdate
+    if not n_clicks or not ctx.triggered:
+        return '', ''
     
     log_event("proposal", "propose_relation_start", {
         "n_clicks": n_clicks,
@@ -1847,7 +2059,7 @@ def handle_propose_relation(n_clicks, person1, person2, rel_type, user_session):
         "relation_type": rel_type
     })
     
-    print(f"🔍 PROPOSE RELATION: n_clicks={n_clicks}, person1={person1}, person2={person2}, rel_type={rel_type}")
+    print(f"✅ [PUBLIC] PROPOSE RELATION: n_clicks={n_clicks}, person1={person1}, person2={person2}, rel_type={rel_type}")
     
     # Récupérer username depuis user_session ou mettre anonymous
     submitted_by = 'anonymous'
@@ -2057,16 +2269,19 @@ def refresh_admin_panel(n_clicks, n_intervals, user_session):
      Output('pending-relations-list', 'children', allow_duplicate=True)],
     Input('btn-submit-propose-person', 'n_clicks'),
     State('user-session', 'data'),
-    prevent_initial_call=True
+    prevent_initial_call='initial_duplicate'
 )
 def refresh_admin_panel_after_propose_person(n_clicks, user_session):
     """Rafraîchir après proposition d'une personne"""
-    print(f"🔄 REFRESH ADMIN PANEL - after propose person")
+    if not n_clicks or not ctx.triggered:
+        return no_update, no_update, no_update
+    
+    print(f"✅ [ADMIN] REFRESH ADMIN PANEL - after propose person")
     user = session.get('user', None)
     
     if not auth_service.is_admin(user):
         print(f"❌ Access denied - not admin")
-        raise PreventUpdate
+        return no_update, no_update, no_update
     
     from components.admin_panel import (
         render_pending_accounts_list,
@@ -2094,16 +2309,19 @@ def refresh_admin_panel_after_propose_person(n_clicks, user_session):
      Output('pending-relations-list', 'children', allow_duplicate=True)],
     Input('btn-submit-propose-relation', 'n_clicks'),
     State('user-session', 'data'),
-    prevent_initial_call=True
+    prevent_initial_call='initial_duplicate'
 )
 def refresh_admin_panel_after_propose_relation(n_clicks, user_session):
     """Rafraîchir après proposition d'une relation"""
-    print(f"🔄 REFRESH ADMIN PANEL - after propose relation")
+    if not n_clicks or not ctx.triggered:
+        return no_update, no_update, no_update
+    
+    print(f"✅ [ADMIN] REFRESH ADMIN PANEL - after propose relation")
     user = session.get('user', None)
     
     if not auth_service.is_admin(user):
         print(f"❌ Access denied - not admin")
-        raise PreventUpdate
+        return no_update, no_update, no_update
     
     from components.admin_panel import (
         render_pending_accounts_list,
@@ -2134,6 +2352,11 @@ def refresh_admin_panel_after_propose_relation(n_clicks, user_session):
 )
 def handle_account_approval(approve_clicks, reject_clicks, user_session):
     """Gérer l'approbation/rejet de comptes"""
+    if not ctx.triggered:
+        return no_update
+    
+    print(f"✅ [ADMIN] Handle account approval: {ctx.triggered_id}")
+    
     user = session.get('user', None)
     
     if not auth_service.is_admin(user):
@@ -2141,11 +2364,11 @@ def handle_account_approval(approve_clicks, reject_clicks, user_session):
     
     ctx_triggered = ctx.triggered_id
     if not ctx_triggered:
-        raise PreventUpdate
+        return no_update
     
     # Vérifier qu'au moins un bouton a vraiment été cliqué
     if all(c is None for c in approve_clicks) and all(c is None for c in reject_clicks):
-        raise PreventUpdate
+        return no_update
     
     account_id = ctx_triggered['index']
     action_type = ctx_triggered['type']
@@ -2171,7 +2394,10 @@ def handle_account_approval(approve_clicks, reject_clicks, user_session):
 )
 def handle_person_approval(approve_clicks, reject_clicks, user_session):
     """Gérer l'approbation/rejet de personnes"""
-    print(f"🔍 PERSON APPROVAL: approve_clicks={approve_clicks}, reject_clicks={reject_clicks}")
+    if not ctx.triggered:
+        return no_update
+    
+    print(f"✅ [ADMIN] PERSON APPROVAL: {ctx.triggered_id}")
     user = session.get('user', None)
     
     if not auth_service.is_admin(user):
@@ -2179,15 +2405,14 @@ def handle_person_approval(approve_clicks, reject_clicks, user_session):
         return "Access Denied"
     
     ctx_triggered = ctx.triggered_id
-    print(f"🎯 Triggered: {ctx_triggered}")
     
     if not ctx_triggered:
-        raise PreventUpdate
+        return no_update
     
     # Vérifier qu'au moins un bouton a vraiment été cliqué
     if all(c is None for c in approve_clicks) and all(c is None for c in reject_clicks):
         print(f"⚠️ No real click detected - preventing update")
-        raise PreventUpdate
+        return no_update
     
     person_id = ctx_triggered['index']
     action_type = ctx_triggered['type']
@@ -2216,6 +2441,14 @@ def handle_person_approval(approve_clicks, reject_clicks, user_session):
 )
 def handle_relation_approval(approve_clicks, reject_clicks, user_session):
     """Gérer l'approbation/rejet de relations"""
+    if not ctx.triggered:
+        return no_update
+    
+    if all(c is None for c in approve_clicks) and all(c is None for c in reject_clicks):
+        return no_update
+    
+    print(f"✅ [ADMIN] Handle relation approval: {ctx.triggered_id}")
+    
     log_event("admin", "relation_approval_callback", {
         "approve_clicks": approve_clicks,
         "reject_clicks": reject_clicks
@@ -2230,7 +2463,7 @@ def handle_relation_approval(approve_clicks, reject_clicks, user_session):
     ctx_triggered = ctx.triggered_id
     if not ctx_triggered:
         log_event("admin", "relation_approval_no_trigger", {"reason": "no_triggered_id"})
-        raise PreventUpdate
+        return no_update
     
     # Vérifier qu'au moins un bouton a vraiment été cliqué (pas juste None)
     # Si tous les clicks sont None, c'est que les boutons viennent d'apparaître
@@ -2239,7 +2472,7 @@ def handle_relation_approval(approve_clicks, reject_clicks, user_session):
             "approve_clicks": approve_clicks,
             "reject_clicks": reject_clicks
         })
-        raise PreventUpdate
+        return no_update
     
     relation_id = ctx_triggered['index']
     action_type = ctx_triggered['type']
@@ -2250,12 +2483,14 @@ def handle_relation_approval(approve_clicks, reject_clicks, user_session):
     })
     
     if action_type == 'approve-relation':
+        print(f"   ✅ Approving relation ID: {relation_id}")
         result = pending_submission_repository.approve_relation(relation_id)
         log_event("admin", "relation_approved", {
             "relation_id": relation_id,
             "success": result
         })
     elif action_type == 'reject-relation':
+        print(f"   ✅ Rejecting relation ID: {relation_id}")
         result = pending_submission_repository.reject_relation(relation_id)
         log_event("admin", "relation_rejected", {
             "relation_id": relation_id,
@@ -2274,13 +2509,17 @@ def handle_relation_approval(approve_clicks, reject_clicks, user_session):
 
 @app.callback(
     Output('network-graph', 'figure'),
-    [Input('layout-dropdown', 'value'),
+    [Input('layout-selector', 'value'),
      Input('color-dropdown', 'value'),
      Input('data-version', 'data'),  # Trigger refresh on data change
-     Input('auto-refresh', 'n_intervals')]
+     Input('auto-refresh', 'n_intervals'),
+     Input('node-size-slider', 'value'),
+     Input('repulsion-slider', 'value'),
+     Input('edge-tension-slider', 'value'),
+     Input('search-person', 'value')]
 )
-def update_graph(layout_type, color_by, data_version, n_intervals):
-    """Build graph using repository + graph.py rendering"""
+def update_graph(layout_type, color_by, data_version, n_intervals, node_size, repulsion, edge_tension, search_person):
+    """Build graph using repository + graph.py rendering with parameters"""
     try:
         # Get relations from repository (deduplicate pour éviter A→B et B→A)
         relations = relation_repository.read_all(deduplicate=True)
@@ -2313,11 +2552,19 @@ def update_graph(layout_type, color_by, data_version, n_intervals):
         # Build NetworkX graph
         G = build_graph(relations_dict)
         
-        # Compute layout
-        pos = compute_layout(G, mode=layout_type)
+        # Compute layout with repulsion parameter
+        pos = compute_layout(G, mode=layout_type, repulsion=repulsion)
         
-        # Create figure (déjà stylée dans make_figure)
-        fig = make_figure(G, pos)
+        # Create figure with size and edge tension parameters
+        fig = make_figure(G, pos, size_factor=node_size/15.0, edge_width=1.0 + edge_tension)
+        
+        # If searching for a person, center and zoom on them
+        if search_person:
+            if search_person in pos:
+                x_pos, y_pos = pos[search_person]
+                # Center on the node and zoom
+                fig.update_xaxes(range=[x_pos - 1, x_pos + 1])
+                fig.update_yaxes(range=[y_pos - 1, y_pos + 1])
         
         return fig
         
@@ -2336,6 +2583,282 @@ def update_graph(layout_type, color_by, data_version, n_intervals):
             yaxis=dict(visible=False),
         )
         return fig
+
+# ============================================================================
+# Admin Graph Callback - Same as public but for admin tab
+# ============================================================================
+
+@app.callback(
+    Output('network-graph-admin', 'figure'),
+    [Input('layout-selector', 'value'),
+     Input('color-dropdown', 'value'),
+     Input('data-version', 'data'),  # Trigger refresh on data change
+     Input('auto-refresh', 'n_intervals'),
+     Input('node-size-slider', 'value'),
+     Input('repulsion-slider', 'value'),
+     Input('edge-tension-slider', 'value'),
+     Input('search-person', 'value')]
+)
+def update_graph_admin(layout_type, color_by, data_version, n_intervals, node_size, repulsion, edge_tension, search_person):
+    """Build graph using repository + graph.py rendering with parameters (admin version)"""
+    try:
+        # Get relations from repository (deduplicate pour éviter A→B et B→A)
+        relations = relation_repository.read_all(deduplicate=True)
+        
+        if not relations:
+            # Empty graph
+            fig = go.Figure()
+            fig.add_annotation(
+                text="No relations to display",
+                xref="paper", yref="paper",
+                x=0.5, y=0.5,
+                showarrow=False,
+                font=dict(size=16, color='#999')
+            )
+            fig.update_layout(
+                xaxis=dict(visible=False),
+                yaxis=dict(visible=False),
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+            )
+            return fig
+        
+        # Convert to dict format for build_graph
+        relations_dict = {}
+        for p1, p2, rel_type in relations:
+            if p1 not in relations_dict:
+                relations_dict[p1] = []
+            relations_dict[p1].append((p2, rel_type))
+        
+        # Build NetworkX graph
+        G = build_graph(relations_dict)
+        
+        # Compute layout with repulsion parameter
+        pos = compute_layout(G, mode=layout_type, repulsion=repulsion)
+        
+        # Create figure with size and edge tension parameters
+        fig = make_figure(G, pos, size_factor=node_size/15.0, edge_width=1.0 + edge_tension)
+        
+        # If searching for a person, center and zoom on them
+        if search_person:
+            if search_person in pos:
+                x_pos, y_pos = pos[search_person]
+                # Center on the node and zoom
+                fig.update_xaxes(range=[x_pos - 1, x_pos + 1])
+                fig.update_yaxes(range=[y_pos - 1, y_pos + 1])
+        
+        return fig
+        
+    except Exception as e:
+        # Error figure
+        fig = go.Figure()
+        fig.add_annotation(
+            text=f"Error: {str(e)}",
+            xref="paper", yref="paper",
+            x=0.5, y=0.5,
+            showarrow=False,
+            font=dict(size=14, color='red')
+        )
+        fig.update_layout(
+            xaxis=dict(visible=False),
+            yaxis=dict(visible=False),
+        )
+        return fig
+
+# ============================================================================
+# CALLBACKS CLIENTSIDE - BOUTONS INTERACTIFS (Zoom, Fullscreen, Hamburger)
+# ============================================================================
+
+# Callback pour Zoom In
+app.clientside_callback(
+    """
+    function(n_clicks) {
+        if (!n_clicks) return window.dash_clientside.no_update;
+        
+        console.log('🔍 Zoom In clicked');
+        
+        var graphDiv = document.getElementById('network-graph');
+        if (!graphDiv) {
+            console.error('Graph div not found');
+            return window.dash_clientside.no_update;
+        }
+        
+        // Trouver le vrai div Plotly
+        var plotlyDiv = graphDiv.querySelector('.js-plotly-plot') || graphDiv;
+        
+        var layout = plotlyDiv.layout || {};
+        var xRange = layout.xaxis ? layout.xaxis.range : null;
+        var yRange = layout.yaxis ? layout.yaxis.range : null;
+        
+        if (!xRange || !yRange) {
+            console.warn('No range found in layout');
+            return window.dash_clientside.no_update;
+        }
+        
+        var xCenter = (xRange[0] + xRange[1]) / 2;
+        var yCenter = (yRange[0] + yRange[1]) / 2;
+        var factor = 1.5;
+        var xSpan = (xRange[1] - xRange[0]) / factor / 2;
+        var ySpan = (yRange[1] - yRange[0]) / factor / 2;
+        
+        try {
+            Plotly.relayout(plotlyDiv, {
+                'xaxis.range': [xCenter - xSpan, xCenter + xSpan],
+                'yaxis.range': [yCenter - ySpan, yCenter + ySpan]
+            });
+            console.log('✅ Zoom in applied');
+        } catch(e) {
+            console.error('Zoom error:', e);
+        }
+        
+        return window.dash_clientside.no_update;
+    }
+    """,
+    Output('btn-zoom-in', 'n_clicks', allow_duplicate=True),
+    Input('btn-zoom-in', 'n_clicks'),
+    prevent_initial_call=True
+)
+
+# Callback pour Zoom Out
+app.clientside_callback(
+    """
+    function(n_clicks) {
+        if (!n_clicks) return window.dash_clientside.no_update;
+        
+        console.log('🔍 Zoom Out clicked');
+        
+        var graphDiv = document.getElementById('network-graph');
+        if (!graphDiv) {
+            console.error('Graph div not found');
+            return window.dash_clientside.no_update;
+        }
+        
+        // Trouver le vrai div Plotly
+        var plotlyDiv = graphDiv.querySelector('.js-plotly-plot') || graphDiv;
+        
+        var layout = plotlyDiv.layout || {};
+        var xRange = layout.xaxis ? layout.xaxis.range : null;
+        var yRange = layout.yaxis ? layout.yaxis.range : null;
+        
+        if (!xRange || !yRange) {
+            console.warn('No range found in layout');
+            return window.dash_clientside.no_update;
+        }
+        
+        var xCenter = (xRange[0] + xRange[1]) / 2;
+        var yCenter = (yRange[0] + yRange[1]) / 2;
+        var factor = 0.67;
+        var xSpan = (xRange[1] - xRange[0]) / factor / 2;
+        var ySpan = (yRange[1] - yRange[0]) / factor / 2;
+        
+        try {
+            Plotly.relayout(plotlyDiv, {
+                'xaxis.range': [xCenter - xSpan, xCenter + xSpan],
+                'yaxis.range': [yCenter - ySpan, yCenter + ySpan]
+            });
+            console.log('✅ Zoom out applied');
+        } catch(e) {
+            console.error('Zoom error:', e);
+        }
+        
+        return window.dash_clientside.no_update;
+    }
+    """,
+    Output('btn-zoom-out', 'n_clicks', allow_duplicate=True),
+    Input('btn-zoom-out', 'n_clicks'),
+    prevent_initial_call=True
+)
+
+# Callback pour Hamburger Menu
+app.clientside_callback(
+    """
+    function(n_clicks) {
+        if (!n_clicks) return window.dash_clientside.no_update;
+        
+        console.log('🍔 Hamburger clicked');
+        
+        var menu = document.getElementById('hamburger-menu');
+        if (!menu) {
+            console.error('Hamburger menu not found');
+            return window.dash_clientside.no_update;
+        }
+        
+        var currentDisplay = window.getComputedStyle(menu).display;
+        var newDisplay = (currentDisplay === 'none') ? 'block' : 'none';
+        menu.style.display = newDisplay;
+        
+        console.log('✅ Menu display:', newDisplay);
+        
+        return window.dash_clientside.no_update;
+    }
+    """,
+    Output('hamburger-btn-graph', 'n_clicks', allow_duplicate=True),
+    Input('hamburger-btn-graph', 'n_clicks'),
+    prevent_initial_call=True
+)
+
+# Callback pour Fullscreen
+app.clientside_callback(
+    """
+    function(n_clicks) {
+        if (!n_clicks) return window.dash_clientside.no_update;
+        
+        console.log('🖥️ Fullscreen clicked');
+        
+        var graphPanel = document.querySelector('.graph-panel');
+        var icon = document.getElementById('fullscreen-icon');
+        
+        if (!graphPanel) {
+            console.error('Graph panel not found');
+            return window.dash_clientside.no_update;
+        }
+        
+        var isFullscreen = graphPanel.classList.contains('fullscreen-mode');
+        
+        if (isFullscreen) {
+            graphPanel.classList.remove('fullscreen-mode');
+            if (icon) icon.className = 'fas fa-expand';
+            console.log('✅ Exited fullscreen');
+        } else {
+            graphPanel.classList.add('fullscreen-mode');
+            if (icon) icon.className = 'fas fa-compress';
+            console.log('✅ Entered fullscreen');
+        }
+        
+        // Resize Plotly graph après un court délai
+        setTimeout(function() {
+            var graphDiv = document.getElementById('network-graph');
+            if (graphDiv && window.Plotly) {
+                var plotlyDiv = graphDiv.querySelector('.js-plotly-plot') || graphDiv;
+                Plotly.Plots.resize(plotlyDiv);
+                console.log('✅ Graph resized');
+            }
+        }, 100);
+        
+        return window.dash_clientside.no_update;
+    }
+    """,
+    Output('btn-fullscreen', 'n_clicks', allow_duplicate=True),
+    Input('btn-fullscreen', 'n_clicks'),
+    prevent_initial_call=True
+)
+
+# ============================================================================
+# CALLBACKS - SEARCH & DROPDOWN OPTIONS
+# ============================================================================
+
+@app.callback(
+    Output('search-person', 'options'),
+    Input('data-version', 'data')
+)
+def update_person_options(data_version):
+    """Update person search dropdown options"""
+    try:
+        persons = person_repository.read_all()
+        options = [{'label': person['name'], 'value': person['name']} for person in persons if person.get('name') and not person['name'].startswith('#')]
+        return sorted(options, key=lambda x: x['label'])
+    except:
+        return []
 
 # ============================================================================
 # CALLBACKS - STATS
@@ -2384,73 +2907,6 @@ def update_history(n_intervals):
     return html.Div(items)
 
 # ============================================================================
-# CALLBACKS - MODALS ADD PERSON
-# ============================================================================
-
-@app.callback(
-    Output('modal-add-person', 'is_open'),
-    [Input('btn-add-person', 'n_clicks'),
-     Input('btn-cancel-add-person', 'n_clicks'),
-     Input('btn-submit-add-person', 'n_clicks')],
-    State('modal-add-person', 'is_open'),
-    prevent_initial_call=True
-)
-def toggle_add_person_modal(open_clicks, cancel_clicks, submit_clicks, is_open):
-    """Toggle add person modal"""
-    if ctx.triggered_id in ['btn-add-person']:
-        return not is_open
-    return False
-
-@app.callback(
-    [Output('input-add-name', 'value'),
-     Output('dropdown-add-gender', 'value'),
-     Output('dropdown-add-orientation', 'value'),
-     Output('data-version', 'data')],
-    Input('btn-submit-add-person', 'n_clicks'),
-    [State('input-add-name', 'value'),
-     State('dropdown-add-gender', 'value'),
-     State('dropdown-add-orientation', 'value'),
-     State('data-version', 'data')],
-    prevent_initial_call=True
-)
-def submit_add_person(n_clicks, name, gender, orientation, current_version):
-    """Add new person using PersonRepository"""
-    if not n_clicks:
-        raise PreventUpdate
-    
-    try:
-        # Validation
-        if not name or not name.strip():
-            raise ValueError("Name is required")
-        
-        # Utilise PersonRepository pour ajouter (sans gender/orientation)
-        person_repository.create(
-            name=name.strip(),
-            gender=None,
-            sexual_orientation=None
-        )
-        
-        # Enregistre dans l'historique
-        history_service.record_action(
-            action_type='ADD_PERSON',
-            person1=name.strip()
-        )
-        
-        # Invalide le cache du graphe
-        graph_builder.clear_cache()
-        
-        # Increment version to trigger graph refresh
-        new_version = (current_version or 0) + 1
-        print(f"   ✅ Person added! New data version: {new_version}")
-        
-        # Reset form and bump version
-        return '', None, None, new_version
-        
-    except Exception as e:
-        print(f"Error adding person: {e}")
-        raise PreventUpdate
-
-# ============================================================================
 # CALLBACKS - MODALS ADD RELATION
 # ============================================================================
 
@@ -2473,9 +2929,25 @@ def submit_add_person(n_clicks, name, gender, orientation, current_version):
 )
 def toggle_and_submit_add_relation(open_clicks, cancel_clicks, submit_clicks, is_open, p1_id, rel_type, p2_id, current_version):
     """Toggle modal AND handle submit (with smart inline person creation)"""
+    if not ctx.triggered:
+        return no_update, no_update, no_update, no_update, no_update, no_update
+    
     triggered_id = ctx.triggered_id
     
-    print(f"🔍 [ADD RELATION] triggered_id={triggered_id}, is_open={is_open}")
+    # Safety check: verify the button that triggered has actually been clicked (n_clicks > 0)
+    if triggered_id == 'btn-add-relation' and (not open_clicks or open_clicks == 0):
+        print(f"⚠️ [ADMIN] Spurious trigger on btn-add-relation (n_clicks={open_clicks})")
+        return no_update, no_update, no_update, no_update, no_update, no_update
+    
+    if triggered_id == 'btn-cancel-add-relation' and (not cancel_clicks or cancel_clicks == 0):
+        print(f"⚠️ [ADMIN] Spurious trigger on btn-cancel-add-relation (n_clicks={cancel_clicks})")
+        return no_update, no_update, no_update, no_update, no_update, no_update
+    
+    if triggered_id == 'btn-submit-add-relation' and (not submit_clicks or submit_clicks == 0):
+        print(f"⚠️ [ADMIN] Spurious trigger on btn-submit-add-relation (n_clicks={submit_clicks})")
+        return no_update, no_update, no_update, no_update, no_update, no_update
+    
+    print(f"✅ [ADMIN] ADD RELATION triggered: {triggered_id}")
     
     # Open modal
     if triggered_id == 'btn-add-relation':
@@ -2494,39 +2966,64 @@ def toggle_and_submit_add_relation(open_clicks, cancel_clicks, submit_clicks, is
         try:
             # === ÉTAPE 1: Check if Person 1 needs to be created ===
             if p1_id and str(p1_id).startswith("__CREATE__"):
-                name = str(p1_id).replace("__CREATE__", "").strip()
-                print(f"   → Creating new person 1: {name}")
-                
-                person_repository.create(
-                    name=name,
-                    gender=None,
-                    sexual_orientation=None
-                )
-                
-                # Get the created person's ID
-                persons = person_repository.read_all()
-                p1 = next((p for p in persons if p['name'] == name), None)
-                if p1:
-                    p1_id = p1['id']
-                    print(f"   ✅ Person 1 created with ID: {p1_id}")
+                raw_name = str(p1_id).replace("__CREATE__", "").strip()
+                # Sanitize using the same rules as the repository so lookup matches
+                clean_name = Validator.sanitize_name(raw_name)
+                print(f"   → Creating new person 1: raw='{raw_name}' clean='{clean_name}'")
+
+                try:
+                    # Create using the cleaned name (repository will also sanitize/validate)
+                    success, msg = person_repository.create(
+                        name=clean_name,
+                        gender=None,
+                        sexual_orientation=None
+                    )
+                    if not success:
+                        print(f"   ❌ Failed to create Person 1: {msg}")
+                        return True, None, rel_type, p2_id, dbc.Alert(f"Error creating person '{clean_name}': {msg}", color='danger', duration=3000), no_update
+
+                    print(f"   ✅ Person 1 created in database: {clean_name}")
+
+                    # Get the created person's ID using read_by_name (exact match on sanitized name)
+                    p1_obj = person_repository.read_by_name(clean_name)
+                    if p1_obj:
+                        p1_id = p1_obj['id']
+                        print(f"   ✅ Person 1 retrieved with ID: {p1_id}")
+                    else:
+                        print(f"   ❌ ERROR: Person 1 was created but couldn't be retrieved (name mismatch)!")
+                        return True, None, rel_type, p2_id, dbc.Alert(f"Error: Could not retrieve created person '{clean_name}'", color='danger', duration=3000), no_update
+                except Exception as e:
+                    print(f"   ❌ ERROR creating Person 1: {e}")
+                    return True, None, rel_type, p2_id, dbc.Alert(f"Error creating person: {str(e)}", color='danger', duration=3000), no_update
             
             # === ÉTAPE 2: Check if Person 2 needs to be created ===
             if p2_id and str(p2_id).startswith("__CREATE__"):
-                name = str(p2_id).replace("__CREATE__", "").strip()
-                print(f"   → Creating new person 2: {name}")
-                
-                person_repository.create(
-                    name=name,
-                    gender=None,
-                    sexual_orientation=None
-                )
-                
-                # Get the created person's ID
-                persons = person_repository.read_all()
-                p2 = next((p for p in persons if p['name'] == name), None)
-                if p2:
-                    p2_id = p2['id']
-                    print(f"   ✅ Person 2 created with ID: {p2_id}")
+                raw_name = str(p2_id).replace("__CREATE__", "").strip()
+                clean_name = Validator.sanitize_name(raw_name)
+                print(f"   → Creating new person 2: raw='{raw_name}' clean='{clean_name}'")
+
+                try:
+                    success, msg = person_repository.create(
+                        name=clean_name,
+                        gender=None,
+                        sexual_orientation=None
+                    )
+                    if not success:
+                        print(f"   ❌ Failed to create Person 2: {msg}")
+                        return True, p1_id, rel_type, None, dbc.Alert(f"Error creating person '{clean_name}': {msg}", color='danger', duration=3000), no_update
+
+                    print(f"   ✅ Person 2 created in database: {clean_name}")
+
+                    p2_obj = person_repository.read_by_name(clean_name)
+                    if p2_obj:
+                        p2_id = p2_obj['id']
+                        print(f"   ✅ Person 2 retrieved with ID: {p2_id}")
+                    else:
+                        print(f"   ❌ ERROR: Person 2 was created but couldn't be retrieved (name mismatch)!")
+                        return True, p1_id, rel_type, None, dbc.Alert(f"Error: Could not retrieve created person '{clean_name}'", color='danger', duration=3000), no_update
+                except Exception as e:
+                    print(f"   ❌ ERROR creating Person 2: {e}")
+                    return True, p1_id, rel_type, None, dbc.Alert(f"Error creating person: {str(e)}", color='danger', duration=3000), no_update
             
             # === ÉTAPE 3: Validation ===
             # Check if all required fields are present (None or empty, but 0 is valid!)
@@ -3120,7 +3617,23 @@ def submit_edit_person(n_clicks, person_id, new_name, gender, orientation, curre
 )
 def toggle_and_submit_merge_persons(open_clicks, cancel_clicks, submit_clicks, is_open, source_id, target_id, current_version):
     """Toggle merge modal AND handle submit"""
+    if not ctx.triggered:
+        return no_update, no_update, no_update, no_update, no_update, no_update
+    
     triggered_id = ctx.triggered_id
+    
+    # Safety check: verify the button that triggered has actually been clicked (n_clicks > 0)
+    if triggered_id == 'btn-merge-persons' and (not open_clicks or open_clicks == 0):
+        print(f"⚠️ [MERGE] Spurious trigger on btn-merge-persons (n_clicks={open_clicks})")
+        return no_update, no_update, no_update, no_update, no_update, no_update
+    
+    if triggered_id == 'btn-cancel-merge-persons' and (not cancel_clicks or cancel_clicks == 0):
+        print(f"⚠️ [MERGE] Spurious trigger on btn-cancel-merge-persons (n_clicks={cancel_clicks})")
+        return no_update, no_update, no_update, no_update, no_update, no_update
+    
+    if triggered_id == 'btn-submit-merge-persons' and (not submit_clicks or submit_clicks == 0):
+        print(f"⚠️ [MERGE] Spurious trigger on btn-submit-merge-persons (n_clicks={submit_clicks})")
+        return no_update, no_update, no_update, no_update, no_update, no_update
     
     print(f"🔍 [MERGE PERSONS] triggered_id={triggered_id}")
     

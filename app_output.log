@@ -1,0 +1,66 @@
+✅ Base de données existante: /Users/diegoclaes/Code/Relation/social_network.db
+⚠️  Warning: Could not import old database module: [Errno 2] No such file or directory: '/Users/diegoclaes/Code/Relation/database.py'
+
+======================================================================
+  🗺️  CENTRALE POTINS MAPS - V2
+======================================================================
+
+  📊 Data: 95 persons, 97 relations
+  ✅ Symmetry: 100% guaranteed
+
+  🚀 Dashboard: http://localhost:8052
+  🏗️  Architecture: Services + Repositories
+  💾 Cache: Enabled for performance
+
+======================================================================
+
+Dash is running on http://0.0.0.0:8052/
+
+ * Serving Flask app 'app_v2'
+ * Debug mode: off
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8052
+ * Running on http://192.168.1.13:8052
+[33mPress CTRL+C to quit[0m
+127.0.0.1 - - [19/Oct/2025 23:21:16] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:21:16] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:21:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:21:46] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:22:16] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:22:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:22:40] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:22:47] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:22:47] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:23:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:23:17] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:23:43] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:23:44] "GET /_dash-layout HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:23:44] "GET /_dash-dependencies HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:23:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:23:44] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+127.0.0.1 - - [19/Oct/2025 23:23:44] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+127.0.0.1 - - [19/Oct/2025 23:23:44] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+127.0.0.1 - - [19/Oct/2025 23:23:44] "[36mGET /_dash-component-suites/dash/dcc/async-slider.js HTTP/1.1[0m" 304 -
+127.0.0.1 - - [19/Oct/2025 23:23:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:23:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:23:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:23:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:23:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:23:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:23:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:23:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:23:44] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+127.0.0.1 - - [19/Oct/2025 23:23:44] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+127.0.0.1 - - [19/Oct/2025 23:23:45] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:23:51] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:24:05] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:24:11] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:24:14] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:24:14] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:24:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:24:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:24:44] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:24:47] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:25:15] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [19/Oct/2025 23:25:15] "POST /_dash-update-component HTTP/1.1" 200 -
