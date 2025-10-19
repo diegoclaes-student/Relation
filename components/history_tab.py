@@ -13,6 +13,9 @@ def create_history_tab():
     return html.Div([
         html.Div("📋 Historique des Modifications", className='section-title', style={'marginBottom': '20px'}),
         
+        # Hidden store for cancel action ID
+        dcc.Store(id='cancel-action-store', data=None),
+        
         # Filters
         html.Div([
             html.Div([
@@ -150,12 +153,12 @@ def render_history_item(record: dict, show_cancel_button: bool = True) -> html.D
     # Button
     button = None
     if show_cancel_button and record.get('status') != 'cancelled':
-        button = dbc.Button(
+        button = html.Button(
             [html.I(className="fas fa-ban", style={'marginRight': '6px'}), "Annuler"],
             id={'type': 'cancel-history', 'index': record.get('id', 0)},
-            size='sm',
-            color='danger',
-            outline=True
+            n_clicks=0,
+            className='btn btn-outline-danger btn-sm',
+            style={'cursor': 'pointer'}
         )
     
     return html.Div([

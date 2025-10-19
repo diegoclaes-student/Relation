@@ -429,3 +429,54 @@
 2025-10-19T21:15:12.057Z | navigation | display_page | {"pathname": "/", "authenticated": false}
 2025-10-19T21:15:45.419Z | navigation | display_page | {"pathname": "/", "authenticated": false}
 2025-10-19T21:23:44.151Z | navigation | display_page | {"pathname": "/", "authenticated": false}
+2025-10-19T21:25:29.581Z | ui | toggle_register_modal | {"open_clicks": 1, "cancel_clicks": null, "was_open": false}
+2025-10-19T21:25:45.415Z | auth | register_attempt | {"username": "Test10", "has_password": true, "has_confirm": true}
+2025-10-19T21:25:45.421Z | auth | register_request_success | {"username": "Test10"}
+2025-10-19T21:25:50.431Z | ui | toggle_login_modal | {"open_clicks": 1, "cancel_clicks": null, "was_open": false}
+2025-10-19T21:25:53.407Z | auth | login_attempt | {"username": "admin", "has_password": true}
+2025-10-19T21:25:53.410Z | auth | login_success | {"username": "admin"}
+2025-10-19T21:25:53.431Z | navigation | display_page | {"pathname": "/", "authenticated": true}
+2025-10-19T21:26:19.418Z | auth | logout | {"username": "admin"}
+2025-10-19T21:26:19.431Z | navigation | display_page | {"pathname": "/", "authenticated": false}
+2025-10-19T21:26:20.816Z | ui | toggle_login_modal | {"open_clicks": 1, "cancel_clicks": null, "was_open": false}
+2025-10-19T21:26:23.343Z | auth | login_attempt | {"username": "Test10", "has_password": true}
+2025-10-19T21:26:23.345Z | auth | login_success | {"username": "Test10"}
+2025-10-19T21:26:23.358Z | navigation | display_page | {"pathname": "/", "authenticated": true}
+2025-10-19T21:28:02.847Z | navigation | display_page | {"pathname": "/", "authenticated": true}
+2025-10-19T21:34:19.094Z | navigation | display_page | {"pathname": "/", "authenticated": true}
+2025-10-19T21:34:20.337Z | auth | logout | {"username": "Test10"}
+2025-10-19T21:34:20.347Z | navigation | display_page | {"pathname": "/", "authenticated": false}
+2025-10-19T21:38:57.478Z | navigation | display_page | {"pathname": "/", "authenticated": false}
+2025-10-19T21:39:03.290Z | ui | toggle_login_modal | {"open_clicks": 1, "cancel_clicks": null, "was_open": false}
+2025-10-19T21:39:06.000Z | auth | login_attempt | {"username": "admin", "has_password": true}
+2025-10-19T21:39:06.006Z | auth | login_success | {"username": "admin"}
+2025-10-19T21:39:06.020Z | navigation | display_page | {"pathname": "/", "authenticated": true}
+2025-10-19T22:02:51.087Z | navigation | display_page | {"pathname": "/", "authenticated": true}
+2025-10-19T22:16:05.062Z | navigation | display_page | {"pathname": "/", "authenticated": true}
+2025-10-19T22:22:15.707Z | navigation | display_page | {"pathname": "/", "authenticated": true}
+2025-10-19T22:42:42.985Z | navigation | display_page | {"pathname": "/", "authenticated": true}
+2025-10-19T22:42:52.534Z | navigation | display_page | {"pathname": "/", "authenticated": true}
+2025-10-19T22:43:54.992Z | auth | logout | {"username": "admin"}
+2025-10-19T22:43:55.039Z | navigation | display_page | {"pathname": "/", "authenticated": false}
+2025-10-19T22:44:03.723Z | ui | toggle_propose_person_modal | {"triggered": "btn-propose-person", "open_clicks": 1, "cancel_clicks": null, "submit_clicks": null, "was_open": false}
+2025-10-19T22:44:12.183Z | ui | toggle_propose_person_modal | {"triggered": "btn-submit-propose-person", "open_clicks": 1, "cancel_clicks": null, "submit_clicks": 1, "was_open": true}
+2025-10-19T22:44:13.026Z | ui | toggle_propose_relation_modal | {"triggered": "btn-propose-relation", "open_clicks": 1, "cancel_clicks": null, "submit_clicks": null, "was_open": false}
+2025-10-19T22:44:33.511Z | proposal | propose_relation_start | {"n_clicks": 1, "person1": "__CREATE__te", "person2": "__CREATE__st", "relation_type": 0}
+2025-10-19T22:44:33.514Z | ui | toggle_propose_relation_modal | {"triggered": "btn-submit-propose-relation", "open_clicks": 1, "cancel_clicks": null, "submit_clicks": 1, "was_open": true}
+2025-10-19T22:44:33.517Z | proposal | create_person_inline | {"name": "te", "success": true}
+2025-10-19T22:44:33.519Z | proposal | create_person_inline | {"name": "st", "success": true}
+2025-10-19T22:44:33.521Z | proposal | propose_relation_submitted | {"submission_id": 18, "person1": "te", "person2": "st", "relation_type": 0, "submitted_by": "anonymous", "created_persons": ["te", "st"]}
+2025-10-19T22:44:34.721Z | ui | toggle_login_modal | {"open_clicks": 1, "cancel_clicks": null, "was_open": false}
+2025-10-19T22:44:37.754Z | auth | login_attempt | {"username": "admin", "has_password": true}
+2025-10-19T22:44:37.758Z | auth | login_success | {"username": "admin"}
+2025-10-19T22:44:37.774Z | navigation | display_page | {"pathname": "/", "authenticated": true}
+2025-10-19T22:44:44.750Z | admin | relation_approval_callback | {"approve_clicks": [1], "reject_clicks": [null]}
+2025-10-19T22:44:44.751Z | admin | relation_action | {"action": "approve-relation", "relation_id": 18}
+2025-10-19T22:44:44.756Z | admin | relation_approved | {"relation_id": 18, "success": true}
+2025-10-19T22:45:31.732Z | navigation | display_page | {"pathname": "/", "authenticated": true}
+2025-10-19T22:45:51.318Z | navigation | display_page | {"pathname": "/", "authenticated": true}
+2025-10-19T22:47:29.696Z | navigation | display_page | {"pathname": "/", "authenticated": true}
+2025-10-19T22:51:35.406Z | navigation | display_page | {"pathname": "/", "authenticated": true}
+2025-10-19T22:51:59.219Z | navigation | display_page | {"pathname": "/", "authenticated": true}
+2025-10-19T22:52:37.672Z | navigation | display_page | {"pathname": "/", "authenticated": true}
+2025-10-19T22:53:05.306Z | navigation | display_page | {"pathname": "/", "authenticated": true}

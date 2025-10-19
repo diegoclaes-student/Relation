@@ -30,7 +30,12 @@ class HistoryService:
                      person2: Optional[str] = None,
                      relation_type: Optional[int] = None,
                      performed_by: str = "system",
-                     details: Optional[str] = None) -> bool:
+                     details: Optional[str] = None,
+                     entity_type: Optional[str] = None,
+                     entity_id: Optional[int] = None,
+                     entity_name: Optional[str] = None,
+                     old_value: Optional[str] = None,
+                     new_value: Optional[str] = None) -> bool:
         """
         Enregistre une action dans l'historique
         
@@ -41,21 +46,30 @@ class HistoryService:
             relation_type: Type de relation (si applicable)
             performed_by: Utilisateur ayant effectué l'action
             details: Détails supplémentaires en JSON
+            entity_type: Type d'entité ('person', 'relation', 'user', 'account')
+            entity_id: ID de l'entité modifiée
+            entity_name: Nom de l'entité
+            old_value: Ancienne valeur (pour UPDATE)
+            new_value: Nouvelle valeur (pour UPDATE)
         
         Returns:
             True si enregistré avec succès
         """
         if action_type not in ACTION_TYPES:
-            return False
+            print(f"⚠️ Unknown action_type: {action_type}, recording anyway...")
         
         conn = self._get_connection()
         try:
             cursor = conn.cursor()
             
             cursor.execute("""
-                INSERT INTO history (action_type, person1, person2, relation_type, performed_by, details)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (action_type, person1, person2, relation_type, performed_by, details))
+                INSERT INTO history (
+                    action_type, person1, person2, relation_type, performed_by, details,
+                    status, entity_type, entity_id, entity_name, old_value, new_value
+                )
+                VALUES (?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?, ?)
+            """, (action_type, person1, person2, relation_type, performed_by, details,
+                  entity_type, entity_id, entity_name, old_value, new_value))
             
             conn.commit()
             
@@ -85,13 +99,14 @@ class HistoryService:
         
         conn.commit()
     
-    def get_history(self, limit: int = 50, action_type: Optional[str] = None) -> List[Dict]:
+    def get_history(self, limit: int = 50, action_type: Optional[str] = None, status: str = 'active') -> List[Dict]:
         """
         Récupère l'historique des actions
         
         Args:
             limit: Nombre max d'entrées à retourner
             action_type: Filtrer par type d'action (optionnel)
+            status: Filtrer par statut ('active', 'cancelled', 'all')
         
         Returns:
             Liste de dictionnaires représentant les actions
@@ -100,19 +115,27 @@ class HistoryService:
         try:
             cursor = conn.cursor()
             
+            # Build query based on filters
+            where_clauses = []
+            params = []
+            
             if action_type:
-                cursor.execute("""
-                    SELECT * FROM history 
-                    WHERE action_type = ?
-                    ORDER BY created_at DESC 
-                    LIMIT ?
-                """, (action_type, limit))
-            else:
-                cursor.execute("""
-                    SELECT * FROM history 
-                    ORDER BY created_at DESC 
-                    LIMIT ?
-                """, (limit,))
+                where_clauses.append("action_type = ?")
+                params.append(action_type)
+            
+            if status != 'all':
+                where_clauses.append("(status = ? OR status IS NULL)")
+                params.append(status)
+            
+            where_sql = " AND ".join(where_clauses) if where_clauses else "1=1"
+            params.append(limit)
+            
+            cursor.execute(f"""
+                SELECT * FROM history 
+                WHERE {where_sql}
+                ORDER BY created_at DESC 
+                LIMIT ?
+            """, params)
             
             return [dict(row) for row in cursor.fetchall()]
             
@@ -123,6 +146,146 @@ class HistoryService:
         """Récupère la dernière action enregistrée"""
         history = self.get_history(limit=1)
         return history[0] if history else None
+    
+    def cancel_action(self, action_id: int, cancelled_by: str = "admin") -> Tuple[bool, str]:
+        """
+        Annule une action en la marquant comme cancelled (ne la supprime pas)
+        
+        Args:
+            action_id: ID de l'action à annuler
+            cancelled_by: Utilisateur qui annule l'action
+        
+        Returns:
+            (success, message)
+        """
+        conn = self._get_connection()
+        try:
+            cursor = conn.cursor()
+            
+            # Get the action details first
+            cursor.execute("SELECT * FROM history WHERE id = ?", (action_id,))
+            action = cursor.fetchone()
+            
+            if not action:
+                return False, f"Action {action_id} non trouvée"
+            
+            action_dict = dict(action)
+            
+            # Check if already cancelled
+            if action_dict.get('status') == 'cancelled':
+                return False, "Cette action a déjà été annulée"
+            
+            # Mark as cancelled
+            cursor.execute("""
+                UPDATE history 
+                SET status = 'cancelled',
+                    cancelled_at = CURRENT_TIMESTAMP,
+                    cancelled_by = ?
+                WHERE id = ?
+            """, (cancelled_by, action_id))
+            
+            conn.commit()
+            
+            # Actually undo the action in the database
+            success, msg = self._revert_action(action_dict, conn)
+            
+            if success:
+                return True, f"✅ Action annulée: {msg}"
+            else:
+                # Rollback if revert failed
+                conn.rollback()
+                return False, f"❌ Erreur lors de l'annulation: {msg}"
+            
+        except Exception as e:
+            conn.rollback()
+            return False, f"Erreur: {str(e)}"
+        finally:
+            conn.close()
+    
+    def _revert_action(self, action: Dict, conn: sqlite3.Connection) -> Tuple[bool, str]:
+        """
+        Revert the actual changes made by an action
+        
+        Args:
+            action: The action dictionary
+            conn: Active database connection
+        
+        Returns:
+            (success, message)
+        """
+        action_type = action.get('action_type', '')
+        cursor = conn.cursor()
+        
+        try:
+            if action_type in ['ADD_RELATION', 'add_relation', 'UPDATE']:
+                # Undo a relation addition - delete the relation
+                cursor.execute("""
+                    DELETE FROM relations 
+                    WHERE (person1 = ? AND person2 = ?)
+                       OR (person1 = ? AND person2 = ?)
+                """, (action['person1'], action['person2'], 
+                      action['person2'], action['person1']))
+                
+                conn.commit()
+                return True, f"Relation supprimée: {action['person1']} ↔ {action['person2']}"
+            
+            elif action_type in ['DELETE_RELATION', 'delete_relation', 'DELETE']:
+                # Undo a relation deletion - recreate the relation
+                rel_type = action.get('relation_type', 0)
+                
+                cursor.execute("""
+                    INSERT OR IGNORE INTO relations (person1, person2, relation_type)
+                    VALUES (?, ?, ?)
+                """, (action['person1'], action['person2'], rel_type))
+                
+                cursor.execute("""
+                    INSERT OR IGNORE INTO relations (person1, person2, relation_type)
+                    VALUES (?, ?, ?)
+                """, (action['person2'], action['person1'], rel_type))
+                
+                conn.commit()
+                return True, f"Relation restaurée: {action['person1']} ↔ {action['person2']}"
+            
+            elif action_type in ['UPDATE_PERSON', 'update_person']:
+                # Undo person update - restore old value
+                if action.get('old_value') and action.get('entity_id'):
+                    cursor.execute("""
+                        UPDATE persons 
+                        SET name = ?
+                        WHERE id = ?
+                    """, (action['old_value'], action['entity_id']))
+                    
+                    conn.commit()
+                    return True, f"Personne restaurée: {action['old_value']}"
+                else:
+                    return False, "Impossible de restaurer: données manquantes"
+            
+            elif action_type in ['ADD_PERSON', 'add_person', 'CREATE']:
+                # Undo person creation - delete the person
+                person_name = action.get('person1') or action.get('entity_name')
+                
+                # Delete all relations first
+                cursor.execute("""
+                    DELETE FROM relations 
+                    WHERE person1 = ? OR person2 = ?
+                """, (person_name, person_name))
+                
+                # Delete the person
+                cursor.execute("DELETE FROM persons WHERE name = ?", (person_name,))
+                
+                conn.commit()
+                return True, f"Personne supprimée: {person_name}"
+            
+            elif action_type in ['APPROVE', 'approve']:
+                # For now, just mark as cancelled without reverting
+                return True, "Action marquée comme annulée"
+            
+            else:
+                # Unknown action type, just mark as cancelled
+                return True, f"Action '{action_type}' marquée comme annulée (pas de revert automatique)"
+            
+        except Exception as e:
+            return False, f"Erreur revert: {str(e)}"
     
     def can_undo(self) -> Tuple[bool, Optional[Dict]]:
         """

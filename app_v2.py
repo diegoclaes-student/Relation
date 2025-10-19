@@ -5,7 +5,7 @@ Architecture 100% propre avec Services + Repositories
 """
 
 import dash
-from dash import dcc, html, Input, Output, State, ALL, ctx, no_update
+from dash import dcc, html, Input, Output, State, ALL, MATCH, ctx, no_update
 import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
 import plotly.graph_objects as go
@@ -1486,12 +1486,6 @@ def create_admin_layout(user):
                         ], id='btn-delete-person', outline=True, color='danger', size='lg', className='mb-3'),
                     ], style={'display': 'flex', 'flexDirection': 'column', 'gap': '10px', 'maxWidth': '400px'}),
                     
-                    # History Section
-                    html.Div([
-                        html.Div("📝 Recent Actions", className='section-title'),
-                        html.Div(id='history-display', style={'fontSize': '12px', 'color': '#666'})
-                    ], style={'marginTop': '30px'}),
-                    
                 ], style={'padding': '30px'}),
             ]),
             
@@ -2672,100 +2666,82 @@ def update_graph_admin(layout_type, color_by, data_version, n_intervals, node_si
 # Callback pour Zoom In
 app.clientside_callback(
     """
-    function(n_clicks) {
-        if (!n_clicks) return window.dash_clientside.no_update;
+    function(n_clicks, figure) {
+        if (!n_clicks || !figure) return window.dash_clientside.no_update;
         
-        console.log('🔍 Zoom In clicked');
+        console.log('🔍 Zoom In clicked, figure:', figure);
         
-        var graphDiv = document.getElementById('network-graph');
-        if (!graphDiv) {
-            console.error('Graph div not found');
-            return window.dash_clientside.no_update;
-        }
+        // Accéder au layout depuis le figure Dash
+        var xRange = figure.layout && figure.layout.xaxis ? figure.layout.xaxis.range : null;
+        var yRange = figure.layout && figure.layout.yaxis ? figure.layout.yaxis.range : null;
         
-        // Trouver le vrai div Plotly
-        var plotlyDiv = graphDiv.querySelector('.js-plotly-plot') || graphDiv;
-        
-        var layout = plotlyDiv.layout || {};
-        var xRange = layout.xaxis ? layout.xaxis.range : null;
-        var yRange = layout.yaxis ? layout.yaxis.range : null;
-        
-        if (!xRange || !yRange) {
-            console.warn('No range found in layout');
+        if (!xRange || !yRange || xRange.length !== 2 || yRange.length !== 2) {
+            console.warn('No valid range found in figure layout');
             return window.dash_clientside.no_update;
         }
         
         var xCenter = (xRange[0] + xRange[1]) / 2;
         var yCenter = (yRange[0] + yRange[1]) / 2;
-        var factor = 1.5;
+        var factor = 1.5; // Zoom in
         var xSpan = (xRange[1] - xRange[0]) / factor / 2;
         var ySpan = (yRange[1] - yRange[0]) / factor / 2;
         
-        try {
-            Plotly.relayout(plotlyDiv, {
-                'xaxis.range': [xCenter - xSpan, xCenter + xSpan],
-                'yaxis.range': [yCenter - ySpan, yCenter + ySpan]
-            });
-            console.log('✅ Zoom in applied');
-        } catch(e) {
-            console.error('Zoom error:', e);
-        }
+        // Créer une nouvelle figure avec le layout modifié
+        var newFigure = {...figure};
+        newFigure.layout = {...figure.layout};
+        newFigure.layout.xaxis = {...figure.layout.xaxis, range: [xCenter - xSpan, xCenter + xSpan]};
+        newFigure.layout.yaxis = {...figure.layout.yaxis, range: [yCenter - ySpan, yCenter + ySpan]};
         
-        return window.dash_clientside.no_update;
+        console.log('✅ Zoom in applied, new ranges:', newFigure.layout.xaxis.range, newFigure.layout.yaxis.range);
+        
+        return [window.dash_clientside.no_update, newFigure];
     }
     """,
-    Output('btn-zoom-in', 'n_clicks', allow_duplicate=True),
-    Input('btn-zoom-in', 'n_clicks'),
+    [Output('btn-zoom-in', 'n_clicks', allow_duplicate=True),
+     Output('network-graph', 'figure', allow_duplicate=True)],
+    [Input('btn-zoom-in', 'n_clicks'),
+     State('network-graph', 'figure')],
     prevent_initial_call=True
 )
 
 # Callback pour Zoom Out
 app.clientside_callback(
     """
-    function(n_clicks) {
-        if (!n_clicks) return window.dash_clientside.no_update;
+    function(n_clicks, figure) {
+        if (!n_clicks || !figure) return window.dash_clientside.no_update;
         
-        console.log('🔍 Zoom Out clicked');
+        console.log('🔍 Zoom Out clicked, figure:', figure);
         
-        var graphDiv = document.getElementById('network-graph');
-        if (!graphDiv) {
-            console.error('Graph div not found');
-            return window.dash_clientside.no_update;
-        }
+        // Accéder au layout depuis le figure Dash
+        var xRange = figure.layout && figure.layout.xaxis ? figure.layout.xaxis.range : null;
+        var yRange = figure.layout && figure.layout.yaxis ? figure.layout.yaxis.range : null;
         
-        // Trouver le vrai div Plotly
-        var plotlyDiv = graphDiv.querySelector('.js-plotly-plot') || graphDiv;
-        
-        var layout = plotlyDiv.layout || {};
-        var xRange = layout.xaxis ? layout.xaxis.range : null;
-        var yRange = layout.yaxis ? layout.yaxis.range : null;
-        
-        if (!xRange || !yRange) {
-            console.warn('No range found in layout');
+        if (!xRange || !yRange || xRange.length !== 2 || yRange.length !== 2) {
+            console.warn('No valid range found in figure layout');
             return window.dash_clientside.no_update;
         }
         
         var xCenter = (xRange[0] + xRange[1]) / 2;
         var yCenter = (yRange[0] + yRange[1]) / 2;
-        var factor = 0.67;
+        var factor = 0.67; // Zoom out
         var xSpan = (xRange[1] - xRange[0]) / factor / 2;
         var ySpan = (yRange[1] - yRange[0]) / factor / 2;
         
-        try {
-            Plotly.relayout(plotlyDiv, {
-                'xaxis.range': [xCenter - xSpan, xCenter + xSpan],
-                'yaxis.range': [yCenter - ySpan, yCenter + ySpan]
-            });
-            console.log('✅ Zoom out applied');
-        } catch(e) {
-            console.error('Zoom error:', e);
-        }
+        // Créer une nouvelle figure avec le layout modifié
+        var newFigure = {...figure};
+        newFigure.layout = {...figure.layout};
+        newFigure.layout.xaxis = {...figure.layout.xaxis, range: [xCenter - xSpan, xCenter + xSpan]};
+        newFigure.layout.yaxis = {...figure.layout.yaxis, range: [yCenter - ySpan, yCenter + ySpan]};
         
-        return window.dash_clientside.no_update;
+        console.log('✅ Zoom out applied, new ranges:', newFigure.layout.xaxis.range, newFigure.layout.yaxis.range);
+        
+        return [window.dash_clientside.no_update, newFigure];
     }
     """,
-    Output('btn-zoom-out', 'n_clicks', allow_duplicate=True),
-    Input('btn-zoom-out', 'n_clicks'),
+    [Output('btn-zoom-out', 'n_clicks', allow_duplicate=True),
+     Output('network-graph', 'figure', allow_duplicate=True)],
+    [Input('btn-zoom-out', 'n_clicks'),
+     State('network-graph', 'figure')],
     prevent_initial_call=True
 )
 
@@ -2887,24 +2863,247 @@ def update_stats(n_intervals):
 # ============================================================================
 
 @app.callback(
-    Output('history-display', 'children'),
-    Input('auto-refresh', 'n_intervals')
+    Output('history-list-recent', 'children'),
+    [Input('btn-refresh-history-recent', 'n_clicks'),
+     Input('auto-refresh', 'n_intervals'),
+     Input('history-filter-type', 'value'),
+     Input('history-filter-action', 'value')],
+    prevent_initial_call=False
 )
-def update_history(n_intervals):
-    """Display recent actions from HistoryService"""
-    recent = history_service.get_history(limit=5)
+def update_history_recent(n_clicks, n_intervals, filter_type, filter_action):
+    """Display recent ACTIVE actions from HistoryService"""
+    print(f"✅ [HISTORY] update_history_recent called: n_clicks={n_clicks}, filter_type={filter_type}, filter_action={filter_action}")
     
-    if not recent:
-        return html.P("No recent actions", style={'fontStyle': 'italic', 'color': '#999'})
+    try:
+        # Get ACTIVE history records from database
+        recent = history_service.get_history(limit=50, status='active')
+        print(f"   → Retrieved {len(recent)} active history records from database")
+        
+        if not recent:
+            return html.P("Aucune modification récente", className='text-muted')
+        
+        # Import components for rendering
+        from components.history_tab import render_history_item
+        
+        # Convert to UI format using the component renderer
+        items = []
+        for record in recent:
+            # Enrich record with entity info if missing
+            if not record.get('entity_type'):
+                # Infer from action_type
+                action_type = record.get('action_type', '')
+                if 'PERSON' in action_type.upper():
+                    record['entity_type'] = 'person'
+                    record['entity_name'] = record.get('person1', 'N/A')
+                elif 'RELATION' in action_type.upper():
+                    record['entity_type'] = 'relation'
+                    record['entity_name'] = f"{record.get('person1', '')} ↔ {record.get('person2', '')}"
+                else:
+                    record['entity_type'] = 'unknown'
+                    record['entity_name'] = record.get('person1', 'N/A')
+            
+            items.append(render_history_item(record, show_cancel_button=True))
+        
+        print(f"   ✅ Returning {len(items)} formatted history items")
+        return html.Div(items) if items else html.P("Aucune modification récente", className='text-muted')
+        
+    except Exception as e:
+        print(f"   ❌ ERROR in update_history_recent: {e}")
+        import traceback
+        traceback.print_exc()
+        return html.P(f"Erreur lors du chargement de l'historique: {str(e)}", className='text-danger')
+
+
+@app.callback(
+    Output('history-list-cancelled', 'children'),
+    [Input('btn-refresh-history-cancelled', 'n_clicks'),
+     Input('auto-refresh', 'n_intervals')],
+    prevent_initial_call=False
+)
+def update_history_cancelled(n_clicks, n_intervals):
+    """Display CANCELLED actions"""
+    print(f"✅ [HISTORY] update_history_cancelled called: n_clicks={n_clicks}")
     
-    items = []
-    for action in recent:
-        items.append(html.Div([
-            html.Span(f"{action.get('created_at', 'Unknown')}: ", style={'fontWeight': '600'}),
-            html.Span(f"{action.get('action_type', 'Unknown')} - {action.get('person1', '')}")
-        ], style={'marginBottom': '5px'}))
+    try:
+        # Get CANCELLED history records
+        cancelled = history_service.get_history(limit=50, status='cancelled')
+        print(f"   → Retrieved {len(cancelled)} cancelled records")
+        
+        if not cancelled:
+            return html.P("Aucune modification annulée", className='text-muted')
+        
+        # Import components for rendering
+        from components.history_tab import render_history_item
+        
+        # Convert to UI format
+        items = []
+        for record in cancelled:
+            # Enrich record
+            if not record.get('entity_type'):
+                action_type = record.get('action_type', '')
+                if 'PERSON' in action_type.upper():
+                    record['entity_type'] = 'person'
+                    record['entity_name'] = record.get('person1', 'N/A')
+                elif 'RELATION' in action_type.upper():
+                    record['entity_type'] = 'relation'
+                    record['entity_name'] = f"{record.get('person1', '')} ↔ {record.get('person2', '')}"
+                else:
+                    record['entity_type'] = 'unknown'
+                    record['entity_name'] = record.get('person1', 'N/A')
+            
+            items.append(render_history_item(record, show_cancel_button=False))
+        
+        return html.Div(items) if items else html.P("Aucune modification annulée", className='text-muted')
+        
+    except Exception as e:
+        print(f"   ❌ ERROR in update_history_cancelled: {e}")
+        import traceback
+        traceback.print_exc()
+        return html.P(f"Erreur: {str(e)}", className='text-danger')
+
+
+# Clientside callback pour détecter le clic sur un bouton d'annulation
+app.clientside_callback(
+    """
+    function(n_clicks_list) {
+        console.log('🔍 [CLIENTSIDE] Cancel button detection triggered');
+        console.log('   n_clicks_list:', n_clicks_list);
+        
+        // Find which button was clicked (look for the one that just incremented)
+        if (!n_clicks_list || n_clicks_list.length === 0) {
+            console.log('   ⚠️ No buttons detected');
+            return window.dash_clientside.no_update;
+        }
+        
+        // Get the triggered component ID from Dash context
+        const triggered = window.dash_clientside.callback_context.triggered;
+        console.log('   Triggered:', triggered);
+        
+        if (!triggered || triggered.length === 0) {
+            return window.dash_clientside.no_update;
+        }
+        
+        // Extract the action ID from the triggered prop_id
+        const prop_id = triggered[0].prop_id;
+        console.log('   prop_id:', prop_id);
+        
+        // Parse the JSON ID to get the index
+        const match = prop_id.match(/"index":(\\d+)/);
+        if (match && match[1]) {
+            const action_id = parseInt(match[1]);
+            console.log('   ✅ Detected cancel for action_id:', action_id);
+            return {
+                'action_id': action_id,
+                'timestamp': Date.now()
+            };
+        }
+        
+        console.log('   ❌ Could not parse action_id from prop_id');
+        return window.dash_clientside.no_update;
+    }
+    """,
+    Output('cancel-action-store', 'data'),
+    Input({'type': 'cancel-history', 'index': ALL}, 'n_clicks'),
+    prevent_initial_call=True
+)
+
+
+# Callback pour annuler l'action stockée dans le Store
+@app.callback(
+    [Output('history-list-recent', 'children', allow_duplicate=True),
+     Output('history-list-cancelled', 'children', allow_duplicate=True),
+     Output('data-version', 'data', allow_duplicate=True),
+     Output('cancel-action-store', 'data', allow_duplicate=True)],
+    Input('cancel-action-store', 'data'),
+    [State('data-version', 'data'),
+     State('auth-data', 'data')],
+    prevent_initial_call=True
+)
+def cancel_history_action(cancel_data, current_version, auth_data):
+    """Cancel a history action based on the stored action ID"""
+    print(f"🔍 [HISTORY-CANCEL] Callback triggered!")
+    print(f"   cancel_data: {cancel_data}")
     
-    return html.Div(items)
+    if not cancel_data or not cancel_data.get('action_id'):
+        print(f"   ⚠️ No action_id in cancel_data")
+        return no_update, no_update, no_update, no_update
+    
+    action_id = cancel_data.get('action_id')
+    
+    # Check authentication
+    if not auth_data or not auth_data.get('is_admin'):
+        print("❌ [HISTORY] Unauthorized cancel attempt")
+        return no_update, no_update, no_update, None
+    
+    print(f"✅ [HISTORY] Cancel action: action_id={action_id}")
+    
+    try:
+        # Cancel the action
+        username = auth_data.get('username', 'admin')
+        success, message = history_service.cancel_action(action_id, cancelled_by=username)
+        
+        if success:
+            print(f"   ✅ {message}")
+            
+            # Clear cache and increment version
+            graph_builder.clear_cache()
+            new_version = (current_version or 0) + 1
+            print(f"   → Cache cleared, new version: {new_version}")
+            
+            # Refresh both lists
+            # Get active actions
+            recent = history_service.get_history(limit=50, status='active')
+            from components.history_tab import render_history_item
+            
+            recent_items = []
+            for record in recent:
+                if not record.get('entity_type'):
+                    action_type = record.get('action_type', '')
+                    if 'PERSON' in action_type.upper():
+                        record['entity_type'] = 'person'
+                        record['entity_name'] = record.get('person1', 'N/A')
+                    elif 'RELATION' in action_type.upper():
+                        record['entity_type'] = 'relation'
+                        record['entity_name'] = f"{record.get('person1', '')} ↔ {record.get('person2', '')}"
+                    else:
+                        record['entity_type'] = 'unknown'
+                        record['entity_name'] = record.get('person1', 'N/A')
+                
+                recent_items.append(render_history_item(record, show_cancel_button=True))
+            
+            recent_display = html.Div(recent_items) if recent_items else html.P("Aucune modification récente", className='text-muted')
+            
+            # Get cancelled actions
+            cancelled = history_service.get_history(limit=50, status='cancelled')
+            cancelled_items = []
+            for record in cancelled:
+                if not record.get('entity_type'):
+                    action_type = record.get('action_type', '')
+                    if 'PERSON' in action_type.upper():
+                        record['entity_type'] = 'person'
+                        record['entity_name'] = record.get('person1', 'N/A')
+                    elif 'RELATION' in action_type.upper():
+                        record['entity_type'] = 'relation'
+                        record['entity_name'] = f"{record.get('person1', '')} ↔ {record.get('person2', '')}"
+                    else:
+                        record['entity_type'] = 'unknown'
+                        record['entity_name'] = record.get('person1', 'N/A')
+                
+                cancelled_items.append(render_history_item(record, show_cancel_button=False))
+            
+            cancelled_display = html.Div(cancelled_items) if cancelled_items else html.P("Aucune modification annulée", className='text-muted')
+            
+            # Clear the store and return updated lists
+            return recent_display, cancelled_display, new_version, None
+        else:
+            print(f"   ❌ {message}")
+            return no_update, no_update, no_update, None
+            
+    except Exception as e:
+        print(f"   ❌ ERROR cancelling action: {e}")
+        import traceback
+        traceback.print_exc()
+        return no_update, no_update, no_update, None
 
 # ============================================================================
 # CALLBACKS - MODALS ADD RELATION
@@ -3531,16 +3730,41 @@ def handle_delete_relation(delete_clicks, current_version):
 )
 def toggle_edit_person_modal_v2(open_clicks, cancel_clicks, submit_clicks, is_open):
     """Toggle edit person modal and populate dropdown"""
-    if ctx.triggered_id == 'btn-edit-person':
+    if not ctx.triggered:
+        return no_update, no_update
+    
+    triggered_id = ctx.triggered_id
+    print(f"✅ [ADMIN] Edit Person Modal: {triggered_id}")
+    
+    # Vérification des n_clicks
+    if triggered_id == 'btn-edit-person' and (not open_clicks or open_clicks < 1):
+        print(f"⚠️ Spurious trigger on btn-edit-person")
+        return no_update, no_update
+    
+    if triggered_id == 'btn-cancel-edit-person' and (not cancel_clicks or cancel_clicks < 1):
+        print(f"⚠️ Spurious trigger on btn-cancel-edit-person")
+        return no_update, no_update
+    
+    if triggered_id == 'btn-submit-edit-person' and (not submit_clicks or submit_clicks < 1):
+        print(f"⚠️ Spurious trigger on btn-submit-edit-person")
+        return no_update, no_update
+    
+    # Ouvrir le modal
+    if triggered_id == 'btn-edit-person':
+        print(f"   → Opening Edit Person modal")
         persons = person_repository.read_all()
         options = [{'label': p['name'], 'value': p['id']} for p in persons]
         return True, options
-    return False, []
+    
+    # Fermer le modal
+    if triggered_id in ['btn-cancel-edit-person', 'btn-submit-edit-person']:
+        print(f"   → Closing Edit Person modal")
+        return False, []
+    
+    return no_update, no_update
 
 @app.callback(
-    [Output('input-edit-person-name', 'value'),
-     Output('dropdown-edit-person-gender', 'value'),
-     Output('dropdown-edit-person-orientation', 'value')],
+    Output('input-edit-person-name', 'value'),
     Input('dropdown-edit-person-select', 'value'),
     prevent_initial_call=True
 )
@@ -3549,10 +3773,15 @@ def load_person_data_for_edit(person_id):
     if not person_id:
         raise PreventUpdate
     
+    print(f"✅ [ADMIN] Loading person data for edit: ID={person_id}")
+    
     person = person_repository.read(person_id)
     if person:
-        return person.get('name', ''), person.get('gender'), person.get('sexual_orientation')
-    return '', None, None
+        print(f"   → Person found: {person.get('name')}")
+        return person.get('name', '')
+    
+    print(f"   ❌ Person not found")
+    return ''
 
 @app.callback(
     [Output('modal-edit-person', 'is_open', allow_duplicate=True),
@@ -3560,42 +3789,64 @@ def load_person_data_for_edit(person_id):
     Input('btn-submit-edit-person', 'n_clicks'),
     [State('dropdown-edit-person-select', 'value'),
      State('input-edit-person-name', 'value'),
-     State('dropdown-edit-person-gender', 'value'),
-     State('dropdown-edit-person-orientation', 'value'),
      State('data-version', 'data')],
     prevent_initial_call=True
 )
-def submit_edit_person(n_clicks, person_id, new_name, gender, orientation, current_version):
+def submit_edit_person(n_clicks, person_id, new_name, current_version):
     """Submit person edit using PersonRepository"""
+    if not ctx.triggered or not n_clicks or n_clicks < 1:
+        return no_update, no_update
+    
+    print(f"✅ [ADMIN] SUBMIT EDIT PERSON: n_clicks={n_clicks}, person_id={person_id}, new_name={new_name}")
+    
     if not person_id or not new_name:
-        raise PreventUpdate
+        print(f"   ❌ Missing person_id or new_name")
+        return False, no_update
     
     try:
-        # Update using repository
+        # Get old value before updating
+        old_person = person_repository.read(person_id)
+        old_name = old_person['name'] if old_person else None
+        
+        # Update using repository (only name, keep existing gender/orientation)
+        print(f"   → Updating person ID {person_id} from '{old_name}' to '{new_name.strip()}'")
         success, message = person_repository.update(
             person_id=person_id,
-            name=new_name.strip() if new_name else None,
-            gender=gender,
-            sexual_orientation=orientation
+            name=new_name.strip()
         )
         
+        print(f"   → Update result: {success}, message: {message}")
+        
         if success:
-            # Record in history
+            # Record in history with old and new values
             history_service.record_action(
                 action_type='UPDATE_PERSON',
-                person1=new_name.strip() if new_name else None
+                person1=new_name.strip(),
+                entity_type='person',
+                entity_id=person_id,
+                entity_name=new_name.strip(),
+                old_value=old_name,
+                new_value=new_name.strip()
             )
+            print(f"   ✅ History recorded (old: '{old_name}' -> new: '{new_name.strip()}')")
             
             # Invalidate graph cache
             graph_builder.clear_cache()
+            print(f"   ✅ Graph cache cleared")
             
             # Bump version
             new_version = (current_version or 0) + 1
             print(f"   ✅ Person updated! New data version: {new_version}")
             return False, new_version  # Close modal
+        else:
+            print(f"   ❌ Update failed: {message}")
+            return False, no_update  # Close modal anyway
         
-        return False, no_update  # Close modal
     except Exception as e:
+        print(f"   ❌ Exception during update: {e}")
+        import traceback
+        traceback.print_exc()
+        return False, no_update  # Close modal
         print(f"Error updating person: {e}")
         return True, no_update  # Keep modal open
 
@@ -3770,7 +4021,8 @@ def show_delete_info(person_id):
         return None
     
     # Count relations
-    relations = relation_repository.get_relations_for_person(person['name'])
+    all_relations = relation_repository.read_all()
+    relations = [r for r in all_relations if r[0] == person['name'] or r[1] == person['name']]
     
     return dbc.Alert([
         html.H6(f"Delete: {person['name']}", className='mb-2'),
@@ -3779,13 +4031,15 @@ def show_delete_info(person_id):
     ], color='warning')
 
 @app.callback(
-    Output('modal-delete-person', 'is_open', allow_duplicate=True),
+    [Output('modal-delete-person', 'is_open', allow_duplicate=True),
+     Output('data-version', 'data', allow_duplicate=True)],
     Input('btn-submit-delete-person', 'n_clicks'),
     [State('dropdown-delete-person-select', 'value'),
-     State('checkbox-delete-cascade', 'value')],
+     State('checkbox-delete-cascade', 'value'),
+     State('data-version', 'data')],
     prevent_initial_call=True
 )
-def submit_delete_person(n_clicks, person_id, cascade):
+def submit_delete_person(n_clicks, person_id, cascade, current_version):
     """Submit person deletion using PersonRepository"""
     if not person_id:
         raise PreventUpdate
@@ -3798,19 +4052,35 @@ def submit_delete_person(n_clicks, person_id, cascade):
         success, message = person_repository.delete(person_id, cascade=bool(cascade))
         
         if success:
+            print(f"✅ [ADMIN] Person deleted: {person_name}")
+            
             # Record in history
             history_service.record_action(
                 action_type='DELETE_PERSON',
-                person1=person_name
+                person1=person_name,
+                entity_type='person',
+                entity_name=person_name
             )
+            print(f"   ✅ History recorded")
             
             # Invalidate graph cache
             graph_builder.clear_cache()
+            print(f"   ✅ Graph cache cleared")
+            
+            # Increment version to trigger graph refresh
+            new_version = (current_version or 0) + 1
+            print(f"   ✅ Data version incremented: {new_version}")
+            
+            return False, new_version  # Close modal and update version
+        else:
+            print(f"   ❌ Deletion failed: {message}")
+            return False, no_update  # Close modal anyway
         
-        return False  # Close modal
     except Exception as e:
-        print(f"Error deleting person: {e}")
-        return True  # Keep modal open
+        print(f"❌ Error deleting person: {e}")
+        import traceback
+        traceback.print_exc()
+        return True, no_update  # Keep modal open on error
 
 # ============================================================================
 # MAIN
