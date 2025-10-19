@@ -33,7 +33,7 @@ pip install -r requirements.txt
 ```
 2. Exportez la variable d'environnement:
 ```bash
-export DATABASE_URL='postgres://user:pass@host:5432/dbname'
+export DATABASE_URL='postgres://postgres:[e8ZKjjzDvS5Ap48A]@xaoectybwqoclobtiwvi.db.eu-central-1.nhost.run:5432/xaoectybwqoclobtiwvi'
 ```
 3. Lancez la migration (testez d'abord sur un projet Nhost de staging):
 ```bash

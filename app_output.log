@@ -544,3 +544,221 @@ Dash is running on http://0.0.0.0:8052/
 127.0.0.1 - - [20/Oct/2025 01:17:09] "POST /_dash-update-component HTTP/1.1" 200 -
 127.0.0.1 - - [20/Oct/2025 01:17:09] "POST /_dash-update-component HTTP/1.1" 200 -
 127.0.0.1 - - [20/Oct/2025 01:17:09] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:18:32] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:18:32] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:18:32] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:18:32] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:18:32] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:20:00] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:20:00] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:20:00] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:20:00] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:20:00] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:21:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:21:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:21:25] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:21:25] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:21:25] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:22:58] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:22:58] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:22:58] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:22:58] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:22:59] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:24:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:24:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:24:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:24:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:24:24] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:25:34] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:25:34] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:25:34] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:25:35] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:25:35] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:27:06] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:27:06] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:27:06] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:27:06] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:27:06] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:28:22] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:28:22] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:28:22] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:28:22] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:28:23] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:30:04] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:30:04] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:30:04] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:30:05] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:30:05] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:31:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:31:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:31:18] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:31:19] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:31:19] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:32:35] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:32:35] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:32:35] "POST /_dash-update-component HTTP/1.1" 200 -
+
+📊 Admin panel data: accounts=0, persons=0, relations=0
+✅ [HISTORY] update_history_cancelled called: n_clicks=None
+   → Retrieved 1 cancelled records
+✅ [HISTORY] update_history_recent called: n_clicks=None, filter_type=all, filter_action=all
+   → Retrieved 50 active history records from database
+   ✅ Returning 50 formatted history items
+🔄 REFRESH ADMIN PANEL called (initial/auto-refresh)
+✅ User is admin, fetching pending submissions...
+🔍 [DB] Getting pending account requests...
+✅ [DB] Found 0 pending account requests: []
+🔍 [DB] Getting pending persons...
+✅ [DB] Found 0 pending persons: []
+🔍 [DB] Getting pending relations...
+✅ [DB] Found 0 pending relations: []
+📊 Admin panel data: accounts=0, persons=0, relations=0
+✅ [HISTORY] update_history_cancelled called: n_clicks=None
+✅ [HISTORY] update_history_recent called: n_clicks=None, filter_type=all, filter_action=all
+   → Retrieved 1 cancelled records
+   → Retrieved 50 active history records from database
+   ✅ Returning 50 formatted history items
+🔄 REFRESH ADMIN PANEL called (initial/auto-refresh)
+✅ User is admin, fetching pending submissions...
+🔍 [DB] Getting pending account requests...
+✅ [DB] Found 0 pending account requests: []
+🔍 [DB] Getting pending persons...
+✅ [DB] Found 0 pending persons: []
+🔍 [DB] Getting pending relations...
+✅ [DB] Found 0 pending relations: []
+📊 Admin panel data: accounts=0, persons=0, relations=0
+✅ [HISTORY] update_history_cancelled called: n_clicks=None
+✅ [HISTORY] update_history_recent called: n_clicks=None, filter_type=all, filter_action=all
+   → Retrieved 1 cancelled records
+   → Retrieved 50 active history records from database
+   ✅ Returning 50 formatted history items
+🔄 REFRESH ADMIN PANEL called (initial/auto-refresh)
+✅ User is admin, fetching pending submissions...
+🔍 [DB] Getting pending account requests...
+✅ [DB] Found 0 pending account requests: []
+🔍 [DB] Getting pending persons...
+✅ [DB] Found 0 pending persons: []
+🔍 [DB] Getting pending relations...
+✅ [DB] Found 0 pending relations: []
+📊 Admin panel data: accounts=0, persons=0, relations=0
+✅ [HISTORY] update_history_cancelled called: n_clicks=None
+✅ [HISTORY] update_history_recent called: n_clicks=None, filter_type=all, filter_action=all
+   → Retrieved 1 cancelled records
+🔄 REFRESH ADMIN PANEL called (initial/auto-refresh)
+✅ User is admin, fetching pending submissions...
+🔍 [DB] Getting pending account requests...
+✅ [DB] Found 0 pending account requests: []
+🔍 [DB] Getting pending persons...
+✅ [DB] Found 0 pending persons: []
+🔍 [DB] Getting pending relations...
+   → Retrieved 50 active history records from database
+✅ [DB] Found 0 pending relations: []
+   ✅ Returning 50 formatted history items
+📊 Admin panel data: accounts=0, persons=0, relations=0
+✅ [HISTORY] update_history_cancelled called: n_clicks=None
+✅ [HISTORY] update_history_recent called: n_clicks=None, filter_type=all, filter_action=all
+🔄 REFRESH ADMIN PANEL called (initial/auto-refresh)
+✅ User is admin, fetching pending submissions...
+🔍 [DB] Getting pending account requests...
+✅ [DB] Found 0 pending account requests: []
+🔍 [DB] Getting pending persons...
+   → Retrieved 1 cancelled records
+   → Retrieved 50 active history records from database
+   ✅ Returning 50 formatted history items
+✅ [DB] Found 0 pending persons: []
+🔍 [DB] Getting pending relations...
+✅ [DB] Found 0 pending relations: []
+📊 Admin panel data: accounts=0, persons=0, relations=0
+✅ [HISTORY] update_history_cancelled called: n_clicks=None
+✅ [HISTORY] update_history_recent called: n_clicks=None, filter_type=all, filter_action=all
+   → Retrieved 1 cancelled records
+   → Retrieved 50 active history records from database
+   ✅ Returning 50 formatted history items
+🔄 REFRESH ADMIN PANEL called (initial/auto-refresh)
+✅ User is admin, fetching pending submissions...
+🔍 [DB] Getting pending account requests...
+✅ [DB] Found 0 pending account requests: []
+🔍 [DB] Getting pending persons...
+✅ [DB] Found 0 pending persons: []
+🔍 [DB] Getting pending relations...
+✅ [DB] Found 0 pending relations: []
+📊 Admin panel data: accounts=0, persons=0, relations=0
+✅ [HISTORY] update_history_cancelled called: n_clicks=None
+✅ [HISTORY] update_history_recent called: n_clicks=None, filter_type=all, filter_action=all
+   → Retrieved 1 cancelled records
+   → Retrieved 50 active history records from database
+   ✅ Returning 50 formatted history items
+🔄 REFRESH ADMIN PANEL called (initial/auto-refresh)
+✅ User is admin, fetching pending submissions...
+🔍 [DB] Getting pending account requests...
+✅ [DB] Found 0 pending account requests: []
+🔍 [DB] Getting pending persons...
+✅ [DB] Found 0 pending persons: []
+🔍 [DB] Getting pending relations...
+✅ [DB] Found 0 pending relations: []
+📊 Admin panel data: accounts=0, persons=0, relations=0
+✅ [HISTORY] update_history_cancelled called: n_clicks=None
+✅ [HISTORY] update_history_recent called: n_clicks=None, filter_type=all, filter_action=all
+   → Retrieved 1 cancelled records
+   → Retrieved 50 active history records from database
+   ✅ Returning 50 formatted history items
+🔄 REFRESH ADMIN PANEL called (initial/auto-refresh)
+✅ User is admin, fetching pending submissions...
+🔍 [DB] Getting pending account requests...
+✅ [DB] Found 0 pending account requests: []
+🔍 [DB] Getting pending persons...
+✅ [DB] Found 0 pending persons: []
+🔍 [DB] Getting pending relations...
+✅ [DB] Found 0 pending relations: []
+📊 Admin panel data: accounts=0, persons=0, relations=0
+✅ [HISTORY] update_history_cancelled called: n_clicks=None
+✅ [HISTORY] update_history_recent called: n_clicks=None, filter_type=all, filter_action=all
+   → Retrieved 1 cancelled records
+   → Retrieved 50 active history records from database
+   ✅ Returning 50 formatted history items
+🔄 REFRESH ADMIN PANEL called (initial/auto-refresh)
+✅ User is admin, fetching pending submissions...
+🔍 [DB] Getting pending account requests...
+✅ [DB] Found 0 pending account requests: []
+🔍 [DB] Getting pending persons...
+✅ [DB] Found 0 pending persons: []
+🔍 [DB] Getting pending relations...
+✅ [DB] Found 0 pending relations: []
+📊 Admin panel data: accounts=0, persons=0, relations=0
+✅ [HISTORY] update_history_cancelled called: n_clicks=None
+   → Retrieved 1 cancelled records
+✅ [HISTORY] update_history_recent called: n_clicks=None, filter_type=all, filter_action=all
+   → Retrieved 50 active history records from database
+   ✅ Returning 50 formatted history items
+🔄 REFRESH ADMIN PANEL called (initial/auto-refresh)
+✅ User is admin, fetching pending submissions...
+🔍 [DB] Getting pending account requests...
+✅ [DB] Found 0 pending account requests: []
+🔍 [DB] Getting pending persons...
+✅ [DB] Found 0 pending persons: []
+🔍 [DB] Getting pending relations...
+✅ [DB] Found 0 pending relations: []
+📊 Admin panel data: accounts=0, persons=0, relations=0
+✅ [HISTORY] update_history_cancelled called: n_clicks=None
+✅ [HISTORY] update_history_recent called: n_clicks=None, filter_type=all, filter_action=all
+   → Retrieved 1 cancelled records
+   → Retrieved 50 active history records from database
+   ✅ Returning 50 formatted history items
+🔄 REFRESH ADMIN PANEL called (initial/auto-refresh)
+✅ User is admin, fetching pending submissions...
+🔍 [DB] Getting pending account requests...
+✅ [DB] Found 0 pending account requests: []
+🔍 [DB] Getting pending persons...
+✅ [DB] Found 0 pending persons: []
+🔍 [DB] Getting pending relations...
+✅ [DB] Found 0 pending relations: []
+📊 Admin panel data: accounts=0, persons=0, relations=0
+✅ [HISTORY] update_history_cancelled called: n_clicks=None
+✅ [HISTORY] update_history_recent called: n_clicks=None, filter_type=all, filter_action=all
+   → Retrieved 1 cancelled records
+   → Retrieved 50 active history records from database
+   ✅ Returning 50 formatted history items
+🔄 REFRESH ADMIN PANEL called (initial/auto-refresh)
+✅ User is admin, fetching pending submissions...
+🔍 [DB] Getting pending account requests...127.0.0.1 - - [20/Oct/2025 01:32:36] "POST /_dash-update-component HTTP/1.1" 200 -
+127.0.0.1 - - [20/Oct/2025 01:32:36] "POST /_dash-update-component HTTP/1.1" 200 -
