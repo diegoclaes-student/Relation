@@ -7,6 +7,7 @@ from typing import List, Dict, Optional
 import sqlite3
 from datetime import datetime
 from pathlib import Path
+from database.base import db_manager
 
 DB_PATH = Path(__file__).parent.parent / "social_network.db"
 
