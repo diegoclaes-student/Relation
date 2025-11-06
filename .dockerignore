@@ -1,9 +1,0 @@
-__pycache__
-*.pyc
-*.pyo
-*.db
-.env
-.env.local
-app_output.log
-venv
-.DS_Store
