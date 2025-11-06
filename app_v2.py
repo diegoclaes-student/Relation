@@ -1248,6 +1248,19 @@ def create_public_layout():
                         ),
                     ], style={'marginBottom': '12px'}),
                     
+                    # 5. Afficher tous les noms
+                    html.Div([
+                        dbc.Checklist(
+                            id='show-all-names',
+                            options=[
+                                {'label': '👁️ Afficher tous les noms', 'value': 'show_all'}
+                            ],
+                            value=[],
+                            switch=True,
+                            style={'fontSize': '12px'}
+                        ),
+                    ], style={'marginBottom': '12px'}),
+                    
                     html.Hr(style={'margin': '12px 0', 'borderColor': '#e0e4e8'}),
                     
                     html.Div("Contribute", style={
@@ -2146,7 +2159,8 @@ def populate_propose_p1_options(search_value, is_open, current_value):
         raise PreventUpdate
     
     persons = person_repository.read_all()
-    options = [{'label': p['name'], 'value': p['name']} for p in persons]
+    # Trier par ordre alphabétique
+    options = [{'label': p['name'], 'value': p['name']} for p in sorted(persons, key=lambda x: x['name'].lower())]
     
     # If search value and no exact match → add "Create new" option
     if search_value and len(search_value.strip()) >= 2:
@@ -2183,7 +2197,8 @@ def populate_propose_p2_options(search_value, is_open, current_value):
         raise PreventUpdate
     
     persons = person_repository.read_all()
-    options = [{'label': p['name'], 'value': p['name']} for p in persons]
+    # Trier par ordre alphabétique
+    options = [{'label': p['name'], 'value': p['name']} for p in sorted(persons, key=lambda x: x['name'].lower())]
     
     # If search value and no exact match → add "Create new" option
     if search_value and len(search_value.strip()) >= 2:
@@ -2510,9 +2525,11 @@ def handle_relation_approval(approve_clicks, reject_clicks, user_session):
      Input('node-size-slider', 'value'),
      Input('repulsion-slider', 'value'),
      Input('edge-tension-slider', 'value'),
-     Input('search-person', 'value')]
+     Input('search-person', 'value'),
+     Input('show-all-names', 'value')],
+    prevent_initial_call=False
 )
-def update_graph(layout_type, color_by, data_version, n_intervals, node_size, repulsion, edge_tension, search_person):
+def update_graph(layout_type, color_by, data_version, n_intervals, node_size, repulsion, edge_tension, search_person, show_all_names):
     """Build graph using repository + graph.py rendering with parameters"""
     try:
         # Get relations from repository (deduplicate pour éviter A→B et B→A)
@@ -2549,8 +2566,11 @@ def update_graph(layout_type, color_by, data_version, n_intervals, node_size, re
         # Compute layout with repulsion parameter
         pos = compute_layout(G, mode=layout_type, repulsion=repulsion)
         
-        # Create figure with size and edge tension parameters
-        fig = make_figure(G, pos, size_factor=node_size/15.0, edge_width=1.0 + edge_tension)
+        # Vérifier si la checkbox est cochée
+        show_all = 'show_all' in (show_all_names or [])
+        
+        # Create figure with size, edge tension, and show_all_names parameters
+        fig = make_figure(G, pos, size_factor=node_size/15.0, edge_width=1.0 + edge_tension, show_all_names=show_all)
         
         # If searching for a person, center and zoom on them
         if search_person:
@@ -2591,9 +2611,11 @@ def update_graph(layout_type, color_by, data_version, n_intervals, node_size, re
      Input('node-size-slider', 'value'),
      Input('repulsion-slider', 'value'),
      Input('edge-tension-slider', 'value'),
-     Input('search-person', 'value')]
+     Input('search-person', 'value'),
+     Input('show-all-names', 'value')],
+    prevent_initial_call=False
 )
-def update_graph_admin(layout_type, color_by, data_version, n_intervals, node_size, repulsion, edge_tension, search_person):
+def update_graph_admin(layout_type, color_by, data_version, n_intervals, node_size, repulsion, edge_tension, search_person, show_all_names):
     """Build graph using repository + graph.py rendering with parameters (admin version)"""
     try:
         # Get relations from repository (deduplicate pour éviter A→B et B→A)
@@ -2630,8 +2652,11 @@ def update_graph_admin(layout_type, color_by, data_version, n_intervals, node_si
         # Compute layout with repulsion parameter
         pos = compute_layout(G, mode=layout_type, repulsion=repulsion)
         
-        # Create figure with size and edge tension parameters
-        fig = make_figure(G, pos, size_factor=node_size/15.0, edge_width=1.0 + edge_tension)
+        # Vérifier si la checkbox est cochée
+        show_all = 'show_all' in (show_all_names or [])
+        
+        # Create figure with size, edge tension, and show_all_names parameters
+        fig = make_figure(G, pos, size_factor=node_size/15.0, edge_width=1.0 + edge_tension, show_all_names=show_all)
         
         # If searching for a person, center and zoom on them
         if search_person:

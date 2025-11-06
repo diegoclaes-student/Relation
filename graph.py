@@ -413,11 +413,12 @@ def shorten_segment(x0: float, y0: float, x1: float, y1: float, cut_head: float,
     return sx0, sy0, sx1, sy1
 
 
-def make_figure(G: nx.DiGraph, pos: Dict[str, Tuple[float, float]], size_factor: float = 1.0, edge_width: float = 1.5) -> go.Figure:
+def make_figure(G: nx.DiGraph, pos: Dict[str, Tuple[float, float]], size_factor: float = 1.0, edge_width: float = 1.5, show_all_names: bool = False) -> go.Figure:
     """Crée une figure Plotly style LinkedIn Maps avec communautés colorées distinctes.
     
     size_factor: multiplicateur pour les tailles de bulles (1.0 = normal, 2.0 = double)
     edge_width: épaisseur des liens
+    show_all_names: si True, affiche tous les noms (sinon seulement les gros nœuds)
     """
     from networkx.algorithms.community import greedy_modularity_communities
     from utils.constants import RELATION_TYPES
@@ -520,11 +521,15 @@ def make_figure(G: nx.DiGraph, pos: Dict[str, Tuple[float, float]], size_factor:
         hover += f"<br><b>📊 Total:</b> {deg_total[i]} connexion{'s' if deg_total[i] > 1 else ''}"
         
         hover_text.append(hover)
-    # Seuil pour afficher les labels : seulement les gros nœuds (degré > médiane)
-    median_deg = sorted(deg_total)[len(deg_total) // 2] if deg_total else 0
     
-    # Labels conditionnels : afficher seulement pour les nœuds importants
-    node_text = [str(n) if deg_total[i] > median_deg else "" for i, n in enumerate(nodes)]
+    # Seuil pour afficher les labels : seulement les gros nœuds (degré > médiane) OU tous si demandé
+    if show_all_names:
+        # Afficher TOUS les noms
+        node_text = [str(n) for n in nodes]
+    else:
+        # Afficher seulement les nœuds importants (comportement par défaut)
+        median_deg = sorted(deg_total)[len(deg_total) // 2] if deg_total else 0
+        node_text = [str(n) if deg_total[i] > median_deg else "" for i, n in enumerate(nodes)]
 
     # Nœuds avec Scatter standard pour compatibilité maximale
     node_trace = go.Scatter(  # Scatter classique - pas de WebGL
