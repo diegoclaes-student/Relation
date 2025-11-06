@@ -41,11 +41,10 @@ class DatabaseManager:
     # ---------- Connections ----------
     def get_connection(self):
         """Retourne une connexion à la base de données (sqlite3 ou psycopg2)
-        Note: pour psycopg2 on retourne une connexion standard; les méthodes
-        exécutent des fetchs compatibles.
+        Note: pour psycopg2 on retourne une connexion avec RealDictCursor
         """
         if self.use_postgres:
-            conn = psycopg2.connect(DATABASE_URL)
+            conn = psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
             return conn
         else:
             conn = sqlite3.connect(
