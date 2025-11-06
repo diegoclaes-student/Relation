@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+.env.local
+venv/
+env/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+social_network.db
+
+# Logs
+*.log
+app_v2.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backups
+*.backup
+*.bak
+*.old
+*.before_*
+app.py.backup
+app.py.before_reorg
+relations.txt.backup
+relations.txt.bak
+
+# Generated files
+graph.html
+graph.txt.html
+
+# Migration files
+migrate_to_csv.py
+symmetrize_relations.py
+
+# Old versions
+old_versions/
