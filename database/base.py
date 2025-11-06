@@ -14,6 +14,12 @@ import os
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+# Debug: afficher si PostgreSQL est détecté
+if DATABASE_URL:
+    print(f"🔵 PostgreSQL détecté ! URL: {DATABASE_URL[:50]}...")
+else:
+    print("⚠️ DATABASE_URL non définie - utilisation de SQLite")
+
 try:
     import psycopg2
     import psycopg2.extras
