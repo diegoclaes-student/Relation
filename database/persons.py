@@ -5,22 +5,19 @@ Encapsule toute la logique DB liée aux personnes
 """
 
 from typing import List, Dict, Optional, Tuple
-import sqlite3
-from config import DB_PATH
+from database.base import db_manager
 from utils.validators import Validator, ValidationError
 
 
 class PersonRepository:
     """Repository pour la gestion des personnes"""
     
-    def __init__(self, db_path: str = DB_PATH):
-        self.db_path = db_path
+    def __init__(self):
+        self.db_manager = db_manager
     
-    def _get_connection(self) -> sqlite3.Connection:
-        """Connexion avec row_factory"""
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        return conn
+    def _get_connection(self):
+        """Connexion via DatabaseManager (SQLite ou PostgreSQL)"""
+        return self.db_manager.get_connection()
     
     def create(self, name: str, gender: Optional[str] = None, 
                sexual_orientation: Optional[str] = None) -> Tuple[bool, str]:

@@ -5,8 +5,7 @@ Garantit la symétrie automatique via SymmetryManager
 """
 
 from typing import List, Dict, Optional, Tuple
-import sqlite3
-from config import DB_PATH
+from database.base import db_manager
 from utils.validators import Validator, ValidationError
 from services.symmetry import symmetry_manager
 
@@ -14,15 +13,13 @@ from services.symmetry import symmetry_manager
 class RelationRepository:
     """Repository pour la gestion des relations avec garantie symétrie"""
     
-    def __init__(self, db_path: str = DB_PATH):
-        self.db_path = db_path
+    def __init__(self):
+        self.db_manager = db_manager
         self.symmetry = symmetry_manager
     
-    def _get_connection(self) -> sqlite3.Connection:
-        """Connexion avec row_factory"""
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        return conn
+    def _get_connection(self):
+        """Connexion via DatabaseManager (SQLite ou PostgreSQL)"""
+        return self.db_manager.get_connection()
     
     def create(self, person1: str, person2: str, relation_type: int) -> Tuple[bool, str]:
         """

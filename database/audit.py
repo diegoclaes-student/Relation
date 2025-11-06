@@ -17,7 +17,7 @@ class AuditRepository:
     @staticmethod
     def init_tables():
         """Initialise les tables audit"""
-        conn = sqlite3.connect(DB_PATH)
+        conn = db_manager.get_connection()
         cur = conn.cursor()
         
         # Table d'historique des modifications
@@ -57,7 +57,7 @@ class AuditRepository:
             new_value: Nouvelle valeur (pour update)
         """
         try:
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             cur = conn.cursor()
             
             cur.execute("""
@@ -77,7 +77,7 @@ class AuditRepository:
     def get_recent_history(limit: int = 50, entity_type: str = None) -> List[Dict]:
         """Récupère l'historique récent"""
         try:
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             conn.row_factory = sqlite3.Row
             cur = conn.cursor()
             
@@ -107,7 +107,7 @@ class AuditRepository:
     def get_cancelled_history(limit: int = 50) -> List[Dict]:
         """Récupère l'historique des modifications annulées"""
         try:
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             conn.row_factory = sqlite3.Row
             cur = conn.cursor()
             
@@ -129,7 +129,7 @@ class AuditRepository:
     def cancel_action(audit_id: int, cancelled_by: str) -> bool:
         """Annule une action (mark as cancelled)"""
         try:
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             cur = conn.cursor()
             
             cur.execute("""

@@ -4,13 +4,11 @@ Gère les utilisateurs et l'authentification
 """
 
 from typing import Optional, List, Dict
-import sqlite3
+from database.base import db_manager
 from datetime import datetime
 import hashlib
 import secrets
 from pathlib import Path
-
-DB_PATH = Path(__file__).parent.parent / "social_network.db"
 
 
 class UserRepository:
@@ -19,7 +17,7 @@ class UserRepository:
     @staticmethod
     def init_tables():
         """Initialise les tables users"""
-        conn = sqlite3.connect(DB_PATH)
+        conn = db_manager.get_connection()
         cur = conn.cursor()
         
         # Table des utilisateurs
@@ -69,7 +67,7 @@ class UserRepository:
     def create_user(username: str, password: str, is_admin: bool = False) -> Optional[int]:
         """Crée un nouvel utilisateur"""
         try:
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             cur = conn.cursor()
             
             password_hash = UserRepository.hash_password(password)
@@ -90,7 +88,7 @@ class UserRepository:
     @staticmethod
     def get_user_by_username(username: str) -> Optional[Dict]:
         """Récupère un utilisateur par username"""
-        conn = sqlite3.connect(DB_PATH)
+        conn = db_manager.get_connection()
         cur = conn.cursor()
         
         cur.execute("""
@@ -116,7 +114,7 @@ class UserRepository:
     @staticmethod
     def get_user_by_id(user_id: int) -> Optional[Dict]:
         """Récupère un utilisateur par ID"""
-        conn = sqlite3.connect(DB_PATH)
+        conn = db_manager.get_connection()
         cur = conn.cursor()
         
         cur.execute("""
@@ -145,7 +143,7 @@ class UserRepository:
         user = UserRepository.get_user_by_username(username)
         if user and UserRepository.verify_password(password, user['password_hash']):
             # Update last login
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             cur = conn.cursor()
             cur.execute("""
                 UPDATE users SET last_login = ? WHERE id = ?
@@ -159,7 +157,7 @@ class UserRepository:
     @staticmethod
     def get_all_users() -> List[Dict]:
         """Récupère tous les utilisateurs actifs"""
-        conn = sqlite3.connect(DB_PATH)
+        conn = db_manager.get_connection()
         cur = conn.cursor()
         
         cur.execute("""
@@ -185,7 +183,7 @@ class UserRepository:
     def delete_user(user_id: int) -> bool:
         """Désactive un utilisateur (soft delete)"""
         try:
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             cur = conn.cursor()
             cur.execute("UPDATE users SET is_active = 0 WHERE id = ?", (user_id,))
             conn.commit()
@@ -198,7 +196,7 @@ class UserRepository:
     def promote_to_admin(user_id: int) -> bool:
         """Promeut un utilisateur à administrateur"""
         try:
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             cur = conn.cursor()
             cur.execute("UPDATE users SET is_admin = 1 WHERE id = ?", (user_id,))
             conn.commit()
@@ -211,7 +209,7 @@ class UserRepository:
     def demote_from_admin(user_id: int) -> bool:
         """Rétrograde un administrateur"""
         try:
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             cur = conn.cursor()
             cur.execute("UPDATE users SET is_admin = 0 WHERE id = ?", (user_id,))
             conn.commit()
@@ -224,7 +222,7 @@ class UserRepository:
     def get_pending_users() -> List[Dict]:
         """Récupère les utilisateurs en attente d'approbation"""
         try:
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             conn.row_factory = sqlite3.Row
             cur = conn.cursor()
             
@@ -244,7 +242,7 @@ class UserRepository:
     def get_pending_user_by_id(pending_id: int) -> Optional[Dict]:
         """Récupère un utilisateur en attente par ID"""
         try:
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             cur = conn.cursor()
             
             cur.execute("""
@@ -269,7 +267,7 @@ class UserRepository:
     def approve_pending_user(pending_id: int, make_admin: bool = False) -> bool:
         """Approuve un utilisateur en attente"""
         try:
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             cur = conn.cursor()
             
             # Get the pending user
@@ -302,7 +300,7 @@ class UserRepository:
     def reject_pending_user(pending_id: int) -> bool:
         """Rejette un utilisateur en attente"""
         try:
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             cur = conn.cursor()
             cur.execute("DELETE FROM pending_accounts WHERE id = ?", (pending_id,))
             conn.commit()
@@ -319,7 +317,7 @@ class PendingAccountRepository:
     def create_request(username: str, password: str) -> Optional[int]:
         """Crée une demande de compte"""
         try:
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             cur = conn.cursor()
             
             password_hash = UserRepository.hash_password(password)
@@ -341,7 +339,7 @@ class PendingAccountRepository:
     def get_pending_requests() -> List[Dict]:
         """Récupère toutes les demandes en attente"""
         print(f"🔍 [DB] Getting pending account requests...")
-        conn = sqlite3.connect(DB_PATH)
+        conn = db_manager.get_connection()
         cur = conn.cursor()
         
         cur.execute("""
@@ -367,7 +365,7 @@ class PendingAccountRepository:
     def approve_request(request_id: int) -> bool:
         """Approuve une demande et crée l'utilisateur"""
         try:
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             cur = conn.cursor()
             
             # Récupérer la demande
@@ -405,7 +403,7 @@ class PendingAccountRepository:
     def reject_request(request_id: int) -> bool:
         """Rejette une demande"""
         try:
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             cur = conn.cursor()
             cur.execute("""
                 UPDATE pending_accounts SET status = 'rejected' WHERE id = ?
@@ -421,7 +419,7 @@ class PendingAccountRepository:
 UserRepository.init_tables()
 
 # Créer un admin par défaut si aucun utilisateur n'existe
-conn = sqlite3.connect(DB_PATH)
+conn = db_manager.get_connection()
 cur = conn.cursor()
 cur.execute("SELECT COUNT(*) FROM users")
 if cur.fetchone()[0] == 0:

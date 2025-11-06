@@ -17,7 +17,7 @@ class PendingSubmissionRepository:
     @staticmethod
     def init_tables():
         """Initialise les tables de soumissions"""
-        conn = sqlite3.connect(DB_PATH)
+        conn = db_manager.get_connection()
         cur = conn.cursor()
         
         # Table des personnes proposées
@@ -52,7 +52,7 @@ class PendingSubmissionRepository:
         """Soumet une nouvelle personne pour approbation"""
         try:
             print(f"📝 [DB] Submitting person: name='{name}', submitted_by='{submitted_by}'")
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             cur = conn.cursor()
             
             now = datetime.now().isoformat()
@@ -76,7 +76,7 @@ class PendingSubmissionRepository:
         """Soumet une nouvelle relation pour approbation"""
         try:
             print(f"📝 [DB] Submitting relation: person1='{person1}', person2='{person2}', type={relation_type}, by='{submitted_by}'")
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             cur = conn.cursor()
             
             now = datetime.now().isoformat()
@@ -100,7 +100,7 @@ class PendingSubmissionRepository:
     def get_pending_persons() -> List[Dict]:
         """Récupère toutes les personnes en attente"""
         print(f"🔍 [DB] Getting pending persons...")
-        conn = sqlite3.connect(DB_PATH)
+        conn = db_manager.get_connection()
         cur = conn.cursor()
         
         cur.execute("""
@@ -127,7 +127,7 @@ class PendingSubmissionRepository:
     def get_pending_relations() -> List[Dict]:
         """Récupère toutes les relations en attente"""
         print(f"🔍 [DB] Getting pending relations...")
-        conn = sqlite3.connect(DB_PATH)
+        conn = db_manager.get_connection()
         cur = conn.cursor()
         
         cur.execute("""
@@ -159,7 +159,7 @@ class PendingSubmissionRepository:
             print(f"🔍 [DB] Approving person with ID: {submission_id}")
             from database.persons import person_repository
             
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             cur = conn.cursor()
             
             # Récupérer la soumission
@@ -206,7 +206,7 @@ class PendingSubmissionRepository:
             from database.relations import relation_repository
             from database.persons import person_repository
             
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             cur = conn.cursor()
             
             # Récupérer la soumission
@@ -262,7 +262,7 @@ class PendingSubmissionRepository:
     def reject_person(submission_id: int) -> bool:
         """Rejette une soumission de personne"""
         try:
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             cur = conn.cursor()
             cur.execute("""
                 UPDATE pending_persons SET status = 'rejected' WHERE id = ?
@@ -277,7 +277,7 @@ class PendingSubmissionRepository:
     def reject_relation(submission_id: int) -> bool:
         """Rejette une soumission de relation"""
         try:
-            conn = sqlite3.connect(DB_PATH)
+            conn = db_manager.get_connection()
             cur = conn.cursor()
             cur.execute("""
                 UPDATE pending_relations SET status = 'rejected' WHERE id = ?
