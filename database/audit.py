@@ -21,6 +21,10 @@ class AuditRepository:
         conn = db_manager.get_connection()
         cur = conn.cursor()
         
+        if getattr(db_manager, "use_postgres", False):
+            conn.close()
+            return
+        
         # Table d'historique des modifications
         cur.execute("""
             CREATE TABLE IF NOT EXISTS audit_log (

@@ -19,6 +19,11 @@ class UserRepository:
         """Initialise les tables users"""
         conn = db_manager.get_connection()
         cur = conn.cursor()
+
+        # PostgreSQL gère les tables via les migrations dédiées
+        if getattr(db_manager, "use_postgres", False):
+            conn.close()
+            return
         
         # Table des utilisateurs
         cur.execute("""

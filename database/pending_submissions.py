@@ -20,6 +20,10 @@ class PendingSubmissionRepository:
         """Initialise les tables de soumissions"""
         conn = db_manager.get_connection()
         cur = conn.cursor()
+
+        if getattr(db_manager, "use_postgres", False):
+            conn.close()
+            return
         
         # Table des personnes proposées
         cur.execute("""
