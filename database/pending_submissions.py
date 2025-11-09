@@ -62,8 +62,11 @@ class PendingSubmissionRepository:
             
             now = datetime.now().isoformat()
             
-            cur.execute("""
-                INSERT INTO pending_persons (name, submitted_by, submitted_at, status)
+            # Use person_name for PostgreSQL compatibility
+            name_column = "person_name" if getattr(db_manager, "use_postgres", False) else "name"
+            
+            cur.execute(f"""
+                INSERT INTO pending_persons ({name_column}, submitted_by, submitted_at, status)
                 VALUES (%s, %s, %s, 'pending')
                 RETURNING id
             """, (name, submitted_by, now))
@@ -110,8 +113,11 @@ class PendingSubmissionRepository:
         conn = db_manager.get_connection()
         cur = conn.cursor()
         
-        cur.execute("""
-            SELECT id, name, submitted_by, submitted_at, status
+        # Use person_name for PostgreSQL compatibility
+        name_column = "person_name" if getattr(db_manager, "use_postgres", False) else "name"
+        
+        cur.execute(f"""
+            SELECT id, {name_column}, submitted_by, submitted_at, status
             FROM pending_persons WHERE status = 'pending'
             ORDER BY submitted_at DESC
         """)
@@ -169,9 +175,12 @@ class PendingSubmissionRepository:
             conn = db_manager.get_connection()
             cur = conn.cursor()
             
+            # Use person_name for PostgreSQL compatibility
+            name_column = "person_name" if getattr(db_manager, "use_postgres", False) else "name"
+            
             # Récupérer la soumission
-            cur.execute("""
-                SELECT name FROM pending_persons 
+            cur.execute(f"""
+                SELECT {name_column} FROM pending_persons 
                 WHERE id = %s AND status = 'pending'
             """, (submission_id,))
             
