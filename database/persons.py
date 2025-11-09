@@ -284,7 +284,7 @@ class PersonRepository:
             target_name = target_row['name']
             
             # Transférer toutes les relations de source vers target
-            # Attention aux doublons : utiliser INSERT OR IGNORE
+            # Attention aux doublons : utiliser INSERT ... ON CONFLICT DO NOTHING (Postgres/SQLite compatible)
             
             # Relations où source est person1
             cursor.execute("""
@@ -297,14 +297,16 @@ class PersonRepository:
                 
                 # Ajouter relation target → person2 (si pas déjà existante)
                 cursor.execute("""
-                    INSERT OR IGNORE INTO relations (person1, person2, relation_type)
+                    INSERT INTO relations (person1, person2, relation_type)
                     VALUES (%s, %s, %s)
+                    ON CONFLICT (person1, person2, relation_type) DO NOTHING
                 """, (target_name, person2, rel_type))
                 
                 # Symétrique
                 cursor.execute("""
-                    INSERT OR IGNORE INTO relations (person1, person2, relation_type)
+                    INSERT INTO relations (person1, person2, relation_type)
                     VALUES (%s, %s, %s)
+                    ON CONFLICT (person1, person2, relation_type) DO NOTHING
                 """, (person2, target_name, rel_type))
             
             # Relations où source est person2
@@ -318,14 +320,16 @@ class PersonRepository:
                 
                 # Ajouter relation person1 → target
                 cursor.execute("""
-                    INSERT OR IGNORE INTO relations (person1, person2, relation_type)
+                    INSERT INTO relations (person1, person2, relation_type)
                     VALUES (%s, %s, %s)
+                    ON CONFLICT (person1, person2, relation_type) DO NOTHING
                 """, (person1, target_name, rel_type))
                 
                 # Symétrique
                 cursor.execute("""
-                    INSERT OR IGNORE INTO relations (person1, person2, relation_type)
+                    INSERT INTO relations (person1, person2, relation_type)
                     VALUES (%s, %s, %s)
+                    ON CONFLICT (person1, person2, relation_type) DO NOTHING
                 """, (target_name, person1, rel_type))
             
             # Supprimer toutes les relations de source

@@ -65,9 +65,10 @@ class PendingSubmissionRepository:
             cur.execute("""
                 INSERT INTO pending_persons (name, submitted_by, submitted_at, status)
                 VALUES (%s, %s, %s, 'pending')
+                RETURNING id
             """, (name, submitted_by, now))
             
-            submission_id = cur.lastrowid
+            submission_id = cur.fetchone()['id']
             print(f"✅ [DB] Person inserted with ID: {submission_id}")
             conn.commit()
             conn.close()
@@ -90,9 +91,10 @@ class PendingSubmissionRepository:
                 INSERT INTO pending_relations 
                 (person1, person2, relation_type, submitted_by, submitted_at, status)
                 VALUES (%s, %s, %s, %s, %s, 'pending')
+                RETURNING id
             """, (person1, person2, relation_type, submitted_by, now))
             
-            submission_id = cur.lastrowid
+            submission_id = cur.fetchone()['id']
             print(f"✅ [DB] Relation inserted with ID: {submission_id}")
             conn.commit()
             conn.close()

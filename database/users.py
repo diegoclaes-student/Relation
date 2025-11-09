@@ -8,6 +8,7 @@ from database.base import db_manager
 from datetime import datetime
 import hashlib
 import secrets
+import sqlite3
 from pathlib import Path
 
 
@@ -80,14 +81,15 @@ class UserRepository:
             
             cur.execute("""
                 INSERT INTO users (username, password_hash, is_admin, created_at, is_active)
-                VALUES (%s, %s, %s, %s, 1)
-            """, (username, password_hash, 1 if is_admin else 0, now))
+                VALUES (%s, %s, %s, %s, TRUE)
+                RETURNING id
+            """, (username, password_hash, is_admin, now))
             
-            user_id = cur.lastrowid
+            user_id = cur.fetchone()['id']
             conn.commit()
             conn.close()
             return user_id
-        except sqlite3.IntegrityError:
+        except Exception:
             return None
     
     @staticmethod
@@ -106,13 +108,13 @@ class UserRepository:
         
         if row:
             return {
-                'id': row[0],
-                'username': row[1],
-                'password_hash': row[2],
-                'is_admin': bool(row[3]),
-                'created_at': row[4],
-                'last_login': row[5],
-                'is_active': bool(row[6])
+                'id': row['id'],
+                'username': row['username'],
+                'password_hash': row['password_hash'],
+                'is_admin': bool(row['is_admin']),
+                'created_at': row['created_at'],
+                'last_login': row['last_login'],
+                'is_active': bool(row['is_active'])
             }
         return None
     
@@ -132,13 +134,13 @@ class UserRepository:
         
         if row:
             return {
-                'id': row[0],
-                'username': row[1],
-                'password_hash': row[2],
-                'is_admin': bool(row[3]),
-                'created_at': row[4],
-                'last_login': row[5],
-                'is_active': bool(row[6])
+                'id': row['id'],
+                'username': row['username'],
+                'password_hash': row['password_hash'],
+                'is_admin': bool(row['is_admin']),
+                'created_at': row['created_at'],
+                'last_login': row['last_login'],
+                'is_active': bool(row['is_active'])
             }
         return None
     
@@ -174,11 +176,11 @@ class UserRepository:
         users = []
         for row in cur.fetchall():
             users.append({
-                'id': row[0],
-                'username': row[1],
-                'is_admin': bool(row[2]),
-                'created_at': row[3],
-                'last_login': row[4]
+                'id': row['id'],
+                'username': row['username'],
+                'is_admin': bool(row['is_admin']),
+                'created_at': row['created_at'],
+                'last_login': row['last_login']
             })
         
         conn.close()
@@ -260,9 +262,9 @@ class UserRepository:
             
             if row:
                 return {
-                    'id': row[0],
-                    'username': row[1],
-                    'requested_at': row[2]
+                    'id': row['id'],
+                    'username': row['username'],
+                    'requested_at': row['requested_at']
                 }
             return None
         except:
@@ -288,8 +290,8 @@ class UserRepository:
             # Create the user
             cur.execute("""
                 INSERT INTO users (username, password_hash, is_admin, created_at, is_active)
-                VALUES (%s, %s, %s, %s, 1)
-            """, (username, password_hash, 1 if make_admin else 0, datetime.now().isoformat()))
+                VALUES (%s, %s, %s, %s, TRUE)
+            """, (username, password_hash, make_admin, datetime.now().isoformat()))
             
             # Remove from pending
             cur.execute("DELETE FROM pending_accounts WHERE id = %s", (pending_id,))
@@ -331,13 +333,14 @@ class PendingAccountRepository:
             cur.execute("""
                 INSERT INTO pending_accounts (username, password_hash, requested_at, status)
                 VALUES (%s, %s, %s, 'pending')
+                RETURNING id
             """, (username, password_hash, now))
             
-            request_id = cur.lastrowid
+            request_id = cur.fetchone()['id']
             conn.commit()
             conn.close()
             return request_id
-        except sqlite3.IntegrityError:
+        except Exception:
             return None
     
     @staticmethod
@@ -356,9 +359,9 @@ class PendingAccountRepository:
         requests = []
         for row in cur.fetchall():
             requests.append({
-                'id': row[0],
-                'username': row[1],
-                'requested_at': row[2],
+                'id': row['id'],
+                    'username': row['username'],
+                    'requested_at': row['requested_at'],
                 'status': row[3]
             })
         
@@ -390,7 +393,7 @@ class PendingAccountRepository:
             # Créer l'utilisateur
             cur.execute("""
                 INSERT INTO users (username, password_hash, is_admin, created_at, is_active)
-                VALUES (%s, %s, 0, %s, 1)
+                VALUES (%s, %s, FALSE, %s, TRUE)
             """, (username, password_hash, now))
             
             # Marquer la demande comme approuvée
