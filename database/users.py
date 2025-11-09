@@ -426,8 +426,11 @@ UserRepository.init_tables()
 # Créer un admin par défaut si aucun utilisateur n'existe
 conn = db_manager.get_connection()
 cur = conn.cursor()
-cur.execute("SELECT COUNT(*) FROM users")
-if cur.fetchone()[0] == 0:
+cur.execute("SELECT COUNT(*) as count FROM users")
+row = cur.fetchone()
+# Support both SQLite (tuple/Row with index) and Postgres (dict-like)
+count = row[0] if isinstance(row, tuple) else row['count'] if isinstance(row, dict) else row[0]
+if count == 0:
     # Créer admin par défaut : admin / admin123
     UserRepository.create_user("admin", "admin123", is_admin=True)
     print("✅ Admin par défaut créé : admin / admin123")
