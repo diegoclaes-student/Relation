@@ -79,7 +79,7 @@ class RelationRepository:
             cursor = conn.cursor()
             cursor.execute("""
                 SELECT person2, relation_type FROM relations 
-                WHERE person1 = ?
+                WHERE person1 = %s
                 ORDER BY person2
             """, (person_name,))
             
@@ -139,7 +139,7 @@ class RelationRepository:
             # Supprimer toutes les relations (dans les deux sens)
             cursor.execute("""
                 DELETE FROM relations 
-                WHERE person1 = ? OR person2 = ?
+                WHERE person1 = %s OR person2 = %s
             """, (person_name, person_name))
             
             deleted_count = cursor.rowcount
@@ -169,8 +169,8 @@ class RelationRepository:
             cursor = conn.cursor()
             cursor.execute("""
                 SELECT COUNT(*) as count FROM relations 
-                WHERE (person1 = ? AND person2 = ?)
-                   OR (person1 = ? AND person2 = ?)
+                WHERE (person1 = %s AND person2 = %s)
+                   OR (person1 = %s AND person2 = %s)
             """, (person1, person2, person2, person1))
             
             return cursor.fetchone()['count'] > 0
@@ -194,7 +194,7 @@ class RelationRepository:
             cursor = conn.cursor()
             cursor.execute("""
                 SELECT relation_type FROM relations 
-                WHERE person1 = ? AND person2 = ?
+                WHERE person1 = %s AND person2 = %s
                 LIMIT 1
             """, (person1, person2))
             

@@ -64,7 +64,7 @@ class PendingSubmissionRepository:
             
             cur.execute("""
                 INSERT INTO pending_persons (name, submitted_by, submitted_at, status)
-                VALUES (?, ?, ?, 'pending')
+                VALUES (%s, %s, %s, 'pending')
             """, (name, submitted_by, now))
             
             submission_id = cur.lastrowid
@@ -89,7 +89,7 @@ class PendingSubmissionRepository:
             cur.execute("""
                 INSERT INTO pending_relations 
                 (person1, person2, relation_type, submitted_by, submitted_at, status)
-                VALUES (?, ?, ?, ?, ?, 'pending')
+                VALUES (%s, %s, %s, %s, %s, 'pending')
             """, (person1, person2, relation_type, submitted_by, now))
             
             submission_id = cur.lastrowid
@@ -170,7 +170,7 @@ class PendingSubmissionRepository:
             # Récupérer la soumission
             cur.execute("""
                 SELECT name FROM pending_persons 
-                WHERE id = ? AND status = 'pending'
+                WHERE id = %s AND status = 'pending'
             """, (submission_id,))
             
             row = cur.fetchone()
@@ -188,7 +188,7 @@ class PendingSubmissionRepository:
             
             # Marquer comme approuvée
             cur.execute("""
-                UPDATE pending_persons SET status = 'approved' WHERE id = ?
+                UPDATE pending_persons SET status = 'approved' WHERE id = %s
             """, (submission_id,))
             
             conn.commit()
@@ -217,7 +217,7 @@ class PendingSubmissionRepository:
             # Récupérer la soumission
             cur.execute("""
                 SELECT person1, person2, relation_type FROM pending_relations 
-                WHERE id = ? AND status = 'pending'
+                WHERE id = %s AND status = 'pending'
             """, (submission_id,))
             
             row = cur.fetchone()
@@ -250,7 +250,7 @@ class PendingSubmissionRepository:
             
             # Marquer comme approuvée
             cur.execute("""
-                UPDATE pending_relations SET status = 'approved' WHERE id = ?
+                UPDATE pending_relations SET status = 'approved' WHERE id = %s
             """, (submission_id,))
             
             conn.commit()
@@ -270,7 +270,7 @@ class PendingSubmissionRepository:
             conn = db_manager.get_connection()
             cur = conn.cursor()
             cur.execute("""
-                UPDATE pending_persons SET status = 'rejected' WHERE id = ?
+                UPDATE pending_persons SET status = 'rejected' WHERE id = %s
             """, (submission_id,))
             conn.commit()
             conn.close()
@@ -285,7 +285,7 @@ class PendingSubmissionRepository:
             conn = db_manager.get_connection()
             cur = conn.cursor()
             cur.execute("""
-                UPDATE pending_relations SET status = 'rejected' WHERE id = ?
+                UPDATE pending_relations SET status = 'rejected' WHERE id = %s
             """, (submission_id,))
             conn.commit()
             conn.close()

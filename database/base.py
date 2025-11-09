@@ -155,7 +155,7 @@ class DatabaseManager:
             password_hash = hashlib.sha256(config.ADMIN_PASSWORD.encode()).hexdigest()
             cursor.execute("""
                 INSERT OR IGNORE INTO admins (username, password_hash)
-                VALUES (?, ?)
+                VALUES (%s, %s)
             """, (config.ADMIN_USERNAME, password_hash))
             print("✅ Tables créées avec succès")
 
@@ -175,7 +175,7 @@ class DatabaseManager:
                 """)
                 unique_persons = cursor.fetchall()
                 for person in unique_persons:
-                    cursor.execute("INSERT OR IGNORE INTO persons (name) VALUES (?)", (person[0],))
+                    cursor.execute("INSERT INTO persons (name) VALUES (%s) ON CONFLICT (name) DO NOTHING", (person[0],))
                 print(f"✅ Migration terminée: {len(unique_persons)} personnes migrées")
 
 

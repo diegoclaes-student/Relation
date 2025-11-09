@@ -80,7 +80,7 @@ class UserRepository:
             
             cur.execute("""
                 INSERT INTO users (username, password_hash, is_admin, created_at, is_active)
-                VALUES (?, ?, ?, ?, 1)
+                VALUES (%s, %s, %s, %s, 1)
             """, (username, password_hash, 1 if is_admin else 0, now))
             
             user_id = cur.lastrowid
@@ -98,7 +98,7 @@ class UserRepository:
         
         cur.execute("""
             SELECT id, username, password_hash, is_admin, created_at, last_login, is_active
-            FROM users WHERE username = ? AND is_active = 1
+            FROM users WHERE username = %s AND is_active = 1
         """, (username,))
         
         row = cur.fetchone()
@@ -124,7 +124,7 @@ class UserRepository:
         
         cur.execute("""
             SELECT id, username, password_hash, is_admin, created_at, last_login, is_active
-            FROM users WHERE id = ? AND is_active = 1
+            FROM users WHERE id = %s AND is_active = 1
         """, (user_id,))
         
         row = cur.fetchone()
@@ -151,7 +151,7 @@ class UserRepository:
             conn = db_manager.get_connection()
             cur = conn.cursor()
             cur.execute("""
-                UPDATE users SET last_login = ? WHERE id = ?
+                UPDATE users SET last_login = %s WHERE id = %s
             """, (datetime.now().isoformat(), user['id']))
             conn.commit()
             conn.close()
@@ -190,7 +190,7 @@ class UserRepository:
         try:
             conn = db_manager.get_connection()
             cur = conn.cursor()
-            cur.execute("UPDATE users SET is_active = 0 WHERE id = ?", (user_id,))
+            cur.execute("UPDATE users SET is_active = 0 WHERE id = %s", (user_id,))
             conn.commit()
             conn.close()
             return True
@@ -203,7 +203,7 @@ class UserRepository:
         try:
             conn = db_manager.get_connection()
             cur = conn.cursor()
-            cur.execute("UPDATE users SET is_admin = 1 WHERE id = ?", (user_id,))
+            cur.execute("UPDATE users SET is_admin = 1 WHERE id = %s", (user_id,))
             conn.commit()
             conn.close()
             return True
@@ -216,7 +216,7 @@ class UserRepository:
         try:
             conn = db_manager.get_connection()
             cur = conn.cursor()
-            cur.execute("UPDATE users SET is_admin = 0 WHERE id = ?", (user_id,))
+            cur.execute("UPDATE users SET is_admin = 0 WHERE id = %s", (user_id,))
             conn.commit()
             conn.close()
             return True
@@ -252,7 +252,7 @@ class UserRepository:
             
             cur.execute("""
                 SELECT id, username, requested_at FROM pending_accounts 
-                WHERE id = ? AND status = 'pending'
+                WHERE id = %s AND status = 'pending'
             """, (pending_id,))
             
             row = cur.fetchone()
@@ -276,7 +276,7 @@ class UserRepository:
             cur = conn.cursor()
             
             # Get the pending user
-            cur.execute("SELECT username, password_hash FROM pending_accounts WHERE id = ?", (pending_id,))
+            cur.execute("SELECT username, password_hash FROM pending_accounts WHERE id = %s", (pending_id,))
             row = cur.fetchone()
             
             if not row:
@@ -288,11 +288,11 @@ class UserRepository:
             # Create the user
             cur.execute("""
                 INSERT INTO users (username, password_hash, is_admin, created_at, is_active)
-                VALUES (?, ?, ?, ?, 1)
+                VALUES (%s, %s, %s, %s, 1)
             """, (username, password_hash, 1 if make_admin else 0, datetime.now().isoformat()))
             
             # Remove from pending
-            cur.execute("DELETE FROM pending_accounts WHERE id = ?", (pending_id,))
+            cur.execute("DELETE FROM pending_accounts WHERE id = %s", (pending_id,))
             
             conn.commit()
             conn.close()
@@ -307,7 +307,7 @@ class UserRepository:
         try:
             conn = db_manager.get_connection()
             cur = conn.cursor()
-            cur.execute("DELETE FROM pending_accounts WHERE id = ?", (pending_id,))
+            cur.execute("DELETE FROM pending_accounts WHERE id = %s", (pending_id,))
             conn.commit()
             conn.close()
             return True
@@ -330,7 +330,7 @@ class PendingAccountRepository:
             
             cur.execute("""
                 INSERT INTO pending_accounts (username, password_hash, requested_at, status)
-                VALUES (?, ?, ?, 'pending')
+                VALUES (%s, %s, %s, 'pending')
             """, (username, password_hash, now))
             
             request_id = cur.lastrowid
@@ -376,7 +376,7 @@ class PendingAccountRepository:
             # Récupérer la demande
             cur.execute("""
                 SELECT username, password_hash FROM pending_accounts 
-                WHERE id = ? AND status = 'pending'
+                WHERE id = %s AND status = 'pending'
             """, (request_id,))
             
             row = cur.fetchone()
@@ -390,12 +390,12 @@ class PendingAccountRepository:
             # Créer l'utilisateur
             cur.execute("""
                 INSERT INTO users (username, password_hash, is_admin, created_at, is_active)
-                VALUES (?, ?, 0, ?, 1)
+                VALUES (%s, %s, 0, %s, 1)
             """, (username, password_hash, now))
             
             # Marquer la demande comme approuvée
             cur.execute("""
-                UPDATE pending_accounts SET status = 'approved' WHERE id = ?
+                UPDATE pending_accounts SET status = 'approved' WHERE id = %s
             """, (request_id,))
             
             conn.commit()
@@ -411,7 +411,7 @@ class PendingAccountRepository:
             conn = db_manager.get_connection()
             cur = conn.cursor()
             cur.execute("""
-                UPDATE pending_accounts SET status = 'rejected' WHERE id = ?
+                UPDATE pending_accounts SET status = 'rejected' WHERE id = %s
             """, (request_id,))
             conn.commit()
             conn.close()

@@ -68,7 +68,7 @@ class AuditRepository:
             cur.execute("""
                 INSERT INTO audit_log 
                 (action_type, entity_type, entity_id, entity_name, performed_by, old_value, new_value, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """, (action_type, entity_type, entity_id, entity_name, performed_by, old_value, new_value, datetime.now().isoformat()))
             
             conn.commit()
@@ -89,16 +89,16 @@ class AuditRepository:
             if entity_type:
                 cur.execute("""
                     SELECT * FROM audit_log 
-                    WHERE entity_type = ? AND status = 'completed'
+                    WHERE entity_type = %s AND status = 'completed'
                     ORDER BY created_at DESC 
-                    LIMIT ?
+                    LIMIT %s
                 """, (entity_type, limit))
             else:
                 cur.execute("""
                     SELECT * FROM audit_log 
                     WHERE status = 'completed'
                     ORDER BY created_at DESC 
-                    LIMIT ?
+                    LIMIT %s
                 """, (limit,))
             
             rows = cur.fetchall()
@@ -120,7 +120,7 @@ class AuditRepository:
                 SELECT * FROM audit_log 
                 WHERE status = 'cancelled'
                 ORDER BY cancelled_at DESC 
-                LIMIT ?
+                LIMIT %s
             """, (limit,))
             
             rows = cur.fetchall()
@@ -139,8 +139,8 @@ class AuditRepository:
             
             cur.execute("""
                 UPDATE audit_log 
-                SET status = 'cancelled', cancelled_by = ?, cancelled_at = ?
-                WHERE id = ?
+                SET status = 'cancelled', cancelled_by = %s, cancelled_at = %s
+                WHERE id = %s
             """, (cancelled_by, datetime.now().isoformat(), audit_id))
             
             conn.commit()
