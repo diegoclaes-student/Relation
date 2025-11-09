@@ -98,7 +98,7 @@ class UserRepository:
         
         cur.execute("""
             SELECT id, username, password_hash, is_admin, created_at, last_login, is_active
-            FROM users WHERE username = %s AND is_active = 1
+            FROM users WHERE username = %s AND is_active = TRUE
         """, (username,))
         
         row = cur.fetchone()
@@ -124,7 +124,7 @@ class UserRepository:
         
         cur.execute("""
             SELECT id, username, password_hash, is_admin, created_at, last_login, is_active
-            FROM users WHERE id = %s AND is_active = 1
+            FROM users WHERE id = %s AND is_active = TRUE
         """, (user_id,))
         
         row = cur.fetchone()
@@ -167,7 +167,7 @@ class UserRepository:
         
         cur.execute("""
             SELECT id, username, is_admin, created_at, last_login
-            FROM users WHERE is_active = 1
+            FROM users WHERE is_active = TRUE
             ORDER BY created_at DESC
         """)
         
@@ -190,7 +190,7 @@ class UserRepository:
         try:
             conn = db_manager.get_connection()
             cur = conn.cursor()
-            cur.execute("UPDATE users SET is_active = 0 WHERE id = %s", (user_id,))
+            cur.execute("UPDATE users SET is_active = FALSE WHERE id = %s", (user_id,))
             conn.commit()
             conn.close()
             return True
@@ -203,7 +203,7 @@ class UserRepository:
         try:
             conn = db_manager.get_connection()
             cur = conn.cursor()
-            cur.execute("UPDATE users SET is_admin = 1 WHERE id = %s", (user_id,))
+            cur.execute("UPDATE users SET is_admin = TRUE WHERE id = %s", (user_id,))
             conn.commit()
             conn.close()
             return True
@@ -216,7 +216,7 @@ class UserRepository:
         try:
             conn = db_manager.get_connection()
             cur = conn.cursor()
-            cur.execute("UPDATE users SET is_admin = 0 WHERE id = %s", (user_id,))
+            cur.execute("UPDATE users SET is_admin = FALSE WHERE id = %s", (user_id,))
             conn.commit()
             conn.close()
             return True
