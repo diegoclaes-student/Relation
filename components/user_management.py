@@ -104,7 +104,7 @@ def render_active_user_item(user: dict) -> html.Div:
                     html.Strong(user['username']),
                 ], style={'marginBottom': '5px'}),
                 html.Small(f"Email: {user.get('email', 'N/A')}", className='text-muted', style={'display': 'block'}),
-                html.Small(f"Créé le: {user.get('created_at', 'N/A')[:10]}", className='text-muted'),
+                html.Small(f"Créé le: {str(user.get('created_at', 'N/A'))[:10]}", className='text-muted'),
             ], style={'flex': '1'}),
             html.Div([
                 dbc.Button([
@@ -139,7 +139,7 @@ def render_pending_user_item(user: dict) -> html.Div:
                 html.Strong(user['username']),
                 html.Br(),
                 html.Small(f"Email: {user.get('email', 'N/A')}", className='text-muted', style={'display': 'block'}),
-                html.Small(f"Demandé le: {user.get('requested_at', 'N/A')[:10]}", className='text-muted'),
+                html.Small(f"Demandé le: {str(user.get('submitted_at', 'N/A'))[:10]}", className='text-muted'),
             ], style={'flex': '1'}),
             html.Div([
                 dbc.Button([

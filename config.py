@@ -38,5 +38,6 @@ GRAPH_HEIGHT = os.getenv("GRAPH_HEIGHT", "90vh")
 MODAL_SIZE = os.getenv("MODAL_SIZE", "xl")
 
 # Base de données
+DATABASE_URL = os.getenv("DATABASE_URL")  # PostgreSQL URL (Render, Nhost, etc.)
 DB_TIMEOUT = int(os.getenv("DB_TIMEOUT", "30"))
 DB_CHECK_SAME_THREAD = os.getenv("DB_CHECK_SAME_THREAD", "False").lower() in ("1", "true", "yes")

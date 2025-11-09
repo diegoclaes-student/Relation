@@ -234,9 +234,9 @@ class UserRepository:
             cur = conn.cursor()
             
             cur.execute("""
-                SELECT id, username, requested_at FROM pending_accounts 
+                SELECT id, username, submitted_at FROM pending_accounts 
                 WHERE status = 'pending'
-                ORDER BY requested_at DESC
+                ORDER BY submitted_at DESC
             """)
             
             rows = cur.fetchall()
@@ -253,7 +253,7 @@ class UserRepository:
             cur = conn.cursor()
             
             cur.execute("""
-                SELECT id, username, requested_at FROM pending_accounts 
+                SELECT id, username, submitted_at FROM pending_accounts 
                 WHERE id = %s AND status = 'pending'
             """, (pending_id,))
             
@@ -264,7 +264,7 @@ class UserRepository:
                 return {
                     'id': row['id'],
                     'username': row['username'],
-                    'requested_at': row['requested_at']
+                    'submitted_at': row['submitted_at']
                 }
             return None
         except:
@@ -331,7 +331,7 @@ class PendingAccountRepository:
             now = datetime.now().isoformat()
             
             cur.execute("""
-                INSERT INTO pending_accounts (username, password_hash, requested_at, status)
+                INSERT INTO pending_accounts (username, password_hash, submitted_at, status)
                 VALUES (%s, %s, %s, 'pending')
                 RETURNING id
             """, (username, password_hash, now))
@@ -351,18 +351,18 @@ class PendingAccountRepository:
         cur = conn.cursor()
         
         cur.execute("""
-            SELECT id, username, requested_at, status
+            SELECT id, username, submitted_at, status
             FROM pending_accounts WHERE status = 'pending'
-            ORDER BY requested_at DESC
+            ORDER BY submitted_at DESC
         """)
         
         requests = []
         for row in cur.fetchall():
             requests.append({
                 'id': row['id'],
-                    'username': row['username'],
-                    'requested_at': row['requested_at'],
-                'status': row[3]
+                'username': row['username'],
+                'submitted_at': row['submitted_at'],
+                'status': row['status']
             })
         
         print(f"✅ [DB] Found {len(requests)} pending account requests: {requests}")

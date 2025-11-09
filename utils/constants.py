@@ -9,6 +9,18 @@ RELATION_TYPES = {
     4: "💔 Ex"
 }
 
+# Genres
+GENDERS = {
+    "M": "Homme",
+    "F": "Femme", 
+    "NB": "Non-binaire",
+    "O": "Autre",
+    None: "Préfère ne pas dire"
+}
+
+# Orientations sexuelles
+SEXUAL_ORIENTATIONS = ["Hétéro", "Homo", "Bi", "Pan", "Asexuel", "Autre", "Préfère ne pas dire"]
+
 # Types d'actions pour l'historique
 ACTION_TYPES = {
     'ADD': 'Ajout',

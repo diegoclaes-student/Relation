@@ -54,7 +54,7 @@ def render_pending_account_item(account: Dict) -> html.Div:
             html.Div([
                 html.Strong(account['username']),
                 html.Br(),
-                html.Small(f"Demandé le: {account['requested_at'][:10]}", className='text-muted'),
+                html.Small(f"Demandé le: {str(account['submitted_at'])[:10]}", className='text-muted'),
             ], style={'flex': '1'}),
             html.Div([
                 dbc.Button([
@@ -85,7 +85,7 @@ def render_pending_person_item(person: Dict) -> html.Div:
             html.Div([
                 html.Strong(person['name']),
                 html.Br(),
-                html.Small(f"Par: {person['submitted_by']} • {person['submitted_at'][:10]}", 
+                html.Small(f"Par: {person['submitted_by']} • {str(person['submitted_at'])[:10]}", 
                           className='text-muted'),
             ], style={'flex': '1'}),
             html.Div([
@@ -121,7 +121,7 @@ def render_pending_relation_item(relation: Dict) -> html.Div:
                 html.Strong(f"{relation['person1']} ↔ {relation['person2']}"),
                 html.Br(),
                 html.Span(rel_type, className='me-2'),
-                html.Small(f"Par: {relation['submitted_by']} • {relation['submitted_at'][:10]}", 
+                html.Small(f"Par: {relation['submitted_by']} • {str(relation['submitted_at'])[:10]}", 
                           className='text-muted'),
             ], style={'flex': '1'}),
             html.Div([
