@@ -683,10 +683,15 @@ app.index_string = '''
             /* Boutons en landscape - empilés verticalement */
             #btn-propose-relation {
                 right: 10px !important;
-                bottom: 80px !important;  /* Au-dessus des boutons zoom */
+                bottom: 135px !important;  /* Au-dessus de tous les boutons */
                 top: auto !important;
                 font-size: 11px !important;
                 padding: 6px 12px !important;
+            }
+            
+            /* Fullscreen aussi décalé */
+            #btn-fullscreen {
+                bottom: 175px !important;
             }
         }
         
@@ -714,7 +719,7 @@ app.index_string = '''
             /* Standalone Proposer Relation button on mobile */
             #btn-propose-relation {
                 right: 10px !important;
-                bottom: 20px !important;  /* Déplacé en bas pour éviter le hamburger */
+                bottom: 135px !important;  /* Au-dessus des boutons zoom (25+40+40+30 de marge) */
                 top: auto !important;
                 font-size: 12px !important;
                 padding: 8px 14px !important;
@@ -725,6 +730,11 @@ app.index_string = '''
             #hamburger-btn-graph {
                 right: 10px !important;
                 top: 10px !important;
+            }
+            
+            /* Ajuster position fullscreen sur mobile portrait */
+            #btn-fullscreen {
+                bottom: 175px !important;  /* Au-dessus du bouton Proposer Relation */
             }
         }
     </style>
