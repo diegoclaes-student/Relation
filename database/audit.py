@@ -4,7 +4,6 @@ Gère l'historique des modifications
 """
 
 from typing import List, Dict, Optional
-import sqlite3
 from datetime import datetime
 from pathlib import Path
 from database.base import db_manager
@@ -83,7 +82,7 @@ class AuditRepository:
         """Récupère l'historique récent"""
         try:
             conn = db_manager.get_connection()
-            conn.row_factory = sqlite3.Row
+            
             cur = conn.cursor()
             
             if entity_type:
@@ -113,7 +112,7 @@ class AuditRepository:
         """Récupère l'historique des modifications annulées"""
         try:
             conn = db_manager.get_connection()
-            conn.row_factory = sqlite3.Row
+            
             cur = conn.cursor()
             
             cur.execute("""

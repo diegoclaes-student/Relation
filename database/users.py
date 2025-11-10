@@ -8,7 +8,6 @@ from database.base import db_manager
 from datetime import datetime
 import hashlib
 import secrets
-import sqlite3
 from pathlib import Path
 
 
@@ -230,7 +229,6 @@ class UserRepository:
         """Récupère les utilisateurs en attente d'approbation"""
         try:
             conn = db_manager.get_connection()
-            conn.row_factory = sqlite3.Row
             cur = conn.cursor()
             
             cur.execute("""

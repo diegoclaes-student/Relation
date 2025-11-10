@@ -4,7 +4,6 @@ Gère les soumissions en attente (relations et personnes proposées par les util
 """
 
 from typing import Optional, List, Dict
-import sqlite3
 from datetime import datetime
 from pathlib import Path
 from database.base import db_manager

@@ -5,24 +5,21 @@ Enregistre toutes les actions importantes pour permettre annulation
 """
 
 from typing import List, Dict, Optional, Tuple
-import sqlite3
 from datetime import datetime
-from config import DB_PATH
+from database.base import db_manager
 from utils.constants import ACTION_TYPES, UNDOABLE_ACTIONS
 
 
 class HistoryService:
     """Service de gestion de l'historique des actions"""
     
-    def __init__(self, db_path: str = DB_PATH, max_history: int = 100):
-        self.db_path = db_path
+    def __init__(self, max_history: int = 100):
+        self.db_manager = db_manager
         self.max_history = max_history
     
-    def _get_connection(self) -> sqlite3.Connection:
-        """Connexion avec row_factory"""
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        return conn
+    def _get_connection(self):
+        """Connexion via DatabaseManager (SQLite ou PostgreSQL)"""
+        return self.db_manager.get_connection()
     
     def record_action(self, 
                      action_type: str,
@@ -67,7 +64,7 @@ class HistoryService:
                     action_type, person1, person2, relation_type, performed_by, details,
                     status, entity_type, entity_id, entity_name, old_value, new_value
                 )
-                VALUES (?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s, 'active', %s, %s, %s, %s, %s)
             """, (action_type, person1, person2, relation_type, performed_by, details,
                   entity_type, entity_id, entity_name, old_value, new_value))
             
@@ -84,7 +81,7 @@ class HistoryService:
         finally:
             conn.close()
     
-    def _cleanup_old_history(self, conn: sqlite3.Connection) -> None:
+    def _cleanup_old_history(self, conn: object) -> None:
         """Garde seulement les N dernières entrées d'historique"""
         cursor = conn.cursor()
         
@@ -93,7 +90,7 @@ class HistoryService:
             WHERE id NOT IN (
                 SELECT id FROM history 
                 ORDER BY created_at DESC 
-                LIMIT ?
+                LIMIT %s
             )
         """, (self.max_history,))
         
@@ -120,11 +117,11 @@ class HistoryService:
             params = []
             
             if action_type:
-                where_clauses.append("action_type = ?")
+                where_clauses.append("action_type = %s")
                 params.append(action_type)
             
             if status != 'all':
-                where_clauses.append("(status = ? OR status IS NULL)")
+                where_clauses.append("(status = %s OR status IS NULL)")
                 params.append(status)
             
             where_sql = " AND ".join(where_clauses) if where_clauses else "1=1"
@@ -134,7 +131,7 @@ class HistoryService:
                 SELECT * FROM history 
                 WHERE {where_sql}
                 ORDER BY created_at DESC 
-                LIMIT ?
+                LIMIT %s
             """, params)
             
             return [dict(row) for row in cursor.fetchall()]
@@ -163,7 +160,7 @@ class HistoryService:
             cursor = conn.cursor()
             
             # Get the action details first
-            cursor.execute("SELECT * FROM history WHERE id = ?", (action_id,))
+            cursor.execute("SELECT * FROM history WHERE id = %s", (action_id,))
             action = cursor.fetchone()
             
             if not action:
@@ -180,8 +177,8 @@ class HistoryService:
                 UPDATE history 
                 SET status = 'cancelled',
                     cancelled_at = CURRENT_TIMESTAMP,
-                    cancelled_by = ?
-                WHERE id = ?
+                    cancelled_by = %s
+                WHERE id = %s
             """, (cancelled_by, action_id))
             
             conn.commit()
@@ -202,7 +199,7 @@ class HistoryService:
         finally:
             conn.close()
     
-    def _revert_action(self, action: Dict, conn: sqlite3.Connection) -> Tuple[bool, str]:
+    def _revert_action(self, action: Dict, conn: object) -> Tuple[bool, str]:
         """
         Revert the actual changes made by an action
         
@@ -221,8 +218,8 @@ class HistoryService:
                 # Undo a relation addition - delete the relation
                 cursor.execute("""
                     DELETE FROM relations 
-                    WHERE (person1 = ? AND person2 = ?)
-                       OR (person1 = ? AND person2 = ?)
+                    WHERE (person1 = %s AND person2 = %s)
+                       OR (person1 = %s AND person2 = %s)
                 """, (action['person1'], action['person2'], 
                       action['person2'], action['person1']))
                 
@@ -235,12 +232,12 @@ class HistoryService:
                 
                 cursor.execute("""
                     INSERT OR IGNORE INTO relations (person1, person2, relation_type)
-                    VALUES (?, ?, ?)
+                    VALUES (%s, %s, %s)
                 """, (action['person1'], action['person2'], rel_type))
                 
                 cursor.execute("""
                     INSERT OR IGNORE INTO relations (person1, person2, relation_type)
-                    VALUES (?, ?, ?)
+                    VALUES (%s, %s, %s)
                 """, (action['person2'], action['person1'], rel_type))
                 
                 conn.commit()
@@ -251,8 +248,8 @@ class HistoryService:
                 if action.get('old_value') and action.get('entity_id'):
                     cursor.execute("""
                         UPDATE persons 
-                        SET name = ?
-                        WHERE id = ?
+                        SET name = %s
+                        WHERE id = %s
                     """, (action['old_value'], action['entity_id']))
                     
                     conn.commit()
@@ -267,11 +264,11 @@ class HistoryService:
                 # Delete all relations first
                 cursor.execute("""
                     DELETE FROM relations 
-                    WHERE person1 = ? OR person2 = ?
+                    WHERE person1 = %s OR person2 = %s
                 """, (person_name, person_name))
                 
                 # Delete the person
-                cursor.execute("DELETE FROM persons WHERE name = ?", (person_name,))
+                cursor.execute("DELETE FROM persons WHERE name = %s", (person_name,))
                 
                 conn.commit()
                 return True, f"Personne supprimée: {person_name}"
@@ -343,13 +340,13 @@ class HistoryService:
             # Supprimer la relation dans les deux sens
             cursor.execute("""
                 DELETE FROM relations 
-                WHERE (person1 = ? AND person2 = ?)
-                   OR (person1 = ? AND person2 = ?)
+                WHERE (person1 = %s AND person2 = %s)
+                   OR (person1 = %s AND person2 = %s)
             """, (action['person1'], action['person2'], 
                   action['person2'], action['person1']))
             
             # Supprimer l'action de l'historique
-            cursor.execute("DELETE FROM history WHERE id = ?", (action['id'],))
+            cursor.execute("DELETE FROM history WHERE id = %s", (action['id'],))
             
             conn.commit()
             return True, f"Relation annulée: {action['person1']} ↔ {action['person2']}"
@@ -371,16 +368,16 @@ class HistoryService:
             
             cursor.execute("""
                 INSERT OR IGNORE INTO relations (person1, person2, relation_type)
-                VALUES (?, ?, ?)
+                VALUES (%s, %s, %s)
             """, (action['person1'], action['person2'], rel_type))
             
             cursor.execute("""
                 INSERT OR IGNORE INTO relations (person1, person2, relation_type)
-                VALUES (?, ?, ?)
+                VALUES (%s, %s, %s)
             """, (action['person2'], action['person1'], rel_type))
             
             # Supprimer l'action de l'historique
-            cursor.execute("DELETE FROM history WHERE id = ?", (action['id'],))
+            cursor.execute("DELETE FROM history WHERE id = %s", (action['id'],))
             
             conn.commit()
             return True, f"Suppression annulée: {action['person1']} ↔ {action['person2']}"
@@ -400,17 +397,17 @@ class HistoryService:
             # Supprimer toutes les relations de la personne
             cursor.execute("""
                 DELETE FROM relations 
-                WHERE person1 = ? OR person2 = ?
+                WHERE person1 = %s OR person2 = %s
             """, (action['person1'], action['person1']))
             
             # Supprimer la personne (si table persons existe)
             try:
-                cursor.execute("DELETE FROM persons WHERE name = ?", (action['person1'],))
+                cursor.execute("DELETE FROM persons WHERE name = %s", (action['person1'],))
             except:
                 pass  # Table persons peut ne pas exister
             
             # Supprimer l'action de l'historique
-            cursor.execute("DELETE FROM history WHERE id = ?", (action['id'],))
+            cursor.execute("DELETE FROM history WHERE id = %s", (action['id'],))
             
             conn.commit()
             return True, f"Ajout de personne annulé: {action['person1']}"
