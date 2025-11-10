@@ -283,7 +283,12 @@ class UserRepository:
                 conn.close()
                 return False
             
-            username, password_hash = row
+            # Handle both dict (PostgreSQL) and tuple (SQLite) formats
+            if isinstance(row, dict):
+                username = row['username']
+                password_hash = row['password_hash']
+            else:
+                username, password_hash = row
             
             # Create the user
             cur.execute("""
@@ -385,7 +390,13 @@ class PendingAccountRepository:
                 conn.close()
                 return False
             
-            username, password_hash = row
+            # Handle both dict (PostgreSQL) and tuple (SQLite) formats
+            if isinstance(row, dict):
+                username = row['username']
+                password_hash = row['password_hash']
+            else:
+                username, password_hash = row
+            
             now = datetime.now().isoformat()
             
             # Créer l'utilisateur

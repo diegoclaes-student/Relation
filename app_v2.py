@@ -2512,6 +2512,159 @@ def handle_relation_approval(approve_clicks, reject_clicks, user_session):
     return render_pending_relations_list(relations)
 
 
+# User Management (pattern matching)
+@app.callback(
+    [Output('active-users-list', 'children'),
+     Output('pending-users-list', 'children'),
+     Output('user-filter-state', 'data')],
+    [Input('btn-refresh-users', 'n_clicks'),
+     Input('filter-all-users', 'n_clicks'),
+     Input('filter-admins', 'n_clicks'),
+     Input('filter-users', 'n_clicks'),
+     Input('filter-pending', 'n_clicks'),
+     Input({'type': 'toggle-admin', 'index': ALL}, 'n_clicks'),
+     Input({'type': 'delete-user', 'index': ALL}, 'n_clicks'),
+     Input({'type': 'approve-pending-user', 'index': ALL}, 'n_clicks'),
+     Input({'type': 'approve-pending-admin', 'index': ALL}, 'n_clicks'),
+     Input({'type': 'reject-pending-user', 'index': ALL}, 'n_clicks')],
+    State('user-session', 'data'),
+    prevent_initial_call=False
+)
+def handle_user_management(refresh_clicks, all_clicks, admin_clicks, user_clicks, pending_clicks,
+                          toggle_admin_clicks, delete_clicks, approve_clicks, approve_admin_clicks, reject_clicks,
+                          user_session):
+    """Gère la liste des utilisateurs et les actions admin"""
+    from components.user_management import render_active_users_list, render_pending_users_list
+    from database.audit import AuditRepository
+    
+    # Vérifier les permissions admin
+    user = session.get('user', None)
+    if not auth_service.is_admin(user):
+        error_div = html.Div("Access Denied", style={'color': 'red', 'padding': '10px'})
+        return error_div, error_div, 'all'
+    
+    filter_type = 'all'
+    
+    # Initial load ou refresh
+    if not ctx.triggered or ctx.triggered_id in ['btn-refresh-users', None]:
+        active_users = UserRepository.get_all_users()
+        pending_users = UserRepository.get_pending_users()
+        return render_active_users_list(active_users, 'all'), render_pending_users_list(pending_users), 'all'
+    
+    triggered_id = ctx.triggered_id
+    print(f"✅ [USER-MGMT] Triggered: {triggered_id}")
+    
+    # Handle filter buttons
+    if triggered_id == 'filter-all-users':
+        filter_type = 'all'
+    elif triggered_id == 'filter-admins':
+        filter_type = 'admins'
+    elif triggered_id == 'filter-users':
+        filter_type = 'users'
+    elif triggered_id == 'filter-pending':
+        filter_type = 'pending'
+    
+    # Handle user actions
+    elif isinstance(triggered_id, dict):
+        user_id = triggered_id.get('index')
+        action_type = triggered_id.get('type')
+        print(f"  Action: {action_type} on user {user_id}")
+        
+        if action_type == 'toggle-admin' and user_id:
+            user_obj = UserRepository.get_user_by_id(user_id)
+            if user_obj:
+                if user_obj.get('is_admin'):
+                    UserRepository.demote_from_admin(user_id)
+                    print(f"  ✅ Demoted {user_obj['username']}")
+                    AuditRepository.log_action(
+                        action_type='demote',
+                        entity_type='user',
+                        entity_id=user_id,
+                        entity_name=user_obj['username'],
+                        performed_by=user.get('username', 'admin') if user else 'admin',
+                        old_value='admin',
+                        new_value='user'
+                    )
+                else:
+                    UserRepository.promote_to_admin(user_id)
+                    print(f"  ✅ Promoted {user_obj['username']}")
+                    AuditRepository.log_action(
+                        action_type='promote',
+                        entity_type='user',
+                        entity_id=user_id,
+                        entity_name=user_obj['username'],
+                        performed_by=user.get('username', 'admin') if user else 'admin',
+                        old_value='user',
+                        new_value='admin'
+                    )
+        
+        elif action_type == 'delete-user' and user_id:
+            user_obj = UserRepository.get_user_by_id(user_id)
+            if user_obj:
+                UserRepository.delete_user(user_id)
+                print(f"  ✅ Deleted {user_obj['username']}")
+                AuditRepository.log_action(
+                    action_type='delete',
+                    entity_type='user',
+                    entity_id=user_id,
+                    entity_name=user_obj['username'],
+                    performed_by=user.get('username', 'admin') if user else 'admin',
+                    old_value=f"user:{user_obj.get('is_admin', False)}",
+                    new_value='deleted'
+                )
+        
+        elif action_type == 'approve-pending-user' and user_id:
+            user_obj = UserRepository.get_pending_user_by_id(user_id)
+            if user_obj:
+                UserRepository.approve_pending_user(user_id, make_admin=False)
+                print(f"  ✅ Approved {user_obj['username']} as user")
+                AuditRepository.log_action(
+                    action_type='approve',
+                    entity_type='user',
+                    entity_id=user_id,
+                    entity_name=user_obj['username'],
+                    performed_by=user.get('username', 'admin') if user else 'admin',
+                    old_value='pending',
+                    new_value='approved'
+                )
+        
+        elif action_type == 'approve-pending-admin' and user_id:
+            user_obj = UserRepository.get_pending_user_by_id(user_id)
+            if user_obj:
+                UserRepository.approve_pending_user(user_id, make_admin=True)
+                print(f"  ✅ Approved {user_obj['username']} as admin")
+                AuditRepository.log_action(
+                    action_type='approve',
+                    entity_type='user',
+                    entity_id=user_id,
+                    entity_name=user_obj['username'],
+                    performed_by=user.get('username', 'admin') if user else 'admin',
+                    old_value='pending',
+                    new_value='approved_admin'
+                )
+        
+        elif action_type == 'reject-pending-user' and user_id:
+            user_obj = UserRepository.get_pending_user_by_id(user_id)
+            if user_obj:
+                UserRepository.reject_pending_user(user_id)
+                print(f"  ✅ Rejected {user_obj['username']}")
+                AuditRepository.log_action(
+                    action_type='reject',
+                    entity_type='user',
+                    entity_id=user_id,
+                    entity_name=user_obj['username'],
+                    performed_by=user.get('username', 'admin') if user else 'admin',
+                    old_value='pending',
+                    new_value='rejected'
+                )
+    
+    # Rafraîchir les listes
+    active_users = UserRepository.get_all_users()
+    pending_users = UserRepository.get_pending_users()
+    
+    return render_active_users_list(active_users, filter_type), render_pending_users_list(pending_users), filter_type
+
+
 # ============================================================================
 # CALLBACKS - GRAPH
 # ============================================================================
