@@ -867,12 +867,23 @@ app.index_string = '''
                 return;
             }
             
+            console.log('🔵 PINCH START: 2 fingers detected');
+            
             var plotlyGraphDiv = getPlotlyGraphDiv();
-            if (!plotlyGraphDiv) return;
+            if (!plotlyGraphDiv) {
+                console.log('❌ No plotly graph div found');
+                return;
+            }
             
             var layout = plotlyGraphDiv._fullLayout || plotlyGraphDiv.layout;
-            if (!layout || !layout.xaxis || !layout.yaxis) return;
-            if (!layout.xaxis.range || !layout.yaxis.range) return;
+            if (!layout || !layout.xaxis || !layout.yaxis) {
+                console.log('❌ No layout found');
+                return;
+            }
+            if (!layout.xaxis.range || !layout.yaxis.range) {
+                console.log('❌ No axis ranges found');
+                return;
+            }
             
             // Initialiser le pinch
             pinchState.active = true;
@@ -883,8 +894,12 @@ app.index_string = '''
             };
             pinchState.lastUpdate = Date.now();
             
+            console.log('✅ Pinch initialized, distance:', pinchState.initialDistance);
+            
+            // IMPORTANT: Empêcher Plotly de gérer le drag
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation();
         }
         
         function handleTouchMove(e) {
@@ -919,22 +934,31 @@ app.index_string = '''
             var newXRange = [xCenter - xSpan, xCenter + xSpan];
             var newYRange = [yCenter - ySpan, yCenter + ySpan];
             
+            console.log('🔍 ZOOM scale:', scale.toFixed(2), 'distance:', currentDistance.toFixed(0));
+            
             try {
                 window.Plotly.relayout(plotlyGraphDiv, {
                     'xaxis.range': newXRange,
                     'yaxis.range': newYRange
                 });
             } catch (err) {
-                // Ignorer les erreurs silencieusement
+                console.log('❌ Relayout error:', err);
             }
             
+            // IMPORTANT: Empêcher le pan de Plotly
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation();
         }
         
         function handleTouchEnd(e) {
+            console.log('🔵 TOUCH END, remaining touches:', e.touches.length);
+            
             // Reset si moins de 2 doigts
             if (e.touches.length < 2) {
+                if (pinchState.active) {
+                    console.log('✅ Pinch zoom ended');
+                }
                 pinchState.active = false;
                 pinchState.initialDistance = 0;
                 pinchState.initialRanges = null;
@@ -951,10 +975,42 @@ app.index_string = '''
                 }
             }
             
-            console.log('✅ Attaching pinch-zoom listeners');
-            graphDiv.addEventListener('touchstart', handleTouchStart, {passive: false});
-            graphDiv.addEventListener('touchmove', handleTouchMove, {passive: false});
-            graphDiv.addEventListener('touchend', handleTouchEnd, false);
+            console.log('✅ Attaching pinch-zoom listeners with CAPTURE mode');
+            
+            // IMPORTANT: capture: true pour intercepter AVANT Plotly
+            // passive: false pour pouvoir faire preventDefault()
+            graphDiv.addEventListener('touchstart', handleTouchStart, {
+                capture: true,
+                passive: false
+            });
+            graphDiv.addEventListener('touchmove', handleTouchMove, {
+                capture: true,
+                passive: false
+            });
+            graphDiv.addEventListener('touchend', handleTouchEnd, {
+                capture: true,
+                passive: false
+            });
+            
+            // Aussi attacher sur la div Plotly elle-même
+            setTimeout(function() {
+                var plotlyDiv = document.querySelector('.js-plotly-plot');
+                if (plotlyDiv) {
+                    console.log('✅ Also attaching to .js-plotly-plot');
+                    plotlyDiv.addEventListener('touchstart', handleTouchStart, {
+                        capture: true,
+                        passive: false
+                    });
+                    plotlyDiv.addEventListener('touchmove', handleTouchMove, {
+                        capture: true,
+                        passive: false
+                    });
+                    plotlyDiv.addEventListener('touchend', handleTouchEnd, {
+                        capture: true,
+                        passive: false
+                    });
+                }
+            }, 500);
         }
         
         // === FONCTION POUR INITIALISER TOUS LES BOUTONS ===
@@ -1798,7 +1854,7 @@ app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     dcc.Store(id='user-session', storage_type='session'),
     dcc.Store(id='data-version', data=0),  # Global store for both public and admin
-    dcc.Interval(id='auto-refresh', interval=30000, n_intervals=0),  # Global interval
+    dcc.Interval(id='auto-refresh', interval=300000, n_intervals=0, disabled=True),  # 5 min, disabled by default
     html.Div(id='page-content')
 ])
 
