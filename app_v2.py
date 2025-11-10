@@ -2558,8 +2558,8 @@ def handle_user_management(refresh_clicks, all_clicks, admin_clicks, user_clicks
     
     # Initial load ou refresh
     if not ctx.triggered or ctx.triggered_id in ['btn-refresh-users', None]:
-        active_users = UserRepository.get_all_users()
-        pending_users = UserRepository.get_pending_users()
+        active_users = user_repository.get_all_users()
+        pending_users = user_repository.get_pending_users()
         return render_active_users_list(active_users, 'all'), render_pending_users_list(pending_users), 'all'
     
     triggered_id = ctx.triggered_id
@@ -2582,10 +2582,10 @@ def handle_user_management(refresh_clicks, all_clicks, admin_clicks, user_clicks
         print(f"  Action: {action_type} on user {user_id}")
         
         if action_type == 'toggle-admin' and user_id:
-            user_obj = UserRepository.get_user_by_id(user_id)
+            user_obj = user_repository.get_user_by_id(user_id)
             if user_obj:
                 if user_obj.get('is_admin'):
-                    UserRepository.demote_from_admin(user_id)
+                    user_repository.demote_from_admin(user_id)
                     print(f"  ✅ Demoted {user_obj['username']}")
                     AuditRepository.log_action(
                         action_type='demote',
@@ -2597,7 +2597,7 @@ def handle_user_management(refresh_clicks, all_clicks, admin_clicks, user_clicks
                         new_value='user'
                     )
                 else:
-                    UserRepository.promote_to_admin(user_id)
+                    user_repository.promote_to_admin(user_id)
                     print(f"  ✅ Promoted {user_obj['username']}")
                     AuditRepository.log_action(
                         action_type='promote',
@@ -2610,9 +2610,9 @@ def handle_user_management(refresh_clicks, all_clicks, admin_clicks, user_clicks
                     )
         
         elif action_type == 'delete-user' and user_id:
-            user_obj = UserRepository.get_user_by_id(user_id)
+            user_obj = user_repository.get_user_by_id(user_id)
             if user_obj:
-                UserRepository.delete_user(user_id)
+                user_repository.delete_user(user_id)
                 print(f"  ✅ Deleted {user_obj['username']}")
                 AuditRepository.log_action(
                     action_type='delete',
@@ -2625,9 +2625,9 @@ def handle_user_management(refresh_clicks, all_clicks, admin_clicks, user_clicks
                 )
         
         elif action_type == 'approve-pending-user' and user_id:
-            user_obj = UserRepository.get_pending_user_by_id(user_id)
+            user_obj = user_repository.get_pending_user_by_id(user_id)
             if user_obj:
-                UserRepository.approve_pending_user(user_id, make_admin=False)
+                user_repository.approve_pending_user(user_id, make_admin=False)
                 print(f"  ✅ Approved {user_obj['username']} as user")
                 AuditRepository.log_action(
                     action_type='approve',
@@ -2640,9 +2640,9 @@ def handle_user_management(refresh_clicks, all_clicks, admin_clicks, user_clicks
                 )
         
         elif action_type == 'approve-pending-admin' and user_id:
-            user_obj = UserRepository.get_pending_user_by_id(user_id)
+            user_obj = user_repository.get_pending_user_by_id(user_id)
             if user_obj:
-                UserRepository.approve_pending_user(user_id, make_admin=True)
+                user_repository.approve_pending_user(user_id, make_admin=True)
                 print(f"  ✅ Approved {user_obj['username']} as admin")
                 AuditRepository.log_action(
                     action_type='approve',
@@ -2655,9 +2655,9 @@ def handle_user_management(refresh_clicks, all_clicks, admin_clicks, user_clicks
                 )
         
         elif action_type == 'reject-pending-user' and user_id:
-            user_obj = UserRepository.get_pending_user_by_id(user_id)
+            user_obj = user_repository.get_pending_user_by_id(user_id)
             if user_obj:
-                UserRepository.reject_pending_user(user_id)
+                user_repository.reject_pending_user(user_id)
                 print(f"  ✅ Rejected {user_obj['username']}")
                 AuditRepository.log_action(
                     action_type='reject',
@@ -2670,8 +2670,8 @@ def handle_user_management(refresh_clicks, all_clicks, admin_clicks, user_clicks
                 )
     
     # Rafraîchir les listes
-    active_users = UserRepository.get_all_users()
-    pending_users = UserRepository.get_pending_users()
+    active_users = user_repository.get_all_users()
+    pending_users = user_repository.get_pending_users()
     
     return render_active_users_list(active_users, filter_type), render_pending_users_list(pending_users), filter_type
 
