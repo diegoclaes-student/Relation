@@ -31,7 +31,6 @@ from services.activity_log import log_event
 from components.auth_components import (
     create_login_modal, 
     create_register_modal,
-    create_propose_person_modal, 
     create_propose_relation_modal,
     create_public_header, 
     create_admin_header
@@ -697,6 +696,18 @@ app.index_string = '''
             /* Menu hamburger en portrait - plus d'espace vertical */
             #hamburger-menu {
                 max-height: calc(100vh - 140px) !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                right: 10px !important;
+                top: 65px !important;
+            }
+            
+            /* Standalone Proposer Relation button on mobile */
+            #btn-propose-relation {
+                right: 10px !important;
+                top: 10px !important;
+                font-size: 12px !important;
+                padding: 8px 14px !important;
             }
         }
     </style>
@@ -1261,41 +1272,6 @@ def create_public_layout():
                     ], style={'marginBottom': '12px'}),
                     
                     html.Hr(style={'margin': '12px 0', 'borderColor': '#e0e4e8'}),
-                    
-                    html.Div("Contribute", style={
-                        'fontSize': '12px', 
-                        'fontWeight': '600', 
-                        'marginBottom': '12px',
-                        'color': 'var(--text-dark)',
-                        'textAlign': 'left',
-                        'paddingBottom': '8px',
-                        'borderBottom': '1px solid #e0e4e8',
-                        'textTransform': 'uppercase',
-                        'letterSpacing': '0.5px'
-                    }),
-                    dbc.Button([
-                        html.I(className="fas fa-user-plus", style={'marginRight': '8px'}),
-                        "Proposer une personne"
-                    ], id='btn-propose-person', size='sm', className='w-100 mb-2', style={
-                        'fontSize': '12px',
-                        'padding': '8px 12px',
-                        'background': 'var(--primary-dark)',
-                        'border': 'none',
-                        'color': 'white',
-                        'borderRadius': '4px'
-                    }),
-                    
-                    dbc.Button([
-                        html.I(className="fas fa-link", style={'marginRight': '8px'}),
-                        "Proposer une relation"
-                    ], id='btn-propose-relation', size='sm', className='w-100', style={
-                        'fontSize': '12px',
-                        'padding': '8px 12px',
-                        'background': 'var(--primary-dark)',
-                        'border': 'none',
-                        'color': 'white',
-                        'borderRadius': '4px'
-                    }),
                 ], id='hamburger-menu', style={
                     'position': 'absolute',
                     'top': '65px',
@@ -1305,9 +1281,31 @@ def create_public_layout():
                     'borderRadius': '8px',
                     'boxShadow': '0 4px 20px rgba(0,0,0,0.3)',
                     'minWidth': '220px',
+                    'maxHeight': 'calc(100vh - 120px)',  # Mobile scrolling fix
+                    'overflowY': 'auto',  # Enable vertical scroll
                     'border': '2px solid white',
                     'display': 'none',  # Caché par défaut
-                    'zIndex': '999',
+                    'zIndex': '9999',  # Increased for fullscreen compatibility
+                }),
+                
+                # Standalone Proposer Relation Button (outside hamburger menu)
+                dbc.Button([
+                    html.I(className="fas fa-link", style={'marginRight': '8px'}),
+                    "Proposer une relation"
+                ], id='btn-propose-relation', style={
+                    'position': 'absolute',
+                    'top': '15px',
+                    'right': '70px',  # Leave space for hamburger icon
+                    'zIndex': '1000',
+                    'fontSize': '14px',
+                    'padding': '10px 18px',
+                    'background': 'var(--primary-dark)',
+                    'border': 'none',
+                    'borderRadius': '6px',
+                    'color': 'white',
+                    'fontWeight': '600',
+                    'boxShadow': '0 2px 8px rgba(0,0,0,0.15)',
+                    'transition': 'all 0.3s ease',
                 }),
             ], className='graph-panel', style={'gridColumn': '1 / -1', 'position': 'relative'}),  # Full width
             
@@ -1323,7 +1321,6 @@ def create_public_layout():
         # Modals auth
         create_login_modal(),
         create_register_modal(),
-        create_propose_person_modal(),
         create_propose_relation_modal(),
         
     ], className='main-container')
@@ -1774,7 +1771,6 @@ def create_admin_layout(user):
         dcc.Store(id='selected-relation-store', data=None),
         
         # Modals auth (needed for admin too!)
-        create_propose_person_modal(),
         create_propose_relation_modal(),
         
     ], className='main-container')
@@ -1976,34 +1972,6 @@ def toggle_register_modal(n_open, n_cancel, is_open):
         "cancel_clicks": n_cancel,
         "was_open": is_open
     })
-    return not is_open
-
-
-@app.callback(
-    Output('modal-propose-person', 'is_open'),
-    [Input('btn-propose-person', 'n_clicks'),
-     Input('btn-cancel-propose-person', 'n_clicks'),
-     Input('btn-submit-propose-person', 'n_clicks')],
-    State('modal-propose-person', 'is_open'),
-    prevent_initial_call=False
-)
-def toggle_propose_person_modal(n_open, n_cancel, n_submit, is_open):
-    """Ouvrir/fermer modal propose person"""
-    if not ctx.triggered:
-        return is_open
-    
-    ctx_triggered = ctx.triggered_id
-    print(f"✅ [PUBLIC] Toggle propose person modal: {ctx_triggered}")
-    
-    log_event("ui", "toggle_propose_person_modal", {
-        "triggered": ctx_triggered,
-        "open_clicks": n_open,
-        "cancel_clicks": n_cancel,
-        "submit_clicks": n_submit,
-        "was_open": is_open
-    })
-    if ctx_triggered in ['btn-cancel-propose-person', 'btn-submit-propose-person']:
-        return False
     return not is_open
 
 
