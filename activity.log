@@ -497,3 +497,8 @@
 2025-11-06T15:16:23.547Z | navigation | display_page | {"pathname": "/", "authenticated": true}
 2025-11-06T15:16:27.300Z | auth | logout | {"username": "admin"}
 2025-11-06T15:16:27.336Z | navigation | display_page | {"pathname": "/", "authenticated": false}
+2025-11-10T13:17:35.227Z | navigation | display_page | {"pathname": "/", "authenticated": false}
+2025-11-10T13:17:41.901Z | ui | toggle_login_modal | {"open_clicks": 1, "cancel_clicks": null, "was_open": false}
+2025-11-10T13:17:49.161Z | auth | login_attempt | {"username": "admin", "has_password": true}
+2025-11-10T13:17:53.592Z | auth | login_attempt | {"username": "admin", "has_password": true}
+2025-11-10T13:17:55.381Z | auth | login_attempt | {"username": "admin", "has_password": true}

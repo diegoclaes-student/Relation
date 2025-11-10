@@ -150,6 +150,11 @@ app.index_string = '''
             height: 600px;
         }
         
+        #network-graph-admin {
+            width: 100%;
+            height: 600px;
+        }
+        
         .controls-panel {
             background: white;
             border-radius: 12px;
@@ -2770,9 +2775,12 @@ def update_graph(layout_type, color_by, data_version, n_intervals, node_size, re
 )
 def update_graph_admin(layout_type, color_by, data_version, n_intervals, node_size, repulsion, edge_tension, search_person, show_all_names):
     """Build graph using repository + graph.py rendering with parameters (admin version)"""
+    print(f"\n🔵 [ADMIN-GRAPH] Callback triggered!")
+    print(f"  Layout: {layout_type}, Show all: {show_all_names}")
     try:
         # Get relations from repository (deduplicate pour éviter A→B et B→A)
         relations = relation_repository.read_all(deduplicate=True)
+        print(f"  Relations retrieved: {len(relations)}")
         
         if not relations:
             # Empty graph
