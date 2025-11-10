@@ -19,6 +19,10 @@ class PersonRepository:
         """Connexion via DatabaseManager (SQLite ou PostgreSQL)"""
         return self.db_manager.get_connection()
     
+    def _normalize(self, query: str) -> str:
+        """Normalise les placeholders SQL selon la base de données"""
+        return self.db_manager.normalize_query(query)
+    
     def create(self, name: str, gender: Optional[str] = None, 
                sexual_orientation: Optional[str] = None) -> Tuple[bool, str]:
         """
@@ -51,15 +55,15 @@ class PersonRepository:
             cursor = conn.cursor()
             
             # Vérifier si existe déjà
-            cursor.execute("SELECT id FROM persons WHERE name = %s", (clean_name,))
+            cursor.execute(self._normalize("SELECT id FROM persons WHERE name = %s"), (clean_name,))
             if cursor.fetchone():
                 return False, f"La personne '{clean_name}' existe déjà"
             
             # Créer la personne
-            cursor.execute("""
+            cursor.execute(self._normalize("""
                 INSERT INTO persons (name, gender, sexual_orientation)
                 VALUES (%s, %s, %s)
-            """, (clean_name, gender, sexual_orientation))
+            """), (clean_name, gender, sexual_orientation))
             
             conn.commit()
             return True, f"Personne créée: {clean_name}"
@@ -83,7 +87,7 @@ class PersonRepository:
         conn = self._get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM persons WHERE id = %s", (person_id,))
+            cursor.execute(self._normalize("SELECT * FROM persons WHERE id = %s"), (person_id,))
             row = cursor.fetchone()
             return dict(row) if row else None
         finally:
@@ -102,7 +106,7 @@ class PersonRepository:
         conn = self._get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM persons WHERE name = %s", (name,))
+            cursor.execute(self._normalize("SELECT * FROM persons WHERE name = %s"), (name,))
             row = cursor.fetchone()
             return dict(row) if row else None
         finally:
@@ -158,7 +162,7 @@ class PersonRepository:
             cursor = conn.cursor()
             
             # Vérifier que la personne existe
-            cursor.execute("SELECT name FROM persons WHERE id = %s", (person_id,))
+            cursor.execute(self._normalize("SELECT name FROM persons WHERE id = %s"), (person_id,))
             row = cursor.fetchone()
             if not row:
                 return False, "Personne non trouvée"
@@ -179,20 +183,20 @@ class PersonRepository:
             
             values.append(person_id)
             
-            query = f"UPDATE persons SET {', '.join(set_clauses)} WHERE id = %s"
+            query = self._normalize(f"UPDATE persons SET {', '.join(set_clauses)} WHERE id = %s")
             cursor.execute(query, values)
             
             # Si le nom a changé, mettre à jour les relations
             if 'name' in kwargs and kwargs['name'] != old_name:
                 new_name = kwargs['name']
                 
-                cursor.execute("""
+                cursor.execute(self._normalize("""
                     UPDATE relations SET person1 = %s WHERE person1 = %s
-                """, (new_name, old_name))
+                """), (new_name, old_name))
                 
-                cursor.execute("""
+                cursor.execute(self._normalize("""
                     UPDATE relations SET person2 = %s WHERE person2 = %s
-                """, (new_name, old_name))
+                """), (new_name, old_name))
             
             conn.commit()
             return True, f"Personne mise à jour: {kwargs.get('name', old_name)}"
@@ -219,7 +223,7 @@ class PersonRepository:
             cursor = conn.cursor()
             
             # Récupérer le nom de la personne
-            cursor.execute("SELECT name FROM persons WHERE id = %s", (person_id,))
+            cursor.execute(self._normalize("SELECT name FROM persons WHERE id = %s"), (person_id,))
             row = cursor.fetchone()
             if not row:
                 return False, "Personne non trouvée"
@@ -228,15 +232,15 @@ class PersonRepository:
             
             if cascade:
                 # Supprimer toutes les relations liées
-                cursor.execute("""
+                cursor.execute(self._normalize("""
                     DELETE FROM relations 
                     WHERE person1 = %s OR person2 = %s
-                """, (person_name, person_name))
+                """), (person_name, person_name))
                 
                 relations_deleted = cursor.rowcount
             
             # Supprimer la personne
-            cursor.execute("DELETE FROM persons WHERE id = %s", (person_id,))
+            cursor.execute(self._normalize("DELETE FROM persons WHERE id = %s"), (person_id,))
             
             conn.commit()
             
@@ -270,82 +274,106 @@ class PersonRepository:
             cursor = conn.cursor()
             
             # Récupérer les noms
-            cursor.execute("SELECT name FROM persons WHERE id = %s", (source_id,))
+            cursor.execute(self._normalize("SELECT name FROM persons WHERE id = %s"), (source_id,))
             source_row = cursor.fetchone()
             if not source_row:
+                conn.close()
                 return False, "Personne source non trouvée"
             
-            cursor.execute("SELECT name FROM persons WHERE id = %s", (target_id,))
+            cursor.execute(self._normalize("SELECT name FROM persons WHERE id = %s"), (target_id,))
             target_row = cursor.fetchone()
             if not target_row:
+                conn.close()
                 return False, "Personne cible non trouvée"
             
             source_name = source_row['name']
             target_name = target_row['name']
             
             # Transférer toutes les relations de source vers target
-            # Attention aux doublons : utiliser INSERT ... ON CONFLICT DO NOTHING (Postgres/SQLite compatible)
-            
             # Relations où source est person1
-            cursor.execute("""
+            cursor.execute(self._normalize("""
                 SELECT DISTINCT person2, relation_type FROM relations 
                 WHERE person1 = %s AND person2 != %s
-            """, (source_name, target_name))
+            """), (source_name, target_name))
             
-            for row in cursor.fetchall():
+            relations_p1 = cursor.fetchall()
+            for row in relations_p1:
                 person2, rel_type = row['person2'], row['relation_type']
                 
-                # Ajouter relation target → person2 (si pas déjà existante)
-                cursor.execute("""
-                    INSERT INTO relations (person1, person2, relation_type)
-                    VALUES (%s, %s, %s)
-                    ON CONFLICT (person1, person2, relation_type) DO NOTHING
-                """, (target_name, person2, rel_type))
+                # Vérifier si la relation existe déjà
+                cursor.execute(self._normalize("""
+                    SELECT COUNT(*) as cnt FROM relations 
+                    WHERE person1 = %s AND person2 = %s AND relation_type = %s
+                """), (target_name, person2, rel_type))
+                
+                if cursor.fetchone()['cnt'] == 0:
+                    cursor.execute(self._normalize("""
+                        INSERT INTO relations (person1, person2, relation_type)
+                        VALUES (%s, %s, %s)
+                    """), (target_name, person2, rel_type))
                 
                 # Symétrique
-                cursor.execute("""
-                    INSERT INTO relations (person1, person2, relation_type)
-                    VALUES (%s, %s, %s)
-                    ON CONFLICT (person1, person2, relation_type) DO NOTHING
-                """, (person2, target_name, rel_type))
+                cursor.execute(self._normalize("""
+                    SELECT COUNT(*) as cnt FROM relations 
+                    WHERE person1 = %s AND person2 = %s AND relation_type = %s
+                """), (person2, target_name, rel_type))
+                
+                if cursor.fetchone()['cnt'] == 0:
+                    cursor.execute(self._normalize("""
+                        INSERT INTO relations (person1, person2, relation_type)
+                        VALUES (%s, %s, %s)
+                    """), (person2, target_name, rel_type))
             
             # Relations où source est person2
-            cursor.execute("""
+            cursor.execute(self._normalize("""
                 SELECT DISTINCT person1, relation_type FROM relations 
                 WHERE person2 = %s AND person1 != %s
-            """, (source_name, target_name))
+            """), (source_name, target_name))
             
-            for row in cursor.fetchall():
+            relations_p2 = cursor.fetchall()
+            for row in relations_p2:
                 person1, rel_type = row['person1'], row['relation_type']
                 
-                # Ajouter relation person1 → target
-                cursor.execute("""
-                    INSERT INTO relations (person1, person2, relation_type)
-                    VALUES (%s, %s, %s)
-                    ON CONFLICT (person1, person2, relation_type) DO NOTHING
-                """, (person1, target_name, rel_type))
+                # Vérifier si la relation existe déjà
+                cursor.execute(self._normalize("""
+                    SELECT COUNT(*) as cnt FROM relations 
+                    WHERE person1 = %s AND person2 = %s AND relation_type = %s
+                """), (person1, target_name, rel_type))
+                
+                if cursor.fetchone()['cnt'] == 0:
+                    cursor.execute(self._normalize("""
+                        INSERT INTO relations (person1, person2, relation_type)
+                        VALUES (%s, %s, %s)
+                    """), (person1, target_name, rel_type))
                 
                 # Symétrique
-                cursor.execute("""
-                    INSERT INTO relations (person1, person2, relation_type)
-                    VALUES (%s, %s, %s)
-                    ON CONFLICT (person1, person2, relation_type) DO NOTHING
-                """, (target_name, person1, rel_type))
+                cursor.execute(self._normalize("""
+                    SELECT COUNT(*) as cnt FROM relations 
+                    WHERE person1 = %s AND person2 = %s AND relation_type = %s
+                """), (target_name, person1, rel_type))
+                
+                if cursor.fetchone()['cnt'] == 0:
+                    cursor.execute(self._normalize("""
+                        INSERT INTO relations (person1, person2, relation_type)
+                        VALUES (%s, %s, %s)
+                    """), (target_name, person1, rel_type))
             
             # Supprimer toutes les relations de source
-            cursor.execute("""
+            cursor.execute(self._normalize("""
                 DELETE FROM relations 
                 WHERE person1 = %s OR person2 = %s
-            """, (source_name, source_name))
+            """), (source_name, source_name))
             
             # Supprimer la personne source
-            cursor.execute("DELETE FROM persons WHERE id = %s", (source_id,))
+            cursor.execute(self._normalize("DELETE FROM persons WHERE id = %s"), (source_id,))
             
             conn.commit()
             return True, f"Fusion réussie: {source_name} → {target_name}"
             
         except Exception as e:
             conn.rollback()
+            import traceback
+            traceback.print_exc()
             return False, f"Erreur fusion: {str(e)}"
         finally:
             conn.close()
@@ -388,7 +416,7 @@ class PersonRepository:
             cursor = conn.cursor()
             
             # Récupérer le nom
-            cursor.execute("SELECT name FROM persons WHERE id = %s", (person_id,))
+            cursor.execute(self._normalize("SELECT name FROM persons WHERE id = %s"), (person_id,))
             row = cursor.fetchone()
             if not row:
                 return 0
@@ -396,10 +424,10 @@ class PersonRepository:
             person_name = row['name']
             
             # Compter les relations (dédupliquées)
-            cursor.execute("""
+            cursor.execute(self._normalize("""
                 SELECT COUNT(DISTINCT person2) FROM relations 
                 WHERE person1 = %s
-            """, (person_name,))
+            """), (person_name,))
             
             return cursor.fetchone()[0]
             

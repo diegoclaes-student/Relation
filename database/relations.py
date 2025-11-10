@@ -22,6 +22,10 @@ class RelationRepository:
         """Connexion via DatabaseManager (SQLite ou PostgreSQL)"""
         return self.db_manager.get_connection()
     
+    def _normalize(self, query: str) -> str:
+        """Normalise les placeholders SQL selon la base de données"""
+        return self.db_manager.normalize_query(query)
+    
     def create(self, person1: str, person2: str, relation_type: int) -> Tuple[bool, str]:
         """
         Crée une relation symétrique
@@ -59,7 +63,7 @@ class RelationRepository:
         conn = self._get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT person1, person2, relation_type FROM relations")
+            cursor.execute(self._normalize("SELECT person1, person2, relation_type FROM relations"))
             results = []
             for row in cursor.fetchall():
                 if isinstance(row, dict):
@@ -83,11 +87,11 @@ class RelationRepository:
         conn = self._get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("""
+            cursor.execute(self._normalize("""
                 SELECT person2, relation_type FROM relations 
                 WHERE person1 = %s
                 ORDER BY person2
-            """, (person_name,))
+            """), (person_name,))
             
             results = []
             for row in cursor.fetchall():
@@ -148,10 +152,10 @@ class RelationRepository:
             cursor = conn.cursor()
             
             # Supprimer toutes les relations (dans les deux sens)
-            cursor.execute("""
+            cursor.execute(self._normalize("""
                 DELETE FROM relations 
                 WHERE person1 = %s OR person2 = %s
-            """, (person_name, person_name))
+            """), (person_name, person_name))
             
             deleted_count = cursor.rowcount
             conn.commit()
@@ -178,11 +182,11 @@ class RelationRepository:
         conn = self._get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("""
+            cursor.execute(self._normalize("""
                 SELECT COUNT(*) as count FROM relations 
                 WHERE (person1 = %s AND person2 = %s)
                    OR (person1 = %s AND person2 = %s)
-            """, (person1, person2, person2, person1))
+            """), (person1, person2, person2, person1))
             
             return cursor.fetchone()['count'] > 0
             
@@ -203,11 +207,11 @@ class RelationRepository:
         conn = self._get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("""
+            cursor.execute(self._normalize("""
                 SELECT relation_type FROM relations 
                 WHERE person1 = %s AND person2 = %s
                 LIMIT 1
-            """, (person1, person2))
+            """), (person1, person2))
             
             row = cursor.fetchone()
             return row['relation_type'] if row else None
@@ -245,18 +249,18 @@ class RelationRepository:
             cursor = conn.cursor()
             
             # Total relations
-            cursor.execute("SELECT COUNT(*) as count FROM relations")
+            cursor.execute(self._normalize("SELECT COUNT(*) as count FROM relations"))
             total = cursor.fetchone()['count']
             
             # Relations uniques (dédupliquées)
             unique = len(self.symmetry.get_deduplicated_relations())
             
             # Par type
-            cursor.execute("""
+            cursor.execute(self._normalize("""
                 SELECT relation_type, COUNT(*) as count 
                 FROM relations 
                 GROUP BY relation_type
-            """)
+            """))
             by_type = {row['relation_type']: row['count'] 
                       for row in cursor.fetchall()}
             

@@ -787,6 +787,227 @@ app.index_string = '''
             });
         });
     </script>
+    <script>
+        // ============================================================================
+        // PINCH-TO-ZOOM POUR MOBILE (Solution robuste)
+        // ============================================================================
+        
+        (function() {
+            console.log('🔧 Pinch-to-zoom initializing...');
+            
+            // État du pinch
+            var pinchState = {
+                active: false,
+                initialDistance: 0,
+                initialCenter: null,
+                initialRanges: null,
+                lastUpdate: 0
+            };
+            
+            // Calculer distance entre 2 touches
+            function getDistance(touch1, touch2) {
+                var dx = touch1.clientX - touch2.clientX;
+                var dy = touch1.clientY - touch2.clientY;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+            
+            // Calculer centre entre 2 touches
+            function getCenter(touch1, touch2) {
+                return {
+                    x: (touch1.clientX + touch2.clientX) / 2,
+                    y: (touch1.clientY + touch2.clientY) / 2
+                };
+            }
+            
+            // Convertir coordonnées écran → graphe
+            function screenToGraph(graphDiv, screenX, screenY) {
+                try {
+                    // Utiliser _fullLayout (Plotly interne) au lieu de layout
+                    var layout = graphDiv._fullLayout || graphDiv.layout || {};
+                    var xaxis = layout.xaxis || {};
+                    var yaxis = layout.yaxis || {};
+                    
+                    if (!xaxis.range || !yaxis.range) {
+                        return null;
+                    }
+                    
+                    var bbox = graphDiv.getBoundingClientRect();
+                    var relX = (screenX - bbox.left) / bbox.width;
+                    var relY = (screenY - bbox.top) / bbox.height;
+                    
+                    var xRange = xaxis.range;
+                    var yRange = yaxis.range;
+                    
+                    return {
+                        x: xRange[0] + relX * (xRange[1] - xRange[0]),
+                        y: yRange[1] - relY * (yRange[1] - yRange[0])  // Y inversé
+                    };
+                } catch(e) {
+                    console.error('screenToGraph error:', e);
+                    return null;
+                }
+            }
+            
+            function handleTouchStart(e) {
+                if (e.touches.length !== 2) {
+                    pinchState.active = false;
+                    return;
+                }
+                
+                // Ne pas intercepter si c'est sur un bouton
+                var target = e.target;
+                if (target.closest('#btn-zoom-in, #btn-zoom-out, #btn-fullscreen, #hamburger-btn-graph')) {
+                    return;
+                }
+                
+                var graphDiv = document.getElementById('network-graph');
+                if (!graphDiv) return;
+                
+                console.log('🔵 Pinch START');
+                
+                // Sauvegarder état initial
+                pinchState.active = true;
+                pinchState.initialDistance = getDistance(e.touches[0], e.touches[1]);
+                pinchState.initialCenter = getCenter(e.touches[0], e.touches[1]);
+                
+                // Récupérer les ranges actuels de _fullLayout (Plotly interne)
+                var currentLayout = graphDiv._fullLayout || graphDiv.layout || {};
+                var xaxis = currentLayout.xaxis || {};
+                var yaxis = currentLayout.yaxis || {};
+                
+                if (xaxis.range && yaxis.range) {
+                    pinchState.initialRanges = {
+                        x: [xaxis.range[0], xaxis.range[1]],
+                        y: [yaxis.range[0], yaxis.range[1]]
+                    };
+                    console.log('✅ Initial ranges saved:', pinchState.initialRanges);
+                } else {
+                    console.log('⚠️ No ranges available yet, trying to wait...');
+                    // Attendre un peu que Plotly se charge
+                    setTimeout(function() {
+                        var layout2 = graphDiv._fullLayout || graphDiv.layout || {};
+                        var xaxis2 = layout2.xaxis || {};
+                        var yaxis2 = layout2.yaxis || {};
+                        if (xaxis2.range && yaxis2.range) {
+                            pinchState.initialRanges = {
+                                x: [xaxis2.range[0], xaxis2.range[1]],
+                                y: [yaxis2.range[0], yaxis2.range[1]]
+                            };
+                            console.log('✅ Ranges retrieved after delay:', pinchState.initialRanges);
+                        }
+                    }, 100);
+                }
+                
+                // Calculer centre en coordonnées graphe
+                var centerGraph = screenToGraph(graphDiv, pinchState.initialCenter.x, pinchState.initialCenter.y);
+                if (centerGraph) {
+                    pinchState.initialCenter.graphX = centerGraph.x;
+                    pinchState.initialCenter.graphY = centerGraph.y;
+                    console.log('📍 Pinch center (graph coords):', centerGraph);
+                }
+                
+                pinchState.lastUpdate = Date.now();
+                
+                // Empêcher le comportement par défaut
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            function handleTouchMove(e) {
+                if (!pinchState.active || e.touches.length !== 2) return;
+                if (!pinchState.initialRanges) return;
+                
+                // Throttle: max 30fps
+                var now = Date.now();
+                if (now - pinchState.lastUpdate < 33) return;
+                pinchState.lastUpdate = now;
+                
+                var currentDistance = getDistance(e.touches[0], e.touches[1]);
+                if (currentDistance === 0 || pinchState.initialDistance === 0) return;
+                
+                // Calculer le facteur de zoom (distance actuelle / distance initiale)
+                // Plus les doigts s'écartent, plus scale est petit (zoom in)
+                var scale = pinchState.initialDistance / currentDistance;
+                
+                // Limiter le zoom
+                if (scale < 0.1) scale = 0.1;   // Max zoom out
+                if (scale > 10) scale = 10;     // Max zoom in
+                
+                var graphDiv = document.getElementById('network-graph');
+                if (!graphDiv || !window.Plotly) return;
+                
+                // Calculer nouvelles ranges centrées sur le point de pinch
+                var xCenter = pinchState.initialCenter.graphX || 
+                              (pinchState.initialRanges.x[0] + pinchState.initialRanges.x[1]) / 2;
+                var yCenter = pinchState.initialCenter.graphY || 
+                              (pinchState.initialRanges.y[0] + pinchState.initialRanges.y[1]) / 2;
+                
+                var xSpan = (pinchState.initialRanges.x[1] - pinchState.initialRanges.x[0]) / 2 * scale;
+                var ySpan = (pinchState.initialRanges.y[1] - pinchState.initialRanges.y[0]) / 2 * scale;
+                
+                var newXRange = [xCenter - xSpan, xCenter + xSpan];
+                var newYRange = [yCenter - ySpan, yCenter + ySpan];
+                
+                console.log('🔍 Pinch scale:', scale.toFixed(2), 'ranges:', newXRange.map(x => x.toFixed(1)), newYRange.map(y => y.toFixed(1)));
+                
+                try {
+                    // Utiliser Plotly.relayout directement sur le div
+                    window.Plotly.relayout(graphDiv, {
+                        'xaxis.range': newXRange,
+                        'yaxis.range': newYRange
+                    });
+                } catch (err) {
+                    console.error('❌ Plotly.relayout error:', err);
+                }
+                
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            function handleTouchEnd(e) {
+                if (e.touches.length < 2) {
+                    if (pinchState.active) {
+                        console.log('🔵 Pinch END');
+                    }
+                    pinchState.active = false;
+                    pinchState.initialDistance = 0;
+                    pinchState.initialRanges = null;
+                }
+            }
+            
+            // Attacher les listeners
+            function attachPinchListeners() {
+                var graphDiv = document.getElementById('network-graph');
+                if (!graphDiv) {
+                    setTimeout(attachPinchListeners, 100);
+                    return;
+                }
+                
+                console.log('✅ Attaching pinch-to-zoom listeners (capture mode)');
+                
+                // Capture mode pour intercepter AVANT Plotly
+                graphDiv.addEventListener('touchstart', handleTouchStart, {
+                    capture: true,
+                    passive: false
+                });
+                graphDiv.addEventListener('touchmove', handleTouchMove, {
+                    capture: true,
+                    passive: false
+                });
+                graphDiv.addEventListener('touchend', handleTouchEnd, {
+                    capture: true,
+                    passive: false
+                });
+            }
+            
+            // Initialiser quand le DOM est prêt
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', attachPinchListeners);
+            } else {
+                attachPinchListeners();
+            }
+        })();
+    </script>
 </head>
 <body>
     {%app_entry%}
@@ -1318,6 +1539,33 @@ def create_admin_layout(user):
         dbc.Modal([
             dbc.ModalHeader(dbc.ModalTitle("✏️ Edit Person")),
             dbc.ModalBody([
+                # Search bar section
+                html.Div([
+                    html.Label([
+                        html.I(className="fas fa-search", style={'marginRight': '8px'}),
+                        "Search Person & Relations"
+                    ], style={'fontSize': '16px', 'fontWeight': 'bold', 'marginBottom': '10px', 'display': 'block'}),
+                    dbc.Input(
+                        id='input-search-person-relations',
+                        type='text',
+                        placeholder='🔍 Type a name to search...',
+                        debounce=True,
+                        style={'fontSize': '15px', 'marginBottom': '10px'}
+                    ),
+                    html.Div(id='search-results-relations', style={
+                        'maxHeight': '200px',
+                        'overflowY': 'auto',
+                        'marginBottom': '15px',
+                        'padding': '10px',
+                        'backgroundColor': '#f8f9fa',
+                        'borderRadius': '8px',
+                        'minHeight': '50px'
+                    })
+                ], style={'marginBottom': '20px', 'padding': '15px', 'backgroundColor': '#f8f9ff', 'borderRadius': '8px'}),
+                
+                html.Hr(),
+                
+                # Original edit section
                 html.Div([
                     html.Label("Select Person", className='control-label'),
                     dcc.Dropdown(id='dropdown-edit-person-select', placeholder='Select person to edit')
@@ -1332,7 +1580,7 @@ def create_admin_layout(user):
                 dbc.Button("Cancel", id='btn-cancel-edit-person', color='secondary'),
                 dbc.Button("Save Changes", id='btn-submit-edit-person', color='primary')
             ])
-        ], id='modal-edit-person', is_open=False),
+        ], id='modal-edit-person', is_open=False, size='lg'),
         
         # Modal Merge Persons
         dbc.Modal([
@@ -3729,6 +3977,142 @@ def submit_edit_person(n_clicks, person_id, new_name, current_version):
         return False, no_update  # Close modal
         print(f"Error updating person: {e}")
         return True, no_update  # Keep modal open
+
+@app.callback(
+    Output('search-results-relations', 'children'),
+    Input('input-search-person-relations', 'value'),
+    prevent_initial_call=True
+)
+def search_person_relations(search_query):
+    """Search for persons and display their relations"""
+    if not search_query or len(search_query.strip()) < 2:
+        return html.Div([
+            html.I(className="fas fa-info-circle", style={'marginRight': '8px', 'color': '#6c757d'}),
+            "Type at least 2 characters to search..."
+        ], style={'color': '#6c757d', 'fontSize': '14px', 'padding': '10px'})
+    
+    try:
+        search_query = search_query.strip().lower()
+        
+        # Get all persons
+        all_persons = person_repository.read_all()
+        
+        # Filter persons matching the search
+        matching_persons = [
+            p for p in all_persons 
+            if search_query in p['name'].lower()
+        ]
+        
+        if not matching_persons:
+            return html.Div([
+                html.I(className="fas fa-search", style={'marginRight': '8px', 'color': '#ffc107'}),
+                f"No person found matching '{search_query}'"
+            ], style={'color': '#856404', 'fontSize': '14px', 'padding': '10px', 'backgroundColor': '#fff3cd', 'borderRadius': '4px'})
+        
+        # Get all relations
+        all_relations = relation_repository.read_all(deduplicate=False)
+        
+        # Build results
+        results = []
+        for person in matching_persons[:5]:  # Limit to 5 results
+            person_name = person['name']
+            person_id = person['id']
+            
+            # Find relations for this person
+            person_relations = [
+                (p1, p2, rel_type) for p1, p2, rel_type in all_relations
+                if p1.lower() == person_name.lower() or p2.lower() == person_name.lower()
+            ]
+            
+            # Create person card
+            relation_items = []
+            if person_relations:
+                for p1, p2, rel_type in person_relations[:10]:  # Limit to 10 relations
+                    # Determine the other person
+                    other_person = p2 if p1.lower() == person_name.lower() else p1
+                    
+                    # Format relation with emoji
+                    relation_emoji = {
+                        'friends': '👥',
+                        'family': '👨‍👩‍👧‍👦',
+                        'colleagues': '💼',
+                        'romantic': '💕',
+                        'other': '🔗'
+                    }.get(rel_type, '🔗')
+                    
+                    relation_items.append(
+                        html.Div([
+                            html.Span(relation_emoji, style={'marginRight': '6px'}),
+                            html.Span(rel_type.capitalize(), style={
+                                'fontWeight': 'bold',
+                                'color': '#667eea',
+                                'marginRight': '6px'
+                            }),
+                            html.Span('with', style={'marginRight': '6px', 'color': '#6c757d'}),
+                            html.Span(other_person, style={'fontWeight': '500'})
+                        ], style={'padding': '4px 0', 'fontSize': '13px'})
+                    )
+                
+                if len(person_relations) > 10:
+                    relation_items.append(
+                        html.Div(
+                            f"... and {len(person_relations) - 10} more relations",
+                            style={'fontSize': '12px', 'color': '#6c757d', 'fontStyle': 'italic', 'padding': '4px 0'}
+                        )
+                    )
+            else:
+                relation_items.append(
+                    html.Div([
+                        html.I(className="fas fa-unlink", style={'marginRight': '6px'}),
+                        "No relations found"
+                    ], style={'color': '#6c757d', 'fontSize': '13px', 'padding': '4px 0'})
+                )
+            
+            results.append(
+                html.Div([
+                    html.Div([
+                        html.I(className="fas fa-user", style={'marginRight': '8px', 'color': '#667eea'}),
+                        html.Strong(person_name, style={'fontSize': '15px', 'color': '#2c3e50'}),
+                        html.Span(
+                            f" ({len(person_relations)} relation{'s' if len(person_relations) != 1 else ''})",
+                            style={'fontSize': '12px', 'color': '#6c757d', 'marginLeft': '6px'}
+                        )
+                    ], style={'marginBottom': '8px', 'paddingBottom': '8px', 'borderBottom': '1px solid #dee2e6'}),
+                    html.Div(relation_items, style={'paddingLeft': '24px'})
+                ], style={
+                    'padding': '12px',
+                    'marginBottom': '10px',
+                    'backgroundColor': 'white',
+                    'borderRadius': '6px',
+                    'border': '1px solid #e0e0e0',
+                    'boxShadow': '0 1px 3px rgba(0,0,0,0.05)'
+                })
+            )
+        
+        if len(matching_persons) > 5:
+            results.append(
+                html.Div(
+                    f"+ {len(matching_persons) - 5} more persons found. Refine your search for better results.",
+                    style={
+                        'fontSize': '13px',
+                        'color': '#6c757d',
+                        'fontStyle': 'italic',
+                        'padding': '8px',
+                        'textAlign': 'center'
+                    }
+                )
+            )
+        
+        return html.Div(results)
+        
+    except Exception as e:
+        print(f"❌ Error searching relations: {e}")
+        import traceback
+        traceback.print_exc()
+        return html.Div([
+            html.I(className="fas fa-exclamation-triangle", style={'marginRight': '8px', 'color': '#dc3545'}),
+            f"Error: {str(e)}"
+        ], style={'color': '#721c24', 'fontSize': '14px', 'padding': '10px', 'backgroundColor': '#f8d7da', 'borderRadius': '4px'})
 
 @app.callback(
     [Output('modal-merge-persons', 'is_open'),

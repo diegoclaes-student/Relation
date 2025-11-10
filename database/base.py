@@ -37,10 +37,18 @@ class DatabaseManager:
     def __init__(self, db_path: Path = config.DB_PATH):
         self.db_path = db_path
         self.use_postgres = bool(DATABASE_URL)
+        self._postgres_failed = False  # Flag pour éviter de réessayer PostgreSQL
+        
         if self.use_postgres and psycopg2 is None:
             raise RuntimeError("DATABASE_URL set but psycopg2 is not installed")
         if not self.use_postgres:
             self._ensure_database_exists()
+    
+    def normalize_query(self, query: str) -> str:
+        """Convertit les placeholders PostgreSQL (%s) en placeholders SQLite (?) si nécessaire"""
+        if not self.use_postgres:
+            return query.replace('%s', '?')
+        return query
     
     # ---------- Connections ----------
     def get_connection(self):
@@ -48,8 +56,33 @@ class DatabaseManager:
         Note: pour psycopg2 on retourne une connexion avec RealDictCursor
         """
         if self.use_postgres:
-            conn = psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
-            return conn
+            import ssl
+            try:
+                # Première tentative : connexion standard avec timeout plus long
+                conn = psycopg2.connect(
+                    DATABASE_URL,
+                    cursor_factory=psycopg2.extras.RealDictCursor,
+                    connect_timeout=30,
+                    keepalives=1,
+                    keepalives_idle=5,
+                    keepalives_interval=2,
+                    keepalives_count=2
+                )
+                return conn
+            except psycopg2.OperationalError as e:
+                error_msg = str(e)
+                print(f"❌ PostgreSQL connection failed: {error_msg}")
+                
+                # Si erreur SSL, informer l'utilisateur
+                if 'SSL' in error_msg:
+                    print("⚠️  Problème SSL détecté avec Render PostgreSQL")
+                    print("   Solutions possibles:")
+                    print("   1. Vérifier que le serveur Render est actif")
+                    print("   2. Vérifier les credentials dans DATABASE_URL")
+                    print("   3. Le serveur gratuit Render peut être en veille")
+                    print("   4. Contacter le support Render si le problème persiste")
+                
+                raise Exception(f"Impossible de se connecter à PostgreSQL: {error_msg}")
         else:
             conn = sqlite3.connect(
                 str(self.db_path),

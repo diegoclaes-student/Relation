@@ -18,6 +18,10 @@ class SymmetryManager:
         """Connexion via DatabaseManager (SQLite ou PostgreSQL)"""
         return self.db_manager.get_connection()
     
+    def _normalize(self, query: str) -> str:
+        """Normalise les placeholders SQL selon la base de données"""
+        return self.db_manager.normalize_query(query)
+    
     def ensure_symmetric_relation(self, person1: str, person2: str, relation_type: int) -> Tuple[bool, str]:
         """
         Ajoute une relation ET sa symétrique en transaction atomique
@@ -38,11 +42,11 @@ class SymmetryManager:
             cursor = conn.cursor()
             
             # Vérifier si la relation existe déjà (dans un sens ou l'autre)
-            cursor.execute("""
+            cursor.execute(self._normalize("""
                 SELECT COUNT(*) as count FROM relations 
                 WHERE (person1 = %s AND person2 = %s) 
                    OR (person1 = %s AND person2 = %s)
-            """, (person1, person2, person2, person1))
+            """), (person1, person2, person2, person1))
             
             result = cursor.fetchone()
             count = result['count'] if isinstance(result, dict) else result[0]
@@ -52,15 +56,15 @@ class SymmetryManager:
                 return False, "Cette relation existe déjà"
             
             # Ajouter les deux directions en une seule transaction
-            cursor.execute("""
+            cursor.execute(self._normalize("""
                 INSERT INTO relations (person1, person2, relation_type)
                 VALUES (%s, %s, %s)
-            """, (person1, person2, relation_type))
+            """), (person1, person2, relation_type))
             
-            cursor.execute("""
+            cursor.execute(self._normalize("""
                 INSERT INTO relations (person1, person2, relation_type)
                 VALUES (%s, %s, %s)
-            """, (person2, person1, relation_type))
+            """), (person2, person1, relation_type))
             
             conn.commit()
             conn.close()
@@ -87,11 +91,11 @@ class SymmetryManager:
             cursor = conn.cursor()
             
             # Supprimer les deux directions
-            cursor.execute("""
+            cursor.execute(self._normalize("""
                 DELETE FROM relations 
                 WHERE (person1 = %s AND person2 = %s)
                    OR (person1 = %s AND person2 = %s)
-            """, (person1, person2, person2, person1))
+            """), (person1, person2, person2, person1))
             
             deleted_count = cursor.rowcount
             conn.commit()
@@ -118,14 +122,14 @@ class SymmetryManager:
         try:
             cursor = conn.cursor()
             
-            cursor.execute("""
+            cursor.execute(self._normalize("""
                 SELECT r1.person1, r1.person2, r1.relation_type
                 FROM relations r1
                 LEFT JOIN relations r2 
                     ON r1.person1 = r2.person2 
                     AND r1.person2 = r2.person1
                 WHERE r2.id IS NULL
-            """)
+            """))
             
             asymmetric = []
             for row in cursor.fetchall():
@@ -163,10 +167,10 @@ class SymmetryManager:
             
             for person1, person2, relation_type in asymmetric:
                 try:
-                    cursor.execute("""
+                    cursor.execute(self._normalize("""
                         INSERT INTO relations (person1, person2, relation_type)
                         VALUES (%s, %s, %s)
-                    """, (person2, person1, relation_type))
+                    """), (person2, person1, relation_type))
                     
                     fixed_count += 1
                     messages.append(f"✅ Symétrie ajoutée: {person2} → {person1}")
@@ -199,7 +203,7 @@ class SymmetryManager:
             cursor = conn.cursor()
             
             # Récupérer toutes les relations
-            cursor.execute("SELECT person1, person2, relation_type FROM relations")
+            cursor.execute(self._normalize("SELECT person1, person2, relation_type FROM relations"))
             all_relations = cursor.fetchall()
             
             # Dédupliquer en gardant une seule direction par paire
@@ -243,12 +247,12 @@ class SymmetryManager:
             cursor = conn.cursor()
             
             # Mettre à jour les deux directions
-            cursor.execute("""
+            cursor.execute(self._normalize("""
                 UPDATE relations 
                 SET relation_type = %s
                 WHERE (person1 = %s AND person2 = %s)
                    OR (person1 = %s AND person2 = %s)
-            """, (new_type, person1, person2, person2, person1))
+            """), (new_type, person1, person2, person2, person1))
             
             updated_count = cursor.rowcount
             conn.commit()
@@ -258,10 +262,10 @@ class SymmetryManager:
                 return True, f"Type de relation mis à jour (symétrie préservée)"
             elif updated_count == 1:
                 # Une seule direction trouvée - ajouter la symétrique
-                cursor.execute("""
+                cursor.execute(self._normalize("""
                     INSERT INTO relations (person1, person2, relation_type)
                     VALUES (%s, %s, %s)
-                """, (person2, person1, new_type))
+                """), (person2, person1, new_type))
                 conn.commit()
                 conn.close()
                 return True, f"Type mis à jour + symétrie corrigée"
