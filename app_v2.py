@@ -1469,6 +1469,19 @@ def create_admin_layout(user):
                             ),
                         ], className='control-group'),
                         
+                        # Show all names checkbox
+                        html.Div([
+                            html.Label("👁️ Display Options", className='control-label'),
+                            dbc.Checklist(
+                                id='show-all-names',
+                                options=[
+                                    {'label': 'Show all names', 'value': 'show_all'}
+                                ],
+                                value=[],
+                                switch=True,
+                            ),
+                        ], className='control-group'),
+                        
                         # Stats Card
                         html.Div([
                             html.H5("📊 Network Statistics"),
