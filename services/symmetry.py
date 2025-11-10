@@ -5,21 +5,18 @@ Utilisé par tous les callbacks pour éviter les relations asymétriques
 """
 
 from typing import List, Tuple, Set
-import sqlite3
-from config import DB_PATH
+from database.base import db_manager
 
 
 class SymmetryManager:
     """Gère la symétrie des relations de manière centralisée"""
     
-    def __init__(self, db_path: str = DB_PATH):
-        self.db_path = db_path
+    def __init__(self):
+        self.db_manager = db_manager
     
-    def _get_connection(self) -> sqlite3.Connection:
-        """Connexion avec row_factory pour dict-like access"""
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        return conn
+    def _get_connection(self):
+        """Connexion via DatabaseManager (SQLite ou PostgreSQL)"""
+        return self.db_manager.get_connection()
     
     def ensure_symmetric_relation(self, person1: str, person2: str, relation_type: int) -> Tuple[bool, str]:
         """
@@ -43,32 +40,36 @@ class SymmetryManager:
             # Vérifier si la relation existe déjà (dans un sens ou l'autre)
             cursor.execute("""
                 SELECT COUNT(*) as count FROM relations 
-                WHERE (person1 = ? AND person2 = ?) 
-                   OR (person1 = ? AND person2 = ?)
+                WHERE (person1 = %s AND person2 = %s) 
+                   OR (person1 = %s AND person2 = %s)
             """, (person1, person2, person2, person1))
             
-            if cursor.fetchone()['count'] > 0:
+            result = cursor.fetchone()
+            count = result['count'] if isinstance(result, dict) else result[0]
+            
+            if count > 0:
+                conn.close()
                 return False, "Cette relation existe déjà"
             
             # Ajouter les deux directions en une seule transaction
             cursor.execute("""
                 INSERT INTO relations (person1, person2, relation_type)
-                VALUES (?, ?, ?)
+                VALUES (%s, %s, %s)
             """, (person1, person2, relation_type))
             
             cursor.execute("""
                 INSERT INTO relations (person1, person2, relation_type)
-                VALUES (?, ?, ?)
+                VALUES (%s, %s, %s)
             """, (person2, person1, relation_type))
             
             conn.commit()
+            conn.close()
             return True, f"Relation ajoutée avec symétrie garantie"
             
         except Exception as e:
             conn.rollback()
-            return False, f"Erreur: {str(e)}"
-        finally:
             conn.close()
+            return False, f"Erreur: {str(e)}"
     
     def delete_symmetric_relation(self, person1: str, person2: str) -> Tuple[bool, str]:
         """
@@ -88,12 +89,13 @@ class SymmetryManager:
             # Supprimer les deux directions
             cursor.execute("""
                 DELETE FROM relations 
-                WHERE (person1 = ? AND person2 = ?)
-                   OR (person1 = ? AND person2 = ?)
+                WHERE (person1 = %s AND person2 = %s)
+                   OR (person1 = %s AND person2 = %s)
             """, (person1, person2, person2, person1))
             
             deleted_count = cursor.rowcount
             conn.commit()
+            conn.close()
             
             if deleted_count > 0:
                 return True, f"Relation supprimée ({deleted_count} entrées)"
@@ -102,9 +104,8 @@ class SymmetryManager:
             
         except Exception as e:
             conn.rollback()
-            return False, f"Erreur: {str(e)}"
-        finally:
             conn.close()
+            return False, f"Erreur: {str(e)}"
     
     def audit_symmetry(self) -> List[Tuple[str, str, int]]:
         """
@@ -126,13 +127,19 @@ class SymmetryManager:
                 WHERE r2.id IS NULL
             """)
             
-            asymmetric = [(row['person1'], row['person2'], row['relation_type']) 
-                         for row in cursor.fetchall()]
+            asymmetric = []
+            for row in cursor.fetchall():
+                if isinstance(row, dict):
+                    asymmetric.append((row['person1'], row['person2'], row['relation_type']))
+                else:
+                    asymmetric.append((row[0], row[1], row[2]))
             
+            conn.close()
             return asymmetric
             
-        finally:
+        except Exception as e:
             conn.close()
+            return []
     
     def fix_asymmetric_relations(self) -> Tuple[int, List[str]]:
         """
@@ -158,24 +165,24 @@ class SymmetryManager:
                 try:
                     cursor.execute("""
                         INSERT INTO relations (person1, person2, relation_type)
-                        VALUES (?, ?, ?)
+                        VALUES (%s, %s, %s)
                     """, (person2, person1, relation_type))
                     
                     fixed_count += 1
                     messages.append(f"✅ Symétrie ajoutée: {person2} → {person1}")
                     
-                except sqlite3.IntegrityError:
-                    # Relation inverse existe déjà (race condition)
-                    messages.append(f"⚠️  Symétrie existe déjà: {person2} → {person1}")
+                except Exception as e:
+                    # Relation inverse existe déjà (race condition) ou autre erreur
+                    messages.append(f"⚠️  Erreur ou symétrie existe déjà: {person2} → {person1}")
             
             conn.commit()
+            conn.close()
             messages.insert(0, f"🔧 {fixed_count} relations corrigées sur {len(asymmetric)} asymétriques détectées")
             
         except Exception as e:
             conn.rollback()
-            messages.append(f"❌ Erreur: {str(e)}")
-        finally:
             conn.close()
+            messages.append(f"❌ Erreur: {str(e)}")
         
         return fixed_count, messages
     
@@ -200,7 +207,10 @@ class SymmetryManager:
             unique_relations = []
             
             for row in all_relations:
-                p1, p2, rel_type = row['person1'], row['person2'], row['relation_type']
+                if isinstance(row, dict):
+                    p1, p2, rel_type = row['person1'], row['person2'], row['relation_type']
+                else:
+                    p1, p2, rel_type = row[0], row[1], row[2]
                 
                 # Créer une paire normalisée (ordre alphabétique)
                 pair = tuple(sorted([p1, p2]))
@@ -209,10 +219,12 @@ class SymmetryManager:
                     seen.add(pair)
                     unique_relations.append((p1, p2, rel_type))
             
+            conn.close()
             return unique_relations
             
-        finally:
+        except Exception as e:
             conn.close()
+            return []
     
     def update_relation_type(self, person1: str, person2: str, new_type: int) -> Tuple[bool, str]:
         """
@@ -233,33 +245,34 @@ class SymmetryManager:
             # Mettre à jour les deux directions
             cursor.execute("""
                 UPDATE relations 
-                SET relation_type = ?
-                WHERE (person1 = ? AND person2 = ?)
-                   OR (person1 = ? AND person2 = ?)
+                SET relation_type = %s
+                WHERE (person1 = %s AND person2 = %s)
+                   OR (person1 = %s AND person2 = %s)
             """, (new_type, person1, person2, person2, person1))
             
             updated_count = cursor.rowcount
             conn.commit()
             
             if updated_count >= 2:
+                conn.close()
                 return True, f"Type de relation mis à jour (symétrie préservée)"
             elif updated_count == 1:
                 # Une seule direction trouvée - ajouter la symétrique
-                cursor = conn.cursor()
                 cursor.execute("""
                     INSERT INTO relations (person1, person2, relation_type)
-                    VALUES (?, ?, ?)
+                    VALUES (%s, %s, %s)
                 """, (person2, person1, new_type))
                 conn.commit()
+                conn.close()
                 return True, f"Type mis à jour + symétrie corrigée"
             else:
+                conn.close()
                 return False, "Relation non trouvée"
             
         except Exception as e:
             conn.rollback()
-            return False, f"Erreur: {str(e)}"
-        finally:
             conn.close()
+            return False, f"Erreur: {str(e)}"
 
 
 # Singleton instance

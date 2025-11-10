@@ -7,7 +7,6 @@ Garantit la symétrie automatique via SymmetryManager
 from typing import List, Dict, Optional, Tuple
 from database.base import db_manager
 from utils.validators import Validator, ValidationError
-from services.symmetry import symmetry_manager
 
 
 class RelationRepository:
@@ -15,6 +14,8 @@ class RelationRepository:
     
     def __init__(self):
         self.db_manager = db_manager
+        # Import lazy pour éviter circular import
+        from services.symmetry import symmetry_manager
         self.symmetry = symmetry_manager
     
     def _get_connection(self):
@@ -264,5 +265,13 @@ class RelationRepository:
             conn.close()
 
 
-# Singleton instance
-relation_repository = RelationRepository()
+# Singleton instance - lazy initialization to avoid circular import
+class _RelationRepositorySingleton:
+    _instance = None
+    
+    def __getattr__(self, name):
+        if self._instance is None:
+            self._instance = RelationRepository()
+        return getattr(self._instance, name)
+
+relation_repository = _RelationRepositorySingleton()
