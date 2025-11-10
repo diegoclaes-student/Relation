@@ -679,6 +679,15 @@ app.index_string = '''
                 max-height: calc(100vh - 80px) !important;
                 font-size: 10px;
             }
+            
+            /* Boutons en landscape - empilés verticalement */
+            #btn-propose-relation {
+                right: 10px !important;
+                bottom: 80px !important;  /* Au-dessus des boutons zoom */
+                top: auto !important;
+                font-size: 11px !important;
+                padding: 6px 12px !important;
+            }
         }
         
         /* Portrait mode optimizations */
@@ -705,9 +714,17 @@ app.index_string = '''
             /* Standalone Proposer Relation button on mobile */
             #btn-propose-relation {
                 right: 10px !important;
-                top: 10px !important;
+                bottom: 20px !important;  /* Déplacé en bas pour éviter le hamburger */
+                top: auto !important;
                 font-size: 12px !important;
                 padding: 8px 14px !important;
+                width: auto !important;
+            }
+            
+            /* Hamburger button stays at top right */
+            #hamburger-btn-graph {
+                right: 10px !important;
+                top: 10px !important;
             }
         }
     </style>
@@ -1296,7 +1313,7 @@ def create_public_layout():
                     'position': 'absolute',
                     'top': '15px',
                     'right': '70px',  # Leave space for hamburger icon
-                    'zIndex': '1000',
+                    'zIndex': '10000',  # Higher than fullscreen overlay (9999)
                     'fontSize': '14px',
                     'padding': '10px 18px',
                     'background': 'var(--primary-dark)',
