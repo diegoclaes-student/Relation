@@ -60,8 +60,13 @@ class RelationRepository:
         try:
             cursor = conn.cursor()
             cursor.execute("SELECT person1, person2, relation_type FROM relations")
-            return [(row['person1'], row['person2'], row['relation_type']) 
-                   for row in cursor.fetchall()]
+            results = []
+            for row in cursor.fetchall():
+                if isinstance(row, dict):
+                    results.append((row['person1'], row['person2'], row['relation_type']))
+                else:
+                    results.append((row[0], row[1], row[2]))
+            return results
         finally:
             conn.close()
     
@@ -84,8 +89,13 @@ class RelationRepository:
                 ORDER BY person2
             """, (person_name,))
             
-            return [(row['person2'], row['relation_type']) 
-                   for row in cursor.fetchall()]
+            results = []
+            for row in cursor.fetchall():
+                if isinstance(row, dict):
+                    results.append((row['person2'], row['relation_type']))
+                else:
+                    results.append((row[0], row[1]))
+            return results
         finally:
             conn.close()
     

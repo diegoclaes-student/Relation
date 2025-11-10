@@ -116,20 +116,30 @@ class PendingSubmissionRepository:
         name_column = "person_name" if getattr(db_manager, "use_postgres", False) else "name"
         
         cur.execute(f"""
-            SELECT id, {name_column}, submitted_by, submitted_at, status
+            SELECT id, {name_column} as name, submitted_by, submitted_at, status
             FROM pending_persons WHERE status = 'pending'
             ORDER BY submitted_at DESC
         """)
         
         submissions = []
         for row in cur.fetchall():
-            submissions.append({
-                'id': row[0],
-                'name': row[1],
-                'submitted_by': row[2],
-                'submitted_at': row[3],
-                'status': row[4]
-            })
+            # Handle both dict (PostgreSQL RealDictCursor) and tuple (SQLite)
+            if isinstance(row, dict):
+                submissions.append({
+                    'id': row['id'],
+                    'name': row['name'],
+                    'submitted_by': row['submitted_by'],
+                    'submitted_at': row['submitted_at'],
+                    'status': row['status']
+                })
+            else:
+                submissions.append({
+                    'id': row[0],
+                    'name': row[1],
+                    'submitted_by': row[2],
+                    'submitted_at': row[3],
+                    'status': row[4]
+                })
         
         print(f"✅ [DB] Found {len(submissions)} pending persons: {submissions}")
         conn.close()
@@ -150,15 +160,27 @@ class PendingSubmissionRepository:
         
         submissions = []
         for row in cur.fetchall():
-            submissions.append({
-                'id': row[0],
-                'person1': row[1],
-                'person2': row[2],
-                'relation_type': row[3],
-                'submitted_by': row[4],
-                'submitted_at': row[5],
-                'status': row[6]
-            })
+            # Handle both dict (PostgreSQL RealDictCursor) and tuple (SQLite)
+            if isinstance(row, dict):
+                submissions.append({
+                    'id': row['id'],
+                    'person1': row['person1'],
+                    'person2': row['person2'],
+                    'relation_type': row['relation_type'],
+                    'submitted_by': row['submitted_by'],
+                    'submitted_at': row['submitted_at'],
+                    'status': row['status']
+                })
+            else:
+                submissions.append({
+                    'id': row[0],
+                    'person1': row[1],
+                    'person2': row[2],
+                    'relation_type': row[3],
+                    'submitted_by': row[4],
+                    'submitted_at': row[5],
+                    'status': row[6]
+                })
         
         print(f"✅ [DB] Found {len(submissions)} pending relations: {submissions}")
         conn.close()
@@ -189,7 +211,8 @@ class PendingSubmissionRepository:
                 conn.close()
                 return False
             
-            name = row[0]
+            # Handle both dict (PostgreSQL) and tuple (SQLite)
+            name = row[name_column] if isinstance(row, dict) else row[0]
             print(f"✅ [DB] Found person: {name}")
             
             # Ajouter la personne
@@ -236,7 +259,14 @@ class PendingSubmissionRepository:
                 conn.close()
                 return False
             
-            person1, person2, relation_type = row
+            # Handle both dict (PostgreSQL) and tuple (SQLite)
+            if isinstance(row, dict):
+                person1 = row['person1']
+                person2 = row['person2']
+                relation_type = row['relation_type']
+            else:
+                person1, person2, relation_type = row
+            
             print(f"✅ [DB] Found relation: {person1} <-> {person2} (type={relation_type})")
             
             # IMPORTANT: Créer les personnes s'il y a un __CREATE__ prefix
