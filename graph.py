@@ -291,6 +291,90 @@ def _compute_radial(G: nx.Graph, seed: int, center_node: Optional[str] = None) -
     return pos
 
 
+def _compute_shell(G: nx.Graph, seed: int) -> Dict[str, Tuple[float, float]]:
+    """Layout shell - nœuds organisés en coquilles concentriques par degré"""
+    Gu = G.to_undirected()
+    degrees = dict(Gu.degree())
+    
+    # Grouper par degré (shells)
+    max_degree = max(degrees.values()) if degrees else 1
+    shells = [[] for _ in range(max_degree + 1)]
+    
+    for node, degree in degrees.items():
+        shells[degree].append(node)
+    
+    # Filtrer les shells vides
+    shells = [s for s in shells if s]
+    
+    try:
+        return nx.shell_layout(Gu, shells, scale=2.0)
+    except:
+        # Fallback si shell_layout échoue
+        return nx.circular_layout(Gu, scale=2.0)
+
+
+def _compute_random(G: nx.Graph, seed: int) -> Dict[str, Tuple[float, float]]:
+    """Layout aléatoire - distribution aléatoire uniforme"""
+    Gu = G.to_undirected()
+    return nx.random_layout(Gu, seed=seed)
+
+
+def _compute_planar(G: nx.Graph, seed: int) -> Dict[str, Tuple[float, float]]:
+    """Layout planaire - essaye d'éviter les croisements"""
+    Gu = G.to_undirected()
+    
+    # Vérifier si le graphe est planaire
+    if nx.is_planar(Gu):
+        try:
+            return nx.planar_layout(Gu, scale=2.0)
+        except:
+            pass
+    
+    # Fallback: utiliser kamada-kawai qui minimise les croisements
+    return nx.kamada_kawai_layout(Gu, scale=2.0)
+
+
+def _compute_bipartite(G: nx.Graph, seed: int) -> Dict[str, Tuple[float, float]]:
+    """Layout bipartite - deux groupes séparés verticalement"""
+    Gu = G.to_undirected()
+    
+    # Essayer de détecter une structure bipartite
+    try:
+        from networkx.algorithms import bipartite
+        if bipartite.is_bipartite(Gu):
+            top_nodes = set(n for n, d in Gu.nodes(data=True) if d.get('bipartite', 0) == 0)
+            if not top_nodes:
+                # Si pas d'attribut bipartite, utiliser une heuristique
+                top_nodes = set(list(Gu.nodes())[:len(Gu.nodes())//2])
+            return nx.bipartite_layout(Gu, top_nodes, scale=2.0)
+    except:
+        pass
+    
+    # Fallback: diviser par degré
+    degrees = dict(Gu.degree())
+    median_degree = sorted(degrees.values())[len(degrees)//2] if degrees else 0
+    
+    top_nodes = [n for n, d in degrees.items() if d >= median_degree]
+    bottom_nodes = [n for n, d in degrees.items() if d < median_degree]
+    
+    import math as _math
+    pos = {}
+    
+    # Placer top nodes en haut
+    for i, node in enumerate(top_nodes):
+        x = (i - len(top_nodes)/2) * 0.3
+        y = 1.5
+        pos[node] = (x, y)
+    
+    # Placer bottom nodes en bas
+    for i, node in enumerate(bottom_nodes):
+        x = (i - len(bottom_nodes)/2) * 0.3
+        y = -1.5
+        pos[node] = (x, y)
+    
+    return pos
+
+
 def _compute_spring(G: nx.Graph, seed: int, spread: float) -> Dict[str, Tuple[float, float]]:
     Gu = G.to_undirected()
     n = max(1, Gu.number_of_nodes())
@@ -354,7 +438,7 @@ def _compute_community_layout(G: nx.Graph, seed: int, spread: float) -> Dict[str
 def compute_layout(G: nx.Graph, seed: int = 42, spread: float = 2.0, min_separation: float = 0.03, mode: str = "community", center_node: Optional[str] = None, repulsion: float = 1.0) -> Dict[str, Tuple[float, float]]:
     """Calcule une disposition 2D lisible.
 
-    mode: 'community' | 'spring' | 'kk' | 'spectral' | 'circular' | 'hierarchical' | 'radial'
+    mode: 'community' | 'spring' | 'kk' | 'spectral' | 'circular' | 'hierarchical' | 'radial' | 'shell' | 'random' | 'planar' | 'bipartite'
     center_node: optionnel, nom du nœud à placer au centre (pour 'radial')
     repulsion: facteur multiplicateur pour la force de répulsion (1.0 = normal)
     """
@@ -373,6 +457,14 @@ def compute_layout(G: nx.Graph, seed: int = 42, spread: float = 2.0, min_separat
         raw = _compute_hierarchical(G, seed)
     elif mode == "radial":
         raw = _compute_radial(G, seed, center_node)
+    elif mode == "shell":
+        raw = _compute_shell(G, seed)
+    elif mode == "random":
+        raw = _compute_random(G, seed)
+    elif mode == "planar":
+        raw = _compute_planar(G, seed)
+    elif mode == "bipartite":
+        raw = _compute_bipartite(G, seed)
     else:
         raw = _compute_community_layout(G, seed, spread * repulsion)
 
@@ -383,8 +475,8 @@ def compute_layout(G: nx.Graph, seed: int = 42, spread: float = 2.0, min_separat
         cx, cy = pos[center_node]
         pos = {n: (x - cx, y - cy) for n, (x, y) in pos.items()}
     
-    # Répulsion locale plus forte pour éviter les chevauchements (sauf pour circular et hierarchical)
-    if mode not in ["circular", "hierarchical"]:
+    # Répulsion locale plus forte pour éviter les chevauchements (sauf pour circular, hierarchical, shell, bipartite)
+    if mode not in ["circular", "hierarchical", "shell", "bipartite"]:
         pos = _enforce_min_separation(pos, min_dist=adjusted_min_sep, steps=12, damping=0.75)
     
     return pos
