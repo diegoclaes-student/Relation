@@ -701,413 +701,91 @@ app.index_string = '''
         }
     </style>
     <script>
-        var graphDiv = null;
-        var zoomButtonsReady = false;
+        // ============================================================================
+        // RELIER LES BOUTONS CUSTOM AUX BOUTONS NATIFS PLOTLY
+        // ============================================================================
         
-        // Attendre que Plotly soit chargé
-        var plotlyCheckInterval = setInterval(function() {
-            if (window.Plotly && window.Plotly.newPlot) {
-                clearInterval(plotlyCheckInterval);
-                setupGraph();
-            }
-        }, 100);
-        
-        function setupGraph() {
-            graphDiv = document.getElementById('network-graph');
-            if (!graphDiv) {
-                setTimeout(setupGraph, 100);
-                return;
-            }
-            
-            console.log('✅ Graph div found, initializing zoom buttons immediately');
-            
-            // Initialiser les boutons dès maintenant, pas besoin d'attendre
-            initZoomButtons();
-            zoomButtonsReady = true;
-            
-            // Observer pour réinitialiser si le graphe est rechargé
-            var observer = new MutationObserver(function(mutations) {
-                var plotlySvg = graphDiv.querySelector('.svg-container');
-                
-                if (plotlySvg && !zoomButtonsReady) {
-                    initZoomButtons();
-                    zoomButtonsReady = true;
-                }
-            });
-            
-            observer.observe(graphDiv, {
-                childList: true,
-                subtree: true,
-                attributes: true
-            });
-        }
-        
-        function initZoomButtons() {
-            var zoomInBtn = document.getElementById('btn-zoom-in');
-            var zoomOutBtn = document.getElementById('btn-zoom-out');
-            
-            console.log('🔍 Initializing zoom buttons:', zoomInBtn ? '✅ In' : '❌ In', zoomOutBtn ? '✅ Out' : '❌ Out');
-            
-            // Fonction utilitaire pour gérer click ET touch
-            function attachZoomListener(btn, factor, name) {
-                if (!btn) return;
-                
-                // Retirer les anciens listeners (cloner le bouton)
-                var newBtn = btn.cloneNode(true);
-                btn.parentNode.replaceChild(newBtn, btn);
-                
-                // Événement click (PC)
-                newBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    console.log('🖱️ Zoom ' + name + ' clicked');
-                    zoomGraph(factor);
-                }, false);
-                
-                // Événement touch (Mobile)
-                newBtn.addEventListener('touchstart', function(e) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    console.log('👆 Zoom ' + name + ' touched');
-                    zoomGraph(factor);
-                }, {passive: false});
-            }
-            
-            attachZoomListener(zoomInBtn, 1.5, 'in');
-            attachZoomListener(zoomOutBtn, 0.67, 'out');
-            
-            console.log('✅ Zoom buttons initialized and ready');
-        }
-        
-        function zoomGraph(factor) {
-            if (!graphDiv) return;
-            
-            var svgContainer = graphDiv.querySelector('.svg-container');
-            if (!svgContainer) return;
-            
-            var plotlyGraphDiv = getPlotlyGraphDiv();
-            if (!plotlyGraphDiv) return;
-            
-            var layout = plotlyGraphDiv._fullLayout || plotlyGraphDiv.layout;
-            if (!layout || !layout.xaxis || !layout.yaxis) return;
-            
-            var xRange = layout.xaxis.range;
-            var yRange = layout.yaxis.range;
-            
-            if (!xRange || !yRange) return;
-            
-            var xCenter = (xRange[0] + xRange[1]) / 2;
-            var yCenter = (yRange[0] + yRange[1]) / 2;
-            
-            var xSpan = (xRange[1] - xRange[0]) / factor / 2;
-            var ySpan = (yRange[1] - yRange[0]) / factor / 2;
-            
-            var newXRange = [xCenter - xSpan, xCenter + xSpan];
-            var newYRange = [yCenter - ySpan, yCenter + ySpan];
-            
-            try {
-                window.Plotly.relayout(plotlyGraphDiv, {
-                    'xaxis.range': newXRange,
-                    'yaxis.range': newYRange
-                }, {responsive: true});
-            } catch (e) {}
-        }
-        
-        // === HELPER: Trouver le Plotly graph div ===
-        function getPlotlyGraphDiv() {
-            if (!graphDiv) return null;
-            
-            var plotlyGraphDiv = null;
-            var children = graphDiv.querySelectorAll('*');
-            
-            for (var i = 0; i < children.length; i++) {
-                if (children[i].data && Array.isArray(children[i].data) && children[i]._fullLayout) {
-                    plotlyGraphDiv = children[i];
-                    break;
-                }
-            }
-            
-            if (!plotlyGraphDiv && window.Plotly && window.Plotly.getPlotly) {
-                try {
-                    plotlyGraphDiv = window.Plotly.getPlotly('network-graph');
-                } catch (e) {}
-            }
-            
-            if (!plotlyGraphDiv && graphDiv.data) {
-                plotlyGraphDiv = graphDiv;
-            }
-            
-            return plotlyGraphDiv;
-        }
-        
-        // === PINCH-TO-ZOOM (2 doigts sur mobile) - SOLUTION PROFESSIONNELLE ===
-        var pinchState = {
-            active: false,
-            initialDistance: 0,
-            initialRanges: null,
-            lastUpdate: 0
-        };
-        
-        function getDistance(touches) {
-            if (touches.length < 2) return 0;
-            var dx = touches[0].clientX - touches[1].clientX;
-            var dy = touches[0].clientY - touches[1].clientY;
-            return Math.sqrt(dx * dx + dy * dy);
-        }
-        
-        function handleTouchStart(e) {
-            // Seulement si exactement 2 doigts
-            if (e.touches.length !== 2) {
-                pinchState.active = false;
-                return;
-            }
-            
-            // Ne pas intercepter si ça vient d'un bouton
-            if (e.target.closest('#btn-zoom-in, #btn-zoom-out, #btn-fullscreen, #hamburger-btn-graph')) {
-                return;
-            }
-            
-            console.log('🔵 PINCH START: 2 fingers detected');
-            
-            var plotlyGraphDiv = getPlotlyGraphDiv();
-            if (!plotlyGraphDiv) {
-                console.log('❌ No plotly graph div found');
-                return;
-            }
-            
-            var layout = plotlyGraphDiv._fullLayout || plotlyGraphDiv.layout;
-            if (!layout || !layout.xaxis || !layout.yaxis) {
-                console.log('❌ No layout found');
-                return;
-            }
-            if (!layout.xaxis.range || !layout.yaxis.range) {
-                console.log('❌ No axis ranges found');
-                return;
-            }
-            
-            // Initialiser le pinch
-            pinchState.active = true;
-            pinchState.initialDistance = getDistance(e.touches);
-            pinchState.initialRanges = {
-                x: [layout.xaxis.range[0], layout.xaxis.range[1]],
-                y: [layout.yaxis.range[0], layout.yaxis.range[1]]
-            };
-            pinchState.lastUpdate = Date.now();
-            
-            console.log('✅ Pinch initialized, distance:', pinchState.initialDistance);
-            
-            // IMPORTANT: Empêcher Plotly de gérer le drag
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-        }
-        
-        function handleTouchMove(e) {
-            if (!pinchState.active || e.touches.length !== 2) return;
-            if (!pinchState.initialRanges || pinchState.initialDistance === 0) return;
-            
-            // Throttle: max 60fps (16ms entre chaque update)
-            var now = Date.now();
-            if (now - pinchState.lastUpdate < 16) return;
-            pinchState.lastUpdate = now;
-            
-            var currentDistance = getDistance(e.touches);
-            if (currentDistance === 0) return;
-            
-            // Calculer le ratio PAR RAPPORT À LA DISTANCE INITIALE (pas la dernière!)
-            var scale = pinchState.initialDistance / currentDistance;
-            
-            // Limiter le zoom (entre 1/10 et 10x de la vue initiale)
-            if (scale < 0.1) scale = 0.1;
-            if (scale > 10) scale = 10;
-            
-            var plotlyGraphDiv = getPlotlyGraphDiv();
-            if (!plotlyGraphDiv) return;
-            
-            // Calculer les nouvelles ranges en gardant le centre fixe
-            var xCenter = (pinchState.initialRanges.x[0] + pinchState.initialRanges.x[1]) / 2;
-            var yCenter = (pinchState.initialRanges.y[0] + pinchState.initialRanges.y[1]) / 2;
-            
-            var xSpan = (pinchState.initialRanges.x[1] - pinchState.initialRanges.x[0]) / 2 * scale;
-            var ySpan = (pinchState.initialRanges.y[1] - pinchState.initialRanges.y[0]) / 2 * scale;
-            
-            var newXRange = [xCenter - xSpan, xCenter + xSpan];
-            var newYRange = [yCenter - ySpan, yCenter + ySpan];
-            
-            console.log('🔍 ZOOM scale:', scale.toFixed(2), 'distance:', currentDistance.toFixed(0));
-            
-            try {
-                window.Plotly.relayout(plotlyGraphDiv, {
-                    'xaxis.range': newXRange,
-                    'yaxis.range': newYRange
-                });
-            } catch (err) {
-                console.log('❌ Relayout error:', err);
-            }
-            
-            // IMPORTANT: Empêcher le pan de Plotly
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-        }
-        
-        function handleTouchEnd(e) {
-            console.log('🔵 TOUCH END, remaining touches:', e.touches.length);
-            
-            // Reset si moins de 2 doigts
-            if (e.touches.length < 2) {
-                if (pinchState.active) {
-                    console.log('✅ Pinch zoom ended');
-                }
-                pinchState.active = false;
-                pinchState.initialDistance = 0;
-                pinchState.initialRanges = null;
-            }
-        }
-        
-        // Attacher les event listeners au graphDiv quand il est prêt
-        function attachPinchZoomListeners() {
-            if (!graphDiv) {
-                graphDiv = document.getElementById('network-graph');
-                if (!graphDiv) {
-                    setTimeout(attachPinchZoomListeners, 50);
-                    return;
-                }
-            }
-            
-            console.log('✅ Attaching pinch-zoom listeners with CAPTURE mode');
-            
-            // IMPORTANT: capture: true pour intercepter AVANT Plotly
-            // passive: false pour pouvoir faire preventDefault()
-            graphDiv.addEventListener('touchstart', handleTouchStart, {
-                capture: true,
-                passive: false
-            });
-            graphDiv.addEventListener('touchmove', handleTouchMove, {
-                capture: true,
-                passive: false
-            });
-            graphDiv.addEventListener('touchend', handleTouchEnd, {
-                capture: true,
-                passive: false
-            });
-            
-            // Aussi attacher sur la div Plotly elle-même
-            setTimeout(function() {
-                var plotlyDiv = document.querySelector('.js-plotly-plot');
-                if (plotlyDiv) {
-                    console.log('✅ Also attaching to .js-plotly-plot');
-                    plotlyDiv.addEventListener('touchstart', handleTouchStart, {
-                        capture: true,
-                        passive: false
-                    });
-                    plotlyDiv.addEventListener('touchmove', handleTouchMove, {
-                        capture: true,
-                        passive: false
-                    });
-                    plotlyDiv.addEventListener('touchend', handleTouchEnd, {
-                        capture: true,
-                        passive: false
-                    });
-                }
-            }, 500);
-        }
-        
-        // === FONCTION POUR INITIALISER TOUS LES BOUTONS ===
-        var buttonsInitialized = false;
-        
-        function initAllButtons() {
-            if (buttonsInitialized) return;
-            
-            var fullscreenBtn = document.getElementById('btn-fullscreen');
-            var hamburgerBtn = document.getElementById('hamburger-btn-graph');
-            
-            // Vérifier que les éléments essentiels existent
-            if (!fullscreenBtn || !hamburgerBtn) {
-                return; // Réessayer plus tard
-            }
-            
-            buttonsInitialized = true;
-            console.log('✅ Initializing all buttons NOW');
-            
-            // === PLEIN ÉCRAN ===
-            var fullscreenIcon = document.getElementById('fullscreen-icon');
-            var graphPanel = document.querySelector('.graph-panel');
-            var isFullscreen = false;
-            
-            if (fullscreenBtn && graphPanel) {
-                fullscreenBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    isFullscreen = !isFullscreen;
-                    if (isFullscreen) {
-                        graphPanel.classList.add('fullscreen-mode');
-                        if (fullscreenIcon) {
-                            fullscreenIcon.className = 'fas fa-compress';
-                        }
-                    } else {
-                        graphPanel.classList.remove('fullscreen-mode');
-                        if (fullscreenIcon) {
-                            fullscreenIcon.className = 'fas fa-expand';
-                        }
-                    }
-                    // Forcer Plotly à se redimensionner
-                    setTimeout(function() {
-                        if (graphDiv && window.Plotly) {
-                            window.Plotly.Plots.resize(graphDiv);
-                        }
-                    }, 100);
-                }, false);
-                console.log('✅ Fullscreen button initialized');
-            }
-            
-            // === MENU HAMBURGER ===
-            var hamburgerMenu = document.getElementById('hamburger-menu');
-            
-            if (hamburgerBtn && hamburgerMenu) {
-                hamburgerBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    var isVisible = hamburgerMenu.style.display !== 'none';
-                    hamburgerMenu.style.display = isVisible ? 'none' : 'block';
-                }, false);
-                
-                // Fermer le menu si on clique ailleurs
-                document.addEventListener('click', function(e) {
-                    if (hamburgerMenu && hamburgerMenu.style.display !== 'none') {
-                        if (!hamburgerMenu.contains(e.target) && e.target !== hamburgerBtn) {
-                            hamburgerMenu.style.display = 'none';
-                        }
-                    }
-                });
-                console.log('✅ Hamburger menu initialized');
-            }
-        }
-        
-        // === INITIALISATION AUTOMATIQUE AVEC MUTATIONOBSERVER ===
-        var buttonsObserver = new MutationObserver(function(mutations) {
-            if (!buttonsInitialized) {
-                initAllButtons();
-            }
-        });
-        
-        // Observer le body pour détecter quand les boutons sont ajoutés
-        buttonsObserver.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
-        
-        // Initialiser quand le DOM est prêt
+        // Attendre que le DOM soit prêt
         document.addEventListener('DOMContentLoaded', function() {
-            setupGraph();
-            attachPinchZoomListeners();
-            initAllButtons(); // Essayer immédiatement
+            console.log('🔧 Linking custom buttons to native Plotly buttons...');
+            
+            // Fonction pour trouver et cliquer sur un bouton natif Plotly
+            function clickPlotlyButton(buttonTitle) {
+                var graphDiv = document.getElementById('network-graph');
+                if (!graphDiv) {
+                    console.log('❌ Graph not found');
+                    return false;
+                }
+                
+                // Trouver la toolbar Plotly
+                var modebar = graphDiv.querySelector('.modebar');
+                if (!modebar) {
+                    console.log('❌ Modebar not found');
+                    return false;
+                }
+                
+                // Chercher le bouton avec le bon titre
+                var buttons = modebar.querySelectorAll('[data-title]');
+                for (var i = 0; i < buttons.length; i++) {
+                    if (buttons[i].getAttribute('data-title') === buttonTitle) {
+                        console.log('✅ Found Plotly button:', buttonTitle);
+                        buttons[i].click();
+                        return true;
+                    }
+                }
+                
+                console.log('❌ Button not found:', buttonTitle);
+                return false;
+            }
+            
+            // Observer pour attacher les listeners quand les boutons sont créés
+            var observer = new MutationObserver(function() {
+                var zoomInBtn = document.getElementById('btn-zoom-in');
+                var zoomOutBtn = document.getElementById('btn-zoom-out');
+                
+                if (zoomInBtn && !zoomInBtn.dataset.linked) {
+                    console.log('🔗 Linking btn-zoom-in to Plotly Zoom in');
+                    zoomInBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('➕ Custom zoom in clicked');
+                        clickPlotlyButton('Zoom in');
+                    });
+                    // Touch pour mobile
+                    zoomInBtn.addEventListener('touchstart', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('➕ Custom zoom in touched');
+                        clickPlotlyButton('Zoom in');
+                    }, {passive: false});
+                    zoomInBtn.dataset.linked = 'true';
+                }
+                
+                if (zoomOutBtn && !zoomOutBtn.dataset.linked) {
+                    console.log('🔗 Linking btn-zoom-out to Plotly Zoom out');
+                    zoomOutBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('➖ Custom zoom out clicked');
+                        clickPlotlyButton('Zoom out');
+                    });
+                    // Touch pour mobile
+                    zoomOutBtn.addEventListener('touchstart', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('➖ Custom zoom out touched');
+                        clickPlotlyButton('Zoom out');
+                    }, {passive: false});
+                    zoomOutBtn.dataset.linked = 'true';
+                }
+            });
+            
+            // Observer le body pour détecter quand les boutons sont ajoutés
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
         });
-        
-        // Essayer aussi après un court délai (sécurité Dash)
-        setTimeout(function() {
-            initAllButtons();
-        }, 100);
     </script>
 </head>
 <body>
@@ -1136,14 +814,22 @@ def create_public_layout():
                 dcc.Graph(
                     id='network-graph',
                     config={
-                        'displayModeBar': False,  # Masquer la barre d'outils (surtout sur mobile)
-                        'scrollZoom': True,
+                        'displayModeBar': 'hover',  # Afficher au survol (desktop) ou toujours (mobile)
+                        'scrollZoom': True,  # Zoom avec molette/trackpad
                         'displaylogo': False,
                         'doubleClick': 'reset',
                         'responsive': True,
                         'showTips': False,
-                        'modeBarButtonsToRemove': ['select2d', 'lasso2d'],
+                        'modeBarButtonsToRemove': ['select2d', 'lasso2d', 'pan2d'],
+                        'modeBarButtonsToAdd': ['zoomIn2d', 'zoomOut2d', 'resetScale2d'],
                         'editable': False,
+                        'toImageButtonOptions': {
+                            'format': 'png',
+                            'filename': 'network_graph',
+                            'height': 1080,
+                            'width': 1920,
+                            'scale': 2
+                        }
                     }
                 ),
                 
@@ -2936,87 +2622,8 @@ def update_graph_admin(layout_type, color_by, data_version, n_intervals, node_si
 # CALLBACKS CLIENTSIDE - BOUTONS INTERACTIFS (Zoom, Fullscreen, Hamburger)
 # ============================================================================
 
-# Callback pour Zoom In
-app.clientside_callback(
-    """
-    function(n_clicks, figure) {
-        if (!n_clicks || !figure) return window.dash_clientside.no_update;
-        
-        console.log('🔍 Zoom In clicked, figure:', figure);
-        
-        // Accéder au layout depuis le figure Dash
-        var xRange = figure.layout && figure.layout.xaxis ? figure.layout.xaxis.range : null;
-        var yRange = figure.layout && figure.layout.yaxis ? figure.layout.yaxis.range : null;
-        
-        if (!xRange || !yRange || xRange.length !== 2 || yRange.length !== 2) {
-            console.warn('No valid range found in figure layout');
-            return window.dash_clientside.no_update;
-        }
-        
-        var xCenter = (xRange[0] + xRange[1]) / 2;
-        var yCenter = (yRange[0] + yRange[1]) / 2;
-        var factor = 1.5; // Zoom in
-        var xSpan = (xRange[1] - xRange[0]) / factor / 2;
-        var ySpan = (yRange[1] - yRange[0]) / factor / 2;
-        
-        // Créer une nouvelle figure avec le layout modifié
-        var newFigure = {...figure};
-        newFigure.layout = {...figure.layout};
-        newFigure.layout.xaxis = {...figure.layout.xaxis, range: [xCenter - xSpan, xCenter + xSpan]};
-        newFigure.layout.yaxis = {...figure.layout.yaxis, range: [yCenter - ySpan, yCenter + ySpan]};
-        
-        console.log('✅ Zoom in applied, new ranges:', newFigure.layout.xaxis.range, newFigure.layout.yaxis.range);
-        
-        return [window.dash_clientside.no_update, newFigure];
-    }
-    """,
-    [Output('btn-zoom-in', 'n_clicks', allow_duplicate=True),
-     Output('network-graph', 'figure', allow_duplicate=True)],
-    [Input('btn-zoom-in', 'n_clicks'),
-     State('network-graph', 'figure')],
-    prevent_initial_call=True
-)
-
-# Callback pour Zoom Out
-app.clientside_callback(
-    """
-    function(n_clicks, figure) {
-        if (!n_clicks || !figure) return window.dash_clientside.no_update;
-        
-        console.log('🔍 Zoom Out clicked, figure:', figure);
-        
-        // Accéder au layout depuis le figure Dash
-        var xRange = figure.layout && figure.layout.xaxis ? figure.layout.xaxis.range : null;
-        var yRange = figure.layout && figure.layout.yaxis ? figure.layout.yaxis.range : null;
-        
-        if (!xRange || !yRange || xRange.length !== 2 || yRange.length !== 2) {
-            console.warn('No valid range found in figure layout');
-            return window.dash_clientside.no_update;
-        }
-        
-        var xCenter = (xRange[0] + xRange[1]) / 2;
-        var yCenter = (yRange[0] + yRange[1]) / 2;
-        var factor = 0.67; // Zoom out
-        var xSpan = (xRange[1] - xRange[0]) / factor / 2;
-        var ySpan = (yRange[1] - yRange[0]) / factor / 2;
-        
-        // Créer une nouvelle figure avec le layout modifié
-        var newFigure = {...figure};
-        newFigure.layout = {...figure.layout};
-        newFigure.layout.xaxis = {...figure.layout.xaxis, range: [xCenter - xSpan, xCenter + xSpan]};
-        newFigure.layout.yaxis = {...figure.layout.yaxis, range: [yCenter - ySpan, yCenter + ySpan]};
-        
-        console.log('✅ Zoom out applied, new ranges:', newFigure.layout.xaxis.range, newFigure.layout.yaxis.range);
-        
-        return [window.dash_clientside.no_update, newFigure];
-    }
-    """,
-    [Output('btn-zoom-out', 'n_clicks', allow_duplicate=True),
-     Output('network-graph', 'figure', allow_duplicate=True)],
-    [Input('btn-zoom-out', 'n_clicks'),
-     State('network-graph', 'figure')],
-    prevent_initial_call=True
-)
+# Note: Les boutons zoom custom (btn-zoom-in, btn-zoom-out) sont reliés
+# aux boutons natifs Plotly via JavaScript (voir index_string)
 
 # Callback pour Hamburger Menu
 app.clientside_callback(
