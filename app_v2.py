@@ -1213,7 +1213,7 @@ def create_public_layout():
                             {'label': '📐 Planaire', 'value': 'planar'},
                             {'label': '↕️ Bipartite', 'value': 'bipartite'},
                         ],
-                        value='community',
+                        value='planar',
                         style={
                             'width': '100%',
                             'padding': '6px',
@@ -1413,7 +1413,7 @@ def create_admin_layout(user):
                                         {'label': '📐 Planar', 'value': 'planar'},
                                         {'label': '↕️ Bipartite', 'value': 'bipartite'},
                                     ],
-                                    value='community',
+                                    value='planar',
                                     clearable=False,
                                 )
                             ], className='control-group'),
@@ -1426,7 +1426,7 @@ def create_admin_layout(user):
                                         {'label': '🎨 By Community', 'value': 'community'},
                                         {'label': '📈 By Connections', 'value': 'degree'},
                                     ],
-                                    value='community',
+                                    value='degree',
                                     clearable=False,
                                 )
                             ], className='control-group'),
