@@ -682,16 +682,28 @@ app.index_string = '''
             
             /* Boutons en landscape - empilés verticalement */
             #btn-propose-relation {
-                right: 10px !important;
-                bottom: 135px !important;  /* Au-dessus de tous les boutons */
+                right: 15px !important;
+                bottom: 15px !important;  /* En bas à droite */
                 top: auto !important;
                 font-size: 11px !important;
                 padding: 6px 12px !important;
             }
             
-            /* Fullscreen aussi décalé */
+            #btn-zoom-in {
+                bottom: 135px !important;  /* Au-dessus de Proposer Relation */
+                right: 15px !important;
+            }
+            
+            #btn-zoom-out {
+                bottom: 85px !important;  /* Entre Zoom+ et Proposer Relation */
+                right: 15px !important;
+            }
+            
+            /* Fullscreen en haut à gauche */
             #btn-fullscreen {
-                bottom: 175px !important;
+                top: 15px !important;
+                left: 15px !important;
+                bottom: auto !important;
             }
         }
         
@@ -718,12 +730,22 @@ app.index_string = '''
             
             /* Standalone Proposer Relation button on mobile */
             #btn-propose-relation {
-                right: 10px !important;
-                bottom: 135px !important;  /* Au-dessus des boutons zoom (25+40+40+30 de marge) */
+                right: 15px !important;
+                bottom: 15px !important;  /* En bas à droite */
                 top: auto !important;
                 font-size: 12px !important;
                 padding: 8px 14px !important;
                 width: auto !important;
+            }
+            
+            #btn-zoom-in {
+                bottom: 135px !important;  /* Au-dessus de Proposer Relation */
+                right: 15px !important;
+            }
+            
+            #btn-zoom-out {
+                bottom: 85px !important;  /* Entre Zoom+ et Proposer Relation */
+                right: 15px !important;
             }
             
             /* Hamburger button stays at top right */
@@ -732,9 +754,11 @@ app.index_string = '''
                 top: 10px !important;
             }
             
-            /* Ajuster position fullscreen sur mobile portrait */
+            /* Fullscreen en haut à gauche */
             #btn-fullscreen {
-                bottom: 175px !important;  /* Au-dessus du bouton Proposer Relation */
+                top: 15px !important;
+                left: 15px !important;
+                bottom: auto !important;
             }
         }
     </style>
@@ -1117,12 +1141,12 @@ def create_public_layout():
                     'border': '2px solid white',
                 }, title="Menu"),
                 
-                # Bouton Zoom + (à droite sous le hamburger)
+                # Bouton Zoom + (en bas à droite, au-dessus de Zoom -)
                 html.Button([
                     html.I(className="fas fa-plus", style={'fontSize': '18px', 'color': 'white'})
                 ], id='btn-zoom-in', n_clicks=0, style={
                     'position': 'absolute',
-                    'bottom': '75px',
+                    'bottom': '135px',  # Au-dessus du bouton Proposer Relation
                     'right': '15px',
                     'width': '40px',
                     'height': '40px',
@@ -1141,12 +1165,12 @@ def create_public_layout():
                     'WebkitTouchCallout': 'none',
                 }, title="Zoom avant"),
                 
-                # Bouton Zoom - (sous le +)
+                # Bouton Zoom - (sous le +, au-dessus de Proposer Relation)
                 html.Button([
                     html.I(className="fas fa-minus", style={'fontSize': '18px', 'color': 'white'})
                 ], id='btn-zoom-out', n_clicks=0, style={
                     'position': 'absolute',
-                    'bottom': '25px',
+                    'bottom': '85px',  # Entre Zoom+ et Proposer Relation
                     'right': '15px',
                     'width': '40px',
                     'height': '40px',
@@ -1165,12 +1189,12 @@ def create_public_layout():
                     'WebkitTouchCallout': 'none',
                 }, title="Zoom arrière"),
                 
-                # Bouton plein écran (en bas à GAUCHE)
+                # Bouton plein écran (en haut à GAUCHE)
                 html.Button([
                     html.I(className="fas fa-expand", id='fullscreen-icon')
                 ], id='btn-fullscreen', n_clicks=0, style={
                     'position': 'absolute',
-                    'bottom': '15px',
+                    'top': '15px',  # En haut au lieu de bottom
                     'left': '15px',
                     'width': '48px',
                     'height': '48px',
@@ -1319,14 +1343,14 @@ def create_public_layout():
                     'zIndex': '9999',  # Increased for fullscreen compatibility
                 }),
                 
-                # Standalone Proposer Relation Button (outside hamburger menu)
+                # Standalone Proposer Relation Button (en bas à droite)
                 dbc.Button([
                     html.I(className="fas fa-link", style={'marginRight': '8px'}),
                     "Proposer une relation"
                 ], id='btn-propose-relation', style={
                     'position': 'absolute',
-                    'top': '15px',
-                    'right': '70px',  # Leave space for hamburger icon
+                    'bottom': '15px',  # En bas au lieu de top
+                    'right': '15px',  # À droite
                     'zIndex': '10000',  # Higher than fullscreen overlay (9999)
                     'fontSize': '14px',
                     'padding': '10px 18px',
