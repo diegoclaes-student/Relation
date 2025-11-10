@@ -326,6 +326,14 @@ app.index_string = '''
             box-shadow: 0 6px 24px rgba(26, 35, 50, 0.6);
         }
         
+        /* Hamburger menu style */
+        #hamburger-menu {
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+        
         /* Zoom buttons hover effect */
         #btn-zoom-in:hover, #btn-zoom-out:hover {
             transform: scale(1.1);
@@ -479,6 +487,15 @@ app.index_string = '''
                 padding: 10px;
                 min-height: calc(75vh - 70px); /* Plus bas : 75% au lieu de 66% */
                 border-radius: 12px;
+            }
+            
+            /* Menu hamburger responsive sur mobile */
+            #hamburger-menu {
+                max-height: calc(100vh - 120px) !important;
+                max-width: calc(100vw - 30px);
+                right: 10px !important;
+                top: 60px !important;
+                font-size: 11px;
             }
             
             #network-graph {
@@ -657,6 +674,12 @@ app.index_string = '''
             #network-graph {
                 height: calc(85vh - 60px) !important; /* Presque plein écran en landscape */
             }
+            
+            /* Menu hamburger en landscape - encore plus compact */
+            #hamburger-menu {
+                max-height: calc(100vh - 80px) !important;
+                font-size: 10px;
+            }
         }
         
         /* Portrait mode optimizations */
@@ -669,6 +692,11 @@ app.index_string = '''
             #network-graph {
                 /* Assurer que le graphe prend bien 2/3 de l'écran */
                 min-height: 450px;
+            }
+            
+            /* Menu hamburger en portrait - plus d'espace vertical */
+            #hamburger-menu {
+                max-height: calc(100vh - 140px) !important;
             }
         }
     </style>

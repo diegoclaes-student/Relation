@@ -51,10 +51,31 @@ document.addEventListener('DOMContentLoaded', function() {
 ```
 
 ### 5. **Menu Hamburger**
-- Position: `fixed` en haut à droite
-- Z-index: `1000` pour rester au-dessus du graphique
+- Position: `absolute` en haut à droite
+- Z-index: `999` pour rester au-dessus du graphique
 - Taille: `48x48px` pour une cible de touch accessible (recommandation : >44px)
+- **Scrollable** : `max-height: calc(100vh - 100px)` + `overflow-y: auto`
+- **Mobile** : `max-height: calc(100vh - 120px)` pour plus d'espace
+- **Landscape** : `max-height: calc(100vh - 80px)` pour écrans courts
+- **Portrait** : `max-height: calc(100vh - 140px)` pour tenir compte du header
+- Smooth scrolling sur iOS : `-webkit-overflow-scrolling: touch`
 - Hover effect: `scale(1.1)` pour feedback visuel
+
+```css
+#hamburger-menu {
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 480px) {
+    #hamburger-menu {
+        max-height: calc(100vh - 120px) !important;
+        max-width: calc(100vw - 30px);
+    }
+}
+```
 
 ### 6. **Responsive Breakpoints**
 - **Tablette (< 1200px)** : Layout 1 colonne
@@ -85,6 +106,9 @@ document.addEventListener('DOMContentLoaded', function() {
 - **Landscape** : Header compact, plus d'espace pour le graphique
 
 ## 🐛 Problèmes connus et solutions
+
+### Problème : Menu hamburger dépasse de l'écran
+**Solution** : Le menu a maintenant `max-height: calc(100vh - 100px)` et `overflow-y: auto`. Sur mobile (< 480px), il utilise `max-height: calc(100vh - 120px)` pour laisser plus d'espace au header. Le menu est scrollable verticalement avec smooth scrolling sur iOS (`-webkit-overflow-scrolling: touch`).
 
 ### Problème : Pinch zoom ne fonctionne pas
 **Solution** : Vérifier dans la console navigateur :

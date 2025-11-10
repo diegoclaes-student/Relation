@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        
+        #hamburger-menu {
+            position: absolute;
+            top: 65px;
+            right: 15px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            min-width: 220px;
+            border: 2px solid white;
+            z-index: 999;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        @media (max-width: 480px) {
+            #hamburger-menu {
+                max-height: calc(100vh - 120px) !important;
+                max-width: calc(100vw - 30px);
+                right: 10px !important;
+                top: 60px !important;
+                font-size: 11px;
+            }
+        }
+        
+        @media (max-width: 768px) and (orientation: landscape) {
+            #hamburger-menu {
+                max-height: calc(100vh - 80px) !important;
+                font-size: 10px;
+            }
+        }
+        
+        @media (max-width: 768px) and (orientation: portrait) {
+            #hamburger-menu {
+                max-height: calc(100vh - 140px) !important;
+            }
+        }
+        
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="padding: 20px;">Test Menu Hamburger</h1>
+    <button onclick="toggleMenu()">Toggle Menu</button>
+    
+    <div id="hamburger-menu">
+        <h3>Menu Settings</h3>
+        <p>Option 1</p>
+        <p>Option 2</p>
+        <p>Option 3</p>
+        <p>Option 4</p>
+        <p>Option 5</p>
+        <p>Option 6</p>
+        <p>Option 7</p>
+        <p>Option 8</p>
+        <p>Option 9</p>
+        <p>Option 10</p>
+        <p>Option 11</p>
+        <p>Option 12</p>
+        <p>Option 13</p>
+        <p>Option 14</p>
+        <p>Option 15</p>
+        <p>Option 16</p>
+        <p>Option 17</p>
+        <p>Option 18</p>
+        <p>Option 19</p>
+        <p>Option 20</p>
+        <p>Cette ligne devrait être scrollable !</p>
+    </div>
+    
+    <script>
+        function toggleMenu() {
+            var menu = document.getElementById('hamburger-menu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+        toggleMenu(); // Hide initially
+    </script>
+</body>
+</html>
