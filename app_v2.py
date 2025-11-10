@@ -50,7 +50,10 @@ app = dash.Dash(
         dbc.themes.BOOTSTRAP,
         "https://use.fontawesome.com/releases/v6.1.1/css/all.css"
     ],
-    meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
+    meta_tags=[{
+        "name": "viewport", 
+        "content": "width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"
+    }],
     suppress_callback_exceptions=True
 )
 
@@ -1055,7 +1058,7 @@ def create_public_layout():
                         'doubleClick': 'reset',
                         'responsive': True,
                         'showTips': False,
-                        'touchAction': 'auto',
+                        'modeBarButtonsToRemove': ['select2d', 'lasso2d'],
                         'editable': False,
                     }
                 ),
